@@ -1,7 +1,7 @@
 <!DOCTYPE html> 
 <html lang="en"> 
 <head>
-    <meta charset="utf-8" content="">
+    <meta charset="utf-8">
     <title>Brainwallet</title> 
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="bitcoin address generator" name="description">
@@ -35,7 +35,7 @@
                     <div class="row"> 
                         <div class="span10"> 
                             <div class="control-group"> 
-                                <label class="control-label" for="string">Get Address From</label> 
+                                <label class="control-label" for="gen_from">Get Address From</label> 
                                 <div class="controls"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="gen_from"> 
                                         <button class="btn active" id="passphrase" title="Using SHA256(passphrase) as the secret exponent" type="button">Passphrase</button> 
@@ -45,20 +45,20 @@
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="string">Passphrase</label> 
+                                <label class="control-label" for="pass">Passphrase</label> 
                                 <div class="controls"> 
                                     <input class="span5" id="pass" type="text"> 
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="string">Secret Exponent</label> 
+                                <label class="control-label" for="hash">Secret Exponent</label> 
                                 <div class="controls"> 
                                     <input class="span5" id="hash" maxlength="64" readonly type="text"> 
                                     <span class="help-inline"></span> 
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="compression">Point Conversion</label> 
+                                <label class="control-label" for="gen_comp">Point Conversion</label> 
                                 <div class="controls"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
                                         <button class="btn active" id="uncompressed" title="Uncompressed keys (reference client)" type="button">Uncompressed</button> 
@@ -108,16 +108,16 @@
             </form>
         </div>
         <div class="tab-pane fade" id="converter"> 
-            <form action="" class="form-inline" method="get">
+            <form action="/" class="form-inline" method="get">
             <fieldset> <legend>Base58 Converter</legend> 
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span6"> 
                             <div class="control-group"> 
                                 <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
-                                    <button class="btn active" id="base58" type="button">Base58</button> 
-                                    <button class="btn" id="hex" type="button">Hex</button> 
-                                    <button class="btn" id="text" type="button">Text</button> 
+                                    <button class="btn active" id="from_base58" type="button">Base58</button> 
+                                    <button class="btn" id="from_hex" type="button">Hex</button> 
+                                    <button class="btn" id="from_text" type="button">Text</button> 
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -128,9 +128,9 @@
                         <div class="span6"> 
                             <div class="control-group"> 
                                 <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
-                                    <button class="btn" id="base58" type="button">Base58</button> 
-                                    <button class="btn active" id="hex" type="button">Hex</button> 
-                                    <button class="btn" id="text" type="button">Text</button> 
+                                    <button class="btn" id="to_base58" type="button">Base58</button> 
+                                    <button class="btn active" id="to_hex" type="button">Hex</button> 
+                                    <button class="btn" id="to_text" type="button">Text</button> 
                                 </div>
                             </div>
                             <div class="control-group"> 

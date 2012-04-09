@@ -346,13 +346,13 @@
     }
 
     function update_enc_from() {
-        from = $(this).attr('id');
+        from = $(this).attr('id').substring(5);
         update_direction(from, to);
         translate();
     }
 
     function update_enc_to() {
-        to = $(this).attr('id');
+        to = $(this).attr('id').substring(3);
         update_direction(from, to);
         translate();
     }
@@ -428,8 +428,10 @@
             $('#pass').focus();
 
             $('#from').bind('input', onChangeFrom);
+
             $("body").on("click", "#enc_from .btn", update_enc_from);
             $("body").on("click", "#enc_to .btn", update_enc_to);
+
             update_direction(from, to);
         }
     );
