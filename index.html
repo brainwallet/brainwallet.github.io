@@ -1,0 +1,155 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>
+    <meta charset="utf-8" content="">
+    <title>Brainwallet</title> 
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="j2me device database" name="description">
+    <meta content="" name="author">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/default.css" rel="stylesheet">
+
+<!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+    <link href="favicon.ico" rel="shortcut icon">
+</head>
+<body>
+<div class="navbar navbar-fixed-top"> 
+    <div class="navbar-inner"> 
+        <div class="container"> <a class="brand" href="/">Brainwallet</a> 
+        </div>
+    </div>
+</div>
+<div class="container"> 
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#generation"><i class="icon-lock"></i> Bitcoin Address Generator</a></li> 
+        <li><a data-toggle="tab" href="#converter"><i class="icon-font"></i> Base58 Converter</a></li> 
+    </ul>
+    <div class="tab-content"> 
+        <div class="tab-pane fade in active" id="generation"> 
+            <form action="/" class="form-horizontal" method="get">
+            <fieldset> <legend>Bitcoin Address Generator</legend> 
+                <div class="control-group"> 
+                    <div class="row"> 
+                        <div class="span10"> 
+                            <div class="control-group"> 
+                                <label class="control-label" for="string">Get Address From</label> 
+                                <div class="controls"> 
+                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_from"> 
+                                        <button class="btn active" id="passphrase" title="Using SHA256(passphrase) as the secret exponent" type="button">Passphrase</button> 
+                                        <button class="btn" id="secret" title="Using hex-encoded secret exponent (32 bytes)" type="button">Secret Exponent</button> 
+                                        <button class="btn" id="privkey" title="Using Base58Check-encoded secret exponent (ver. 128)" type="button">Private Key</button> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="string">Passphrase</label> 
+                                <div class="controls"> 
+                                    <input class="span5" id="pass" type="text"> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="string">Secret Exponent</label> 
+                                <div class="controls"> 
+                                    <input class="span5" id="hash" maxlength="64" readonly type="text"> 
+                                    <span class="help-inline"></span> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="compression">Point Conversion</label> 
+                                <div class="controls"> 
+                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
+                                        <button class="btn active" id="uncompressed" title="Uncompressed keys (reference client)" type="button">Uncompressed</button> 
+                                        <button class="btn" id="compressed" title="Compressed keys (inroduced in 0.5.99)" type="button">Compressed</button> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="sec">Private Key</label> 
+                                <div class="controls"> 
+                                    <input class="span5" id="sec" readonly type="text"> 
+                                    <span class="help-inline"></span> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="addr">Address</label> 
+                                <div class="controls"> 
+                                    <input class="span4" id="addr" readonly type="text"> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="der">Private Key (DER)</label> 
+                                <div class="controls"> 
+<textarea class="span5" id="der" readonly rows="8"></textarea>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="pub">Public Key (SEC)</label> 
+                                <div class="controls"> 
+<textarea class="span5" id="pub" readonly rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="h160">HASH160</label> 
+                                <div class="controls"> 
+                                    <input class="span4" id="h160" readonly type="text"> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span2"> 
+                            <h3><span class="pull-right" id="qr_addr"></span></h3> 
+                            <div class="pull-right" id="qr"></div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="converter"> 
+            <form action="" class="form-inline" method="get">
+            <fieldset> <legend>Base58 Converter</legend> 
+                <div class="control-group"> 
+                    <div class="row"> 
+                        <div class="span6"> 
+                            <div class="control-group"> 
+                                <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
+                                    <button class="btn active" id="base58" type="button">Base58</button> 
+                                    <button class="btn" id="hex" type="button">Hex</button> 
+                                    <button class="btn" id="text" type="button">Text</button> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+<textarea class="span6" id="from" rows="8"></textarea>
+                            </div>
+                            <div id="direction"></div>
+                        </div>
+                        <div class="span6"> 
+                            <div class="control-group"> 
+                                <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
+                                    <button class="btn" id="base58" type="button">Base58</button> 
+                                    <button class="btn active" id="hex" type="button">Hex</button> 
+                                    <button class="btn" id="text" type="button">Text</button> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+<textarea class="span6" id="to" readonly rows="8"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+    </div>
+    <hr> 
+    <div id="footer">&copy; Brainwallet 2012</div>
+</div>
+<script src="js/jquery-1.7.min.js"></script> 
+<script src="js/bootstrap.min.js"></script> 
+<script src="js/bitcoinjs-min.js"></script> 
+<script src="js/qrcode.js"></script> 
+<script src="js/brainwallet.js"></script> 
+</body>
+</html> 

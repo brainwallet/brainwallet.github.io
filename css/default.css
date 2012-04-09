@@ -1,0 +1,20 @@
+body { 
+    padding-top: 60px;
+}
+
+input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd;cursor:text;}
+
+#qr {
+    width: 185px;
+    height: 185px;
+    display: inline-block;
+}
+
+#qr_addr {
+    position: relative;
+    z-index: 1;
+}
+
+.ajax-loader {
+    display: none;
+}
