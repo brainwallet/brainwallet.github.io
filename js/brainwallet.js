@@ -92,7 +92,6 @@
         var encoded_gxgy = ecparams.getG().getEncoded(compressed);
         var encoded_pub = getSEC(eckey, compressed);
 
-        var der = Bitcoin.ECDSA.der;
         return encode_sequence(
             encode_integer(1),
             encode_octet_string(secret),
