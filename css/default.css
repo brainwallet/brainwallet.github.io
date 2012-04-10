@@ -14,7 +14,3 @@ input[disabled],select[disabled],textarea[disabled],input[readonly],select[reado
     position: relative;
     z-index: 1;
 }
-
-.ajax-loader {
-    display: none;
-}
