@@ -65,9 +65,9 @@
         return encode_id(0x30, sequence);
     }
 
-    function getSEC(eckey, compressed) {
-       var x = gen_pt.getX().toBigInteger();
-       var y = gen_pt.getY().toBigInteger();
+    function getEncoded(pt, compressed) {
+       var x = pt.getX().toBigInteger();
+       var y = pt.getY().toBigInteger();
        var enc = integerToBytes(x, 32);
        if (compressed) {
          if (y.isEven()) {
@@ -89,8 +89,8 @@
         var encoded_oid = [0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x01, 0x01];
 
         var secret = integerToBytes(eckey.priv, 32);
-        var encoded_gxgy = ecparams.getG().getEncoded(compressed);
-        var encoded_pub = getSEC(eckey, compressed);
+        var encoded_gxgy = getEncoded(ecparams.getG(), compressed);
+        var encoded_pub = getEncoded(gen_pt, compressed);
 
         return encode_sequence(
             encode_integer(1),
@@ -189,12 +189,14 @@
         gen_eckey = eckey;
 
         try {
-            var addr = eckey.getBitcoinAddress();
             var ecparams = getSECCurveByName("secp256k1");
             gen_pt = ecparams.getG().multiply(eckey.priv);
-            gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(getSEC(gen_eckey, gen_compressed));
+            gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
+            gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
+            var addr = eckey.getBitcoinAddress();
             setErrorState($('#hash'), false);
         } catch (err) {
+            console.info(err);
             setErrorState($('#hash'), true, 'Invalid secret exponent (must be non-zero value)');
             return;
         }
@@ -206,7 +208,8 @@
         setErrorState($('#hash'), false);
         setErrorState($('#sec'), false);
         gen_compressed = $(this).attr('id') == 'compressed';
-        gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(getSEC(gen_eckey, gen_compressed));
+        gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
+        gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
         gen_update();
     }
 
@@ -234,7 +237,7 @@
         var sec = new Bitcoin.Address(payload); sec.version = 128;
         $('#sec').val(sec);
 
-        var pub = Crypto.util.bytesToHex(getSEC(eckey, compressed));
+        var pub = Crypto.util.bytesToHex(getEncoded(gen_pt, compressed));
         $('#pub').val(pub);
 
         var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
