@@ -410,12 +410,21 @@
         timeout = setTimeout(translate, gen_timeout);
     }
 
+    function onInput(id, func) {
+        $(id).bind("input keyup keydown keypress change blur", function() {
+            if ($(this).val() != jQuery.data(this, "lastvalue")) {
+                func();
+            }
+            jQuery.data(this, "lastvalue", $(this).val());
+        });
+    }
+
     $(document).ready(
         function() {
 
-            $('#pass').bind('input', onChangePass);
-            $('#hash').bind('input', onChangeHash);
-            $('#sec').bind('input', onChangePrivKey);
+            onInput('#pass', onChangePass);
+            onInput('#hash', onChangeHash);
+            onInput('#sec', onChangePrivKey);
 
             $('#passphrase').click(update_gen_from);
             $('#secret').click(update_gen_from);
@@ -425,12 +434,11 @@
             $('#compressed').click(update_gen_compressed);
 
             $('#pass').val('correct horse battery staple');
-
             calc_hash();
             generate();
             $('#pass').focus();
 
-            $('#from').bind('input', onChangeFrom);
+            onInput('#from', onChangeFrom);
 
             $("body").on("click", "#enc_from .btn", update_enc_from);
             $("body").on("click", "#enc_to .btn", update_enc_to);
@@ -439,4 +447,3 @@
         }
     );
 })(jQuery);
-
