@@ -435,11 +435,16 @@
     }
 
     function onInput(id, func) {
+
         $(id).bind("input keyup keydown keypress change blur", function() {
             if ($(this).val() != jQuery.data(this, "lastvalue")) {
                 func();
             }
             jQuery.data(this, "lastvalue", $(this).val());
+        });
+
+        $(id).bind("focus", function() {
+           jQuery.data(this, "lastvalue", $(this).val());
         });
     }
 
