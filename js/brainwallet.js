@@ -407,6 +407,8 @@
                 bytes = Crypto.util.hexToBytes(str);
             } else if (from == 'rfc1751') {
                 bytes = rfc1751_to_key(str, false);
+            } else if (from == 'base64') {
+                bytes = Crypto.util.base64ToBytes(str);
             }
 
             if (to == 'base58') {
@@ -417,6 +419,8 @@
                 text = bytesToString(bytes);
             } else if (to == 'rfc1751') {
                 text = key_to_rfc1751(bytes, false);
+            } else if (to == 'base64') {
+                text = Crypto.util.bytesToBase64(bytes);
             }
 
             var bstr = bytes.length + ' ' + (bytes.length == 1 ? 'byte' : 'bytes');
