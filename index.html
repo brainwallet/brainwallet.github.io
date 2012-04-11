@@ -18,18 +18,18 @@
 <div class="navbar navbar-fixed-top"> 
     <div class="navbar-inner"> 
         <div class="container"> <a class="brand" href="/">Brainwallet</a> 
+            <ul class="nav">
+                <li class="active"><a data-toggle="tab" href="#generation">Generator</a></li> 
+                <li><a data-toggle="tab" href="#converter">Converter</a></li> 
+            </ul>
         </div>
     </div>
 </div>
 <div class="container"> 
-    <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#generation"><i class="icon-lock"></i> Bitcoin Address Generator</a></li> 
-        <li><a data-toggle="tab" href="#converter"><i class="icon-font"></i> Base58 Converter</a></li> 
-    </ul>
     <div class="tab-content"> 
         <div class="tab-pane fade in active" id="generation"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Bitcoin Address Generator</legend> 
+            <fieldset> <legend>Generator</legend> 
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span10"> 
@@ -108,7 +108,7 @@
         </div>
         <div class="tab-pane fade" id="converter"> 
             <form action="/" class="form-inline" method="get">
-            <fieldset> <legend>Base58 Converter</legend> 
+            <fieldset> <legend>Converter</legend> 
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span6"> 
@@ -117,6 +117,7 @@
                                     <button class="btn active" id="from_base58" type="button">Base58</button> 
                                     <button class="btn" id="from_hex" type="button">Hex</button> 
                                     <button class="btn" id="from_text" type="button">Text</button> 
+                                    <button class="btn" id="from_rfc1751" type="button">RFC1751</button> 
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -130,6 +131,7 @@
                                     <button class="btn" id="to_base58" type="button">Base58</button> 
                                     <button class="btn active" id="to_hex" type="button">Hex</button> 
                                     <button class="btn" id="to_text" type="button">Text</button> 
+                                    <button class="btn" id="to_rfc1751" type="button">RFC1751</button>
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -151,6 +153,7 @@
 <script src="js/bootstrap.min.js"></script> 
 <script src="js/bitcoinjs-min.js"></script> 
 <script src="js/qrcode.js"></script> 
+<script src="js/rfc1751.js"></script> 
 <script src="js/brainwallet.js"></script> 
 </body>
 </html> 

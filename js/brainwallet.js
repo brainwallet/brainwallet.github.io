@@ -388,17 +388,20 @@
                 bytes = Bitcoin.Base58.decode(str);
             } else if (from == 'hex') {
                 bytes = Crypto.util.hexToBytes(str);
+            } else if (from == 'rfc1751') {
+                bytes = rfc1751_to_key(str, false);
             }
 
             if (to == 'base58') {
                 text = Bitcoin.Base58.encode(bytes);
-            }
-            else if (to == 'hex') {
+            } else if (to == 'hex') {
                 text = Crypto.util.bytesToHex(bytes);
-            }
-            else if (to == 'text') {
+            } else if (to == 'text') {
                 text = bytesToString(bytes);
+            } else if (to == 'rfc1751') {
+                text = key_to_rfc1751(bytes, false);
             }
+
         }
 
         $('#to').val(text);
