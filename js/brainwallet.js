@@ -161,8 +161,7 @@
         update_gen();
         var bytes = Crypto.util.randomBytes(32);
         $('#hash').val(Crypto.util.bytesToHex(bytes));
-        clearTimeout(timeout);
-        timeout = setTimeout(generate, gen_timeout);
+        generate();
     }
 
     function update_gen() {
