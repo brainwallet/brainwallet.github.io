@@ -7,8 +7,8 @@
     <meta content="bitcoin address generator" name="description">
     <meta content="brainwallet" name="author">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -17,11 +17,19 @@
 <body>
 <div class="navbar navbar-fixed-top"> 
     <div class="navbar-inner"> 
-        <div class="container"> <a class="brand" href="/">Brainwallet</a> 
-            <ul class="nav">
-                <li class="active"><a data-toggle="tab" href="#generation">Generator</a></li> 
-                <li><a data-toggle="tab" href="#converter">Converter</a></li> 
-            </ul>
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand" href="/">Brainwallet</a> 
+            <div class="nav-collapse">
+                 <ul class="nav">
+                     <li class="active"><a data-toggle="tab" href="#generation">Generator</a></li> 
+                     <li><a data-toggle="tab" href="#converter">Converter</a></li> 
+                 </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -81,7 +89,7 @@
                             <div class="control-group"> 
                                 <label class="control-label" for="der">Private Key (DER)</label> 
                                 <div class="controls"> 
-                                    <textarea class="span7" id="der" readonly rows="6"></textarea>
+                                    <textarea class="span6" id="der" readonly rows="7"></textarea>
                                 </div>
                             </div>
                             <div class="control-group"> 

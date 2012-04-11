@@ -402,6 +402,10 @@
                 text = key_to_rfc1751(bytes, false);
             }
 
+            var bstr = bytes.length + ' ' + (bytes.length == 1 ? 'byte' : 'bytes');
+
+            $('#direction').html(from + '  &gt; ' + bstr + ' &gt; ' + to);
+
         }
 
         $('#to').val(text);
