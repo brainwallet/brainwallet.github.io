@@ -126,14 +126,21 @@
     }
 
     function setErrorState(field, err, msg) {
-        group = field.parent().parent();
+
+        //group = field.parent().parent();
+
+        group = field.closest('.control-group');
+
+
         if (err) {
             group.addClass('error');
         } else {
             group.removeClass('error');
         }
-        if (field.next()) {
-            field.next().text(msg||'');
+
+        var e = group.find('.errormsg');
+        if (e) {
+            e.text(msg||'');
         }
     }
 
@@ -146,11 +153,22 @@
         return res;
     }
 
+    function gen_random() {
+        $('#pass').val('');
+        $('#hash').focus();
+        gen_from = 'secret';
+        $('#secret').button('toggle');
+        update_gen();
+        var bytes = Crypto.util.randomBytes(32);
+        $('#hash').val(Crypto.util.bytesToHex(bytes));
+        clearTimeout(timeout);
+        timeout = setTimeout(generate, gen_timeout);
+    }
+
     function update_gen() {
         $('#pass').attr('readonly', gen_from != 'passphrase');
         $('#hash').attr('readonly', gen_from != 'secret');
         $('#sec').attr('readonly', gen_from != 'privkey');
-
         $('#sec').parent().parent().removeClass('error');
     }
 
@@ -286,7 +304,6 @@
 
         timeout = setTimeout(generate, gen_timeout);
     }
-
 
     function onChangePrivKey() {
 
@@ -436,6 +453,7 @@
             $('#passphrase').click(update_gen_from);
             $('#secret').click(update_gen_from);
             $('#privkey').click(update_gen_from);
+            $('#random').click(gen_random);
 
             $('#uncompressed').click(update_gen_compressed);
             $('#compressed').click(update_gen_compressed);
