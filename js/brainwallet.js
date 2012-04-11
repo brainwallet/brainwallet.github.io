@@ -407,7 +407,11 @@
             } else if (from == 'rfc1751') {
                 bytes = rfc1751_to_key(str, false);
             } else if (from == 'base64') {
+                try {
                 bytes = Crypto.util.base64ToBytes(str);
+                } catch (err) {
+                    //TODO: autodetection
+                }
             }
 
             if (to == 'base58') {
