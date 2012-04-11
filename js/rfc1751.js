@@ -298,9 +298,9 @@ function key_to_english(key) {
     //pad to 8 bytes
     var padding = [];
     for (var i = 0; i < (8 - (key.length % 8)) % 8; i++) {
-        padding.push(0);
+        padding.push(0x80);
     }
-    key = padding.concat(key);
+    key = key.concat(padding);
 
     var english = [];
     for (var index = 0; index < key.length; index += 8) {
