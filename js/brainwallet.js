@@ -458,7 +458,7 @@
             } else if (from == 'hex') {
                 bytes = Crypto.util.hexToBytes(str.replace(/[ :,]+/g,''));
             } else if (from == 'rfc1751') {
-                try { bytes = english_to_key(str); } catch (err) {};
+                try { bytes = english_to_key(str); } catch (err) { type = ' ' + err; bytes = []; };
             } else if (from == 'mnemonic') {
                 bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
             } else if (from == 'base64') {
