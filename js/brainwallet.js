@@ -367,7 +367,7 @@
     }
 
     function isHex(str) {
-        return !/[^0123456789abcdef: ]+/i.test(str);
+        return !/[^0123456789abcdef:, ]+/i.test(str);
     }
 
     function isBase58(str) {
@@ -456,7 +456,7 @@
                     bytes = Bitcoin.Base58.decode(str);
                 }
             } else if (from == 'hex') {
-                bytes = Crypto.util.hexToBytes(str);
+                bytes = Crypto.util.hexToBytes(str.replace(/[ :,]+/g,''));
             } else if (from == 'rfc1751') {
                 try { bytes = english_to_key(str); } catch (err) {};
             } else if (from == 'mnemonic') {
