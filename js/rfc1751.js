@@ -2,21 +2,10 @@
     rfc1751.js : Converts between 128-bit strings and a human-readable
     sequence of words, as defined in RFC1751: "A Convention for
     Human-Readable 128-bit Keys", by Daniel L. McDonald.
-    Converted to js from Python Cryptography Toolkit (public domain)
-    (c) Brainwallet, 2012 (public domain)
+    Ported from rfc1751.py / Python Cryptography Toolkit (public domain).
 */
 
-function rfc1751_to_key(str, hex) {
-    var key = english_to_key(str);
-    return hex ? _bytesToHex(key) : key;
-}
-
-function key_to_rfc1751(key, hex) {
-    var arg = hex ? _hexToBytes(key) : key;
-    return key_to_english(arg);
-}
-
-var wordlist = [ "A", "ABE", "ACE", "ACT", "AD", "ADA", "ADD",
+var rfc1751_wordlist = [ "A", "ABE", "ACE", "ACT", "AD", "ADA", "ADD",
    "AGO", "AID", "AIM", "AIR", "ALL", "ALP", "AM", "AMY", "AN", "ANA",
    "AND", "ANN", "ANT", "ANY", "APE", "APS", "APT", "ARC", "ARE", "ARK",
    "ARM", "ART", "AS", "ASH", "ASK", "AT", "ATE", "AUG", "AUK", "AVE",
@@ -295,6 +284,7 @@ function _extract(key, start, length) {
 }
 
 function key_to_english(key) {
+
     //pad to 8 bytes
     var padding = [];
     for (var i = 0; i < (8 - (key.length % 8)) % 8; i++) {
@@ -316,7 +306,7 @@ function key_to_english(key) {
 
         skbin = _key2bin(subkey);
         for (var i = 0; i < 64; i += 11) {
-            english.push(wordlist[_extract(skbin, i, 11)]);
+            english.push(rfc1751_wordlist[_extract(skbin, i, 11)]);
         }
     }
     return english.join(' ');
@@ -333,7 +323,7 @@ function english_to_key(str) {
         var ch = [0,0,0,0,0,0,0,0,0];
         for (var k = 0; k < sublist.length; k++) {
             var i = sublist[k];
-            var idx = wordlist.indexOf(i);
+            var idx = rfc1751_wordlist.indexOf(i);
             var shift = (8 - (bits + 11) % 8) % 8;
             var y = idx << shift;
             var cl = y >> 16;
@@ -363,7 +353,7 @@ function english_to_key(str) {
         var cs0 = _extract(skbin, 64, 2);
         var cs1 = p & 3;
         if (cs0 != cs1) {
-            //parity error
+            throw new Error("Parity error in resulting key");
         }
 
         key = key.concat( subkey.slice(0,8) );

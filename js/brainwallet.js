@@ -144,15 +144,6 @@
         }
     }
 
-    function get_radiobtn_id(obj, def) {
-        res = def;
-        obj.children().each(function(i) {
-            if ($(this).hasClass('active'))
-                res = $(this).attr('id');
-        });
-        return res;
-    }
-
     function gen_random() {
         $('#pass').val('');
         $('#hash').focus();
@@ -348,31 +339,16 @@
         timeout = setTimeout(generate, gen_timeout);
     }
 
-    var from = 'base58';
+    var from = 'hex';
     var to = 'hex';
-
-    function get_radiobtn_id(obj, def) {
-        res = def;
-        obj.children().each(function(i) {
-            if ($(this).hasClass('active'))
-                res = $(this).attr('id');
-        });
-        return res;
-    }
-
-    function update_direction(from, to) {
-        $('#direction').html(from + ' &gt; ' + to);
-    }
 
     function update_enc_from() {
         from = $(this).attr('id').substring(5);
-        update_direction(from, to);
         translate();
     }
 
     function update_enc_to() {
         to = $(this).attr('id').substring(3);
-        update_direction(from, to);
         translate();
     }
 
@@ -390,28 +366,103 @@
         return str;
     }
 
+    function isHex(str) {
+        return !/[^0123456789abcdef: ]+/i.test(str);
+    }
+
+    function isBase58(str) {
+        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/.test(str);
+    }
+
+    function isBase64(str) {
+        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/.test(str) && (str.length % 4) == 0;
+    }
+
+    function issubset(a, ssv) {
+        var b = ssv.trim().split(' ');
+        for (var i = 0; i < b.length; i++) {
+            if (a.indexOf(b[i].toLowerCase()) == -1 
+                && a.indexOf(b[i].toUpperCase()) == -1)
+            return false;
+        }
+        return true;
+    }
+
+    function autodetect(str) {
+        var enc = [];
+        if (isHex(str)) 
+            enc.push('hex');
+        if (isBase58(str))
+            enc.push('base58');
+        if (issubset(mn_words, str)) 
+            enc.push('mnemonic');
+        if (issubset(rfc1751_wordlist, str)) 
+            enc.push('rfc1751');
+        if (isBase64(str))
+            enc.push('base64');
+        if (str.length > 0)
+            enc.push('text');
+        return enc;
+    }
+
+    function update_toolbar(enc) {
+        var reselect = false;
+        $.each($('#enc_from').children(), function() {
+            var id = $(this).attr('id').substring(5);
+            var disabled = (enc && enc.indexOf(id) == -1);
+            if (disabled && $(this).hasClass('active')) {
+                $(this).removeClass('active');
+                reselect = true;
+            }
+            $(this).attr('disabled', disabled);
+        });
+        if (enc && enc.length > 0 && reselect) {
+            $('#from_' + enc[0]).addClass('active');
+            from = enc[0];
+        }
+    }
+
+    function enct(id) {
+        return $('#from_'+id).text();
+    }
+
     function translate() {
 
-        var str = $('#from').val();
+        var str = $('#src').val();
+
+        if (str.length == 0) {
+            update_toolbar(null);
+            return;
+        }
 
         text = str;
 
+        var enc = autodetect(str);
+
+        update_toolbar(enc);
+
         bytes = strToBytes(str);
 
-        if (bytes.length > 0) {
+        var type = '';
 
+        if (bytes.length > 0) {
             if (from == 'base58') {
-                bytes = Bitcoin.Base58.decode(str);
+                var arr = parseBase58Check(str);
+                var version = arr[0];
+                if (version >= 0) {
+                    type = 'Check ver.' + version;
+                    bytes = arr[1];
+                } else {
+                    bytes = Bitcoin.Base58.decode(str);
+                }
             } else if (from == 'hex') {
                 bytes = Crypto.util.hexToBytes(str);
             } else if (from == 'rfc1751') {
-                bytes = rfc1751_to_key(str, false);
+                try { bytes = english_to_key(str); } catch (err) {};
+            } else if (from == 'mnemonic') {
+                bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
             } else if (from == 'base64') {
-                try {
-                bytes = Crypto.util.base64ToBytes(str);
-                } catch (err) {
-                    //TODO: autodetection
-                }
+                try { bytes = Crypto.util.base64ToBytes(str); } catch (err) {}
             }
 
             if (to == 'base58') {
@@ -421,19 +472,17 @@
             } else if (to == 'text') {
                 text = bytesToString(bytes);
             } else if (to == 'rfc1751') {
-                text = key_to_rfc1751(bytes, false);
+                text = key_to_english(bytes);
+            } else if (to == 'mnemonic') {
+                text = mn_encode(Crypto.util.bytesToHex(bytes));
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
-            }
-
-            var bstr = bytes.length + ' ' + (bytes.length == 1 ? 'byte' : 'bytes');
-
-            $('#direction').html(from + '  &gt; ' + bstr + ' &gt; ' + to);
-
+            } 
         }
 
-        $('#to').val(text);
-
+        $('#hint_from').text(enct(from) + type + ' (' + bytes.length + ' byte' + (bytes.length == 1 ? ')' : 's)'));
+        $('#hint_to').text(enct(to) + ' (' + text.length + ' character' + (text.length == 1 ? ')' : 's)'));
+        $('#dest').val(text);
     }
 
     function onChangeFrom() {
@@ -475,12 +524,10 @@
             generate();
             $('#pass').focus();
 
-            onInput('#from', onChangeFrom);
+            onInput('#src', onChangeFrom);
 
             $("body").on("click", "#enc_from .btn", update_enc_from);
             $("body").on("click", "#enc_to .btn", update_enc_to);
-
-            update_direction(from, to);
         }
     );
 })(jQuery);
