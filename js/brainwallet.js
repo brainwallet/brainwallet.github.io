@@ -16,21 +16,19 @@
         if (checksum[0] != bytes[end] ||
             checksum[1] != bytes[end+1] ||
             checksum[2] != bytes[end+2] ||
-            checksum[3] != bytes[end+3]) {
-          return [-1, []];
-        }
+            checksum[3] != bytes[end+3])
+                throw new Error("Wrong checksum");
         var version = hash.shift();
         return [version, hash];
     }
 
     encode_length = function(len) {
-        if (len < 0x80) {
+        if (len < 0x80)
             return [len];
-        } else if (len < 255) {
+        else if (len < 255)
             return [0x80|1, len];
-        } else {
+        else
             return [0x80|2, len >> 8, len & 0xff];
-        }
     }
     
     encode_id = function(id, s) {
@@ -39,9 +37,8 @@
     }
 
     encode_integer = function(s) {
-        if (typeof s == 'number') {
+        if (typeof s == 'number')
             s = [s];
-        }
         return encode_id(0x02, s);
     }
 
@@ -59,9 +56,8 @@
 
     encode_sequence = function() {
         sequence = [];
-        for (var i = 0; i < arguments.length; i++) {
+        for (var i = 0; i < arguments.length; i++)
             sequence = sequence.concat(arguments[i]);
-        }
         return encode_id(0x30, sequence);
     }
 
@@ -126,11 +122,7 @@
     }
 
     function setErrorState(field, err, msg) {
-
-        //group = field.parent().parent();
-
         group = field.closest('.control-group');
-
 
         if (err) {
             group.addClass('error');
@@ -304,37 +296,35 @@
 
         var sec = $('#sec').val();
 
-        var res = parseBase58Check(sec);
-        var version = res[0];
-        var hash = res[1];
-
-        var error = (version != 128 || hash.length != 32);
-
-        if (version == -1) {
+        try { 
+            var res = parseBase58Check(sec); 
+            var version = res[0];
+            var payload = res[1];
+        } catch (err) {
             setErrorState($('#sec'), true, 'Invalid private key checksum');
             return;
-        } else if (version != 128) {
+        };
+
+        if (version != 128) {
             setErrorState($('#sec'), true, 'Invalid private key version (must be 128)');
             return;
-        } else if (hash.length < 32) {
+        } else if (payload.length < 32) {
             setErrorState($('#sec'), true, 'Invalid payload (must be 32 or 33 bytes)');
             return;
         }
 
         setErrorState($('#sec'), false);
 
-        if (hash.length > 32) {
-            hash.pop();
-
+        if (payload.length > 32) {
+            payload.pop();
             gen_compressed = true;
             $('#compressed').button('toggle');
         } else {
-
             gen_compressed = false;
             $('#uncompressed').button('toggle');
         }
 
-        $('#hash').val(Crypto.util.bytesToHex(hash));
+        $('#hash').val(Crypto.util.bytesToHex(payload));
 
         timeout = setTimeout(generate, gen_timeout);
     }
@@ -447,12 +437,11 @@
 
         if (bytes.length > 0) {
             if (from == 'base58') {
-                var arr = parseBase58Check(str);
-                var version = arr[0];
-                if (version >= 0) {
-                    type = 'Check ver.' + version;
-                    bytes = arr[1];
-                } else {
+                try { 
+                    var res = parseBase58Check(str); 
+                    type = 'Check ver.' + res[0];
+                    bytes = res[1];
+                } catch (err) {
                     bytes = Bitcoin.Base58.decode(str);
                 }
             } else if (from == 'hex') {
