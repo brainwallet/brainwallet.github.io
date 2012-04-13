@@ -528,6 +528,9 @@
 
             $("body").on("click", "#enc_from .btn", update_enc_from);
             $("body").on("click", "#enc_to .btn", update_enc_to);
+
+            if (window.location.hash == '#converter')
+                $('#tab-converter').tab('show');
         }
     );
 })(jQuery);
