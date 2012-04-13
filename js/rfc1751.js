@@ -308,8 +308,8 @@ function english_to_key(str) {
         var bits = 0;
         var ch = [0,0,0,0,0,0,0,0,0];
         for (var k = 0; k < sublist.length; k++) {
-            var i = sublist[k];
-            var idx = rfc1751_wordlist.indexOf(i);
+            var word = sublist[k];
+            var idx = rfc1751_wordlist.indexOf(word);
             var shift = (8 - (bits + 11) % 8) % 8;
             var y = idx << shift;
             var cl = y >> 16;
@@ -339,7 +339,7 @@ function english_to_key(str) {
         var cs0 = _extract(skbin, 64, 2);
         var cs1 = p & 3;
         if (cs0 != cs1) {
-            throw new Error("Parity error in resulting key");
+            throw new Error("Parity error at " + word);
         }
 
         key = key.concat( subkey.slice(0,8) );
