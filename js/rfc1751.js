@@ -252,20 +252,6 @@ var rfc1751_wordlist = [ "A", "ABE", "ACE", "ACT", "AD", "ADA", "ADD",
 var binary = ['0000', '0001', '0010', '0011', '0100', '0101', '0110', '0111', 
               '1000', '1001', '1010', '1011', '1100', '1101', '1110', '1111'];
 
-function _hexToBytes(hex) {
-    for (var bytes = [], c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
-    return bytes;
-}
-
-function _bytesToHex(bytes) {
-    for (var hex = [], i = 0; i < bytes.length; i++) {
-        hex.push((bytes[i] >>> 4).toString(16));
-        hex.push((bytes[i] & 0xF).toString(16));
-    }
-    return hex.join("");
-}
-
 function _key2bin(key) {
     res = ''
     for (var i = 0; i < key.length; i++) {
