@@ -512,7 +512,7 @@
         var str = '';
         if (chain_mode == 'csv') {
             for (var i = 0; i < addresses.length; i++)
-                str += (i+1) + ', ' + addresses[i][0] +', ' + addresses[i][1] +'\n';
+                str += (i+1) + ', "' + addresses[i][0] +'", "' + addresses[i][1] +'"\n';
         } else if (chain_mode == 'json') {
             var w = {};
             w['keys'] = [];
