@@ -27,6 +27,7 @@
             <div class="nav-collapse">
                  <ul class="nav">
                      <li class="active"><a data-toggle="tab" href="#generation">Generator</a></li> 
+                     <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
                      <li><a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
                  </ul>
             </div>
@@ -163,6 +164,57 @@
                         </div>
                     </div>
                 </div>
+            </fieldset>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="chains"> 
+            <form action="/" class="form-horizontal" method="get">
+            <fieldset> <legend>Chains</legend> 
+                <div class="control-group"> 
+                    <label class="control-label" for="method">Generation Method</label> 
+                    <div class="controls"> 
+                        <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
+                            <button class="btn active" id="secret" type="button">Electrum</button> 
+                            <!--button class="btn" id="secret" type="button">Armory</button--> 
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="seed">Seed</label> 
+                    <div class="controls"> 
+                        <div class="input-append">
+                            <input id="seed" maxlength="32" class="span3" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="seed">Range</label> 
+                    <div class="controls"> 
+                        <input id="range" class="span1" maxlength="2" type="text" value="6">
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="method">Wallet Format</label> 
+                    <div class="controls"> 
+                        <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
+                            <button class="btn active" id="csv" type="button">CSV</button> 
+                            <button class="btn" id="json" type="button">JSON</button> 
+                            <button class="btn" id="electrum" type="button">Electrum</button> 
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="chain">Chain</label>
+                    <div class="controls"> 
+                        <textarea class="span8" id="chain" readonly rows="16"></textarea>
+                    </div>
+                </div>
+                <!--div class="control-group"> 
+                    <label class="control-label" for="mnemonic">Mnemonic</label> 
+                    <div class="controls"> 
+                        <input class="span6" id="mnemonic" readonly type="text"> 
+                    </div>
+                </div-->
             </fieldset>
             </form>
         </div>

@@ -480,17 +480,156 @@
     }
 
     function onInput(id, func) {
-
         $(id).bind("input keyup keydown keypress change blur", function() {
             if ($(this).val() != jQuery.data(this, "lastvalue")) {
                 func();
             }
             jQuery.data(this, "lastvalue", $(this).val());
         });
-
         $(id).bind("focus", function() {
            jQuery.data(this, "lastvalue", $(this).val());
         });
+    }
+
+    // --- chain ---
+    var oldseed = [];
+    var seed = [];
+    var rounds = 0;
+    var master_pubkey = null;
+    var master_pt = null;
+    var master_exp = null;
+    var chain_mode = 'csv';
+    var addresses = [];
+    var addr_change = [];
+    var chain_range = 5;
+
+    function onChangeMethod() {
+        chain_mode = $(this).attr('id');
+        update_chain();
+    }
+
+    function update_chain() {
+        var str = '';
+        if (chain_mode == 'csv') {
+            for (var i = 0; i < addresses.length; i++)
+                str += (i+1) + ', ' + addresses[i][0] +', ' + addresses[i][1] +'\n';
+        } else if (chain_mode == 'json') {
+            var w = {};
+            w['keys'] = [];
+            for (var i = 0; i < addresses.length; i++)
+                w['keys'].push({'addr':addresses[i][0],'sec':addresses[i][1]});
+            str = JSON.stringify(w, null, 4);
+        } else if (chain_mode == 'electrum') {
+            var w = {};
+            w['change_addresses'] = [];
+            w['fee'] = 0.0001;
+            w['master_public_key'] = Crypto.util.bytesToHex(master_pubkey);
+            w['change_addresses'] = addresses[addresses.length-1][0];
+            w['addresses'] = [];
+            for (var i = 0; i < addresses.length-1; i++)
+                w['addresses'].push(addresses[i][0]);
+            w['seed'] = $('#seed').val();
+            w['use_encryption'] = false;
+            w['seed_version'] = 4;
+            str = JSON.stringify(w, null, 4);
+        }
+        $('#chain').text(str);
+    }
+
+    function onChangeSeed() {
+        clearTimeout(timeout);
+        timeout = setTimeout(chain_generate, gen_timeout);
+    }
+
+    function onSeedRandom() {
+        clearTimeout(timeout);
+        var bytes = Crypto.util.randomBytes(16);
+        $('#seed').val(Crypto.util.bytesToHex(bytes));
+        chain_generate();
+    }
+
+    function dhash(bytes) {
+        return Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
+    }
+
+    function get_sequence(n, for_change) {
+        var mode = for_change ? 1 : 0;
+        var s = dhash( strToBytes(n + ':' + mode + ':').concat(master_pubkey) );
+        return BigInteger.fromByteArrayUnsigned(s);
+    }
+
+    function create_new_address(n, for_change) {
+        var curve = getSECCurveByName("secp256k1");
+        var z = get_sequence(n, for_change);
+        var pubkey_point = master_pt.add(curve.getG().multiply(z));
+        var compressed = false;
+        var pub = getEncoded(pubkey_point, compressed);
+        var hash = Bitcoin.Util.sha256ripe160(pub);
+        var addr = new Bitcoin.Address(hash);
+        var secexp = BigInteger.fromByteArrayUnsigned(master_exp).add(z).mod(curve.getN());
+        var payload = secexp.toByteArrayUnsigned();
+        var sec = new Bitcoin.Address(payload); sec.version = 128;
+        return [addr.toString(), sec.toString()];
+    }
+
+    function onChangeRange() {
+        chain_range = parseInt($('#range').val());
+        clearTimeout(timeout);
+        timeout = setTimeout(update_chain_range, gen_timeout);
+    }
+
+    function update_chain_range() {
+        addresses = [];
+        for (var i = 0; i < chain_range; i++) {
+            //last address is for change
+            var for_change = (i == chain_range - 1);
+            var n = for_change ? 0 : i;
+            addresses.push(create_new_address(n, for_change));
+        }
+        update_chain();
+    }
+
+    function electrum_wallet(exponent) {
+        master_exp = exponent;
+        var curve = getSECCurveByName("secp256k1");
+        var secexp = BigInteger.fromByteArrayUnsigned(exponent);
+        var pt = curve.getG().multiply(secexp);
+        var pubkey = getEncoded(pt, false);
+        pubkey.shift();
+        master_pubkey = pubkey;
+        master_pt = pt;
+        chain_range = parseInt($('#range').val());
+        update_chain_range();
+    }
+
+    function batch() {
+        for (var i = 0; i < 1000; i++)
+            seed = Crypto.SHA256(seed.concat(oldseed), {asBytes: true});
+
+        rounds += 1000;
+        if (rounds < 100000) {
+            var p = rounds * 100 / 100000;
+            var pp = Math.floor(p) + '%';
+            $('#chain').text('Key strengthening: ' + pp);
+            timeout = setTimeout(batch, 10);
+        } else {
+            electrum_wallet(seed);
+        }
+    }
+
+    function chain_generate(secexp) {
+        var str = $('#seed').val();
+        if (str.length == 0) {
+            $('#chain').text('');
+            return;
+        }
+        if (secexp && secexp.length == 64) {
+            return electrum_wallet( Crypto.util.hexToBytes(secexp) );
+        }
+        seed = strToBytes(str);
+        oldseed = seed;
+        rounds = 0;
+        timeout = setTimeout(batch, 10);
     }
 
     $(document).ready(
@@ -520,6 +659,21 @@
 
             if (window.location.hash == '#converter')
                 $('#tab-converter').tab('show');
+            else if (window.location.hash == '#chains')
+                $('#tab-chains').tab('show');
+
+            $('#seed_random').click(onSeedRandom);
+
+            $('#csv').click(onChangeMethod);
+            $('#json').click(onChangeMethod);
+            $('#electrum').click(onChangeMethod);
+            onInput($('#range'), onChangeRange);
+
+            onInput($('#seed'), onChangeSeed);
+            //$('#seed').val('123456');
+            //chain_generate('83945f4f3bb9d14119daa0f4b44fdd20b190c8220398f06c0fa69ec2ae5fe01c');
+            //chain_generate('58f3fe879848f50b870d9f569557c86c49ecb5886fc14bf8a56990edb998beb1');
+
         }
     );
 })(jQuery);
