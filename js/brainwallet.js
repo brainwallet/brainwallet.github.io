@@ -524,9 +524,9 @@
             w['change_addresses'] = [];
             w['fee'] = 0.0001;
             w['master_public_key'] = Crypto.util.bytesToHex(master_pubkey);
-            w['change_addresses'] = addresses[addresses.length-1][0];
+            w['change_addresses'] = addresses[0][0];
             w['addresses'] = [];
-            for (var i = 0; i < addresses.length-1; i++)
+            for (var i = 1; i < addresses.length; i++)
                 w['addresses'].push(addresses[i][0]);
             w['seed'] = $('#seed').val();
             w['use_encryption'] = false;
@@ -581,9 +581,9 @@
     function update_chain_range() {
         addresses = [];
         for (var i = 0; i < chain_range; i++) {
-            //last address is for change
-            var for_change = (i == chain_range - 1);
-            var n = for_change ? 0 : i;
+            //first address is for change
+            var for_change = (i == 0);
+            var n = (i == 0) ? i : i-1;
             addresses.push(create_new_address(n, for_change));
         }
         update_chain();
