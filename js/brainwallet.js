@@ -1,6 +1,6 @@
 (function($){
 
-    var gen_from = 'passphrase';
+    var gen_from = 'pass';
     var gen_compressed = false;
     var gen_eckey = null;
     var gen_pt = null;
@@ -79,13 +79,13 @@
     }
 
     function getDER(eckey, compressed) {
-        var ecparams = getSECCurveByName("secp256k1");
-        var _p = ecparams.getCurve().getQ().toByteArrayUnsigned();
-        var _r = ecparams.getN().toByteArrayUnsigned();
+        var curve = getSECCurveByName("secp256k1");
+        var _p = curve.getCurve().getQ().toByteArrayUnsigned();
+        var _r = curve.getN().toByteArrayUnsigned();
         var encoded_oid = [0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x01, 0x01];
 
         var secret = integerToBytes(eckey.priv, 32);
-        var encoded_gxgy = getEncoded(ecparams.getG(), compressed);
+        var encoded_gxgy = getEncoded(curve.getG(), compressed);
         var encoded_pub = getEncoded(gen_pt, compressed);
 
         return encode_sequence(
@@ -139,7 +139,7 @@
     function gen_random() {
         $('#pass').val('');
         $('#hash').focus();
-        gen_from = 'secret';
+        gen_from = 'hash';
         $('#secret').button('toggle');
         update_gen();
         var bytes = Crypto.util.randomBytes(32);
@@ -148,35 +148,41 @@
     }
 
     function update_gen() {
-        $('#pass').attr('readonly', gen_from != 'passphrase');
-        $('#hash').attr('readonly', gen_from != 'secret');
-        $('#sec').attr('readonly', gen_from != 'privkey');
+        setErrorState($('#hash'), false);
+        setErrorState($('#sec'), false);
+        $('#pass').attr('readonly', gen_from != 'pass');
+        $('#hash').attr('readonly', gen_from != 'hash');
+        $('#sec').attr('readonly', gen_from != 'sec');
         $('#sec').parent().parent().removeClass('error');
     }
 
     function update_gen_from() {
-        gen_from = $(this).attr('id');
+        gen_from = $(this).attr('id').substring(5);
         update_gen();
-
-        setErrorState($('#hash'), false);
-        setErrorState($('#sec'), false);
-
-        if (gen_from == 'passphrase') {
-
+        if (gen_from == 'pass') {
             if (gen_ps_reset) {
                 gen_ps_reset = false;
                 onChangePass();
             }
             $('#pass').focus();
-        }
-
-        if (gen_from == 'secret') {
+        } else if (gen_from == 'hash') {
             $('#hash').focus();
-        }
-
-        if (gen_from == 'privkey') {
+        } else if (gen_from == 'sec') {
             $('#sec').focus();
         }
+    }
+
+    function update_gen_from_focus() {
+        gen_from = $(this).attr('id');
+        update_gen();
+        if (gen_from == 'pass') {
+            if (gen_ps_reset) {
+                gen_ps_reset = false;
+                onChangePass();
+            }
+        }
+
+        $('#from_'+gen_from).button('toggle');
     }
 
     function generate() {
@@ -189,8 +195,8 @@
         gen_eckey = eckey;
 
         try {
-            var ecparams = getSECCurveByName("secp256k1");
-            gen_pt = ecparams.getG().multiply(eckey.priv);
+            var curve = getSECCurveByName("secp256k1");
+            gen_pt = curve.getG().multiply(eckey.priv);
             gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
             gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
             var addr = eckey.getBitcoinAddress();
@@ -494,6 +500,8 @@
     // --- chain ---
     var oldseed = [];
     var seed = [];
+    var chainCode = [];
+    var pubKey = [];
     var rounds = 0;
     var master_pubkey = [];
     var master_pt = null;
@@ -502,7 +510,7 @@
     var addresses = [];
     var addr_change = [];
     var chain_range = 5;
-    var chain_type = 'chain_simple';
+    var chain_type = 'chain_armory';
 
     function onChangeMethod() {
         chain_mode = $(this).attr('id');
@@ -545,10 +553,21 @@
         timeout = setTimeout(chain_generate, gen_timeout);
     }
 
+    function onChangeMemo() {
+        clearTimeout(timeout);
+        timeout = setTimeout(chain_generate, gen_timeout);
+    }
+
     function onChangeChain() {
         chain_type = $(this).attr('id');
         rounds = 0;
         chain_generate();
+    }
+
+    function onChangeFocus() {
+        var id = $(this).attr('id');
+        $('#seed').attr('readonly', id != 'seed');
+        $('#memo').attr('readonly', id != 'memo');
     }
 
     function onSeedRandom() {
@@ -589,14 +608,11 @@
     }
 
     function update_chain_range() {
-        addresses = [];
-        for (var i = 0; i < chain_range; i++) {
-            //first address is for change
-            var for_change = (i == 0);
-            var n = (i == 0) ? i : i-1;
-            addresses.push(create_new_address(n, for_change));
+        if (chain_type == 'chain_electrum') {
+            electrum_gen();
+        } else {
+            armory_gen();
         }
-        update_chain();
     }
 
     function electrum_wallet(exponent) {
@@ -612,7 +628,7 @@
         update_chain_range();
     }
 
-    function batch() {
+    function electrum_batch() {
         for (var i = 0; i < 1000; i++)
             seed = Crypto.SHA256(seed.concat(oldseed), {asBytes: true});
         rounds -= 1000;
@@ -620,29 +636,64 @@
             var p = 100 - rounds * 100 / 100000;
             var pp = Math.floor(p) + '%';
             $('#chain').text('Key strengthening: ' + pp);
-            timeout = setTimeout(batch, 10);
+            timeout = setTimeout(electrum_batch, 0);
         } else {
             electrum_wallet(seed);
         }
     }
 
+    function electrum_gen() {
+        addresses = [];
+        for (var i = 0; i < chain_range; i++) {
+            //first address is for change
+            var for_change = (i == 0);
+            var n = (i == 0) ? i : i-1;
+            addresses.push(create_new_address(n, for_change));
+        }
+        update_chain();
+    }
+
+    function armory_gen() {
+
+        var codes = $('#memo').val();
+        var keys = armory_decode_keys(codes);
+        privKey = keys[0];
+        chainCode = keys[1];
+        var curve = getSECCurveByName("secp256k1");
+        var secexp = BigInteger.fromByteArrayUnsigned(privKey);
+        var pt = curve.getG().multiply(secexp);
+        pubKey = pt.getEncoded();
+
+        addresses = [];
+        for (var i = 0; i < chain_range; i++) {
+            r = armory_extend_keys(pubKey, chainCode, privKey, true);
+            addresses.push( [r[0], r[1]] );
+            pubKey = r[2];
+            privKey = r[3];
+        }
+        update_chain();
+    }
+
     function chain_generate(secexp) {
+
         var str = $('#seed').val();
-        if (str.length == 0) {
-            $('#chain').text('');
-            return;
-        }
-        if (secexp && secexp.length == 64) {
-            return electrum_wallet( Crypto.util.hexToBytes(secexp) );
-        }
-        seed = strToBytes(str);
-        oldseed = seed;
 
-        //TODO: electrum generator actually uses 100k rounds and works fine
-        //simple chain is just a placeholder and should be rewritten
-        rounds = chain_type == 'chain_simple' ? 1 : 100000;
+        rounds = 0;
+        addresses = [];
+        $('#chain').text('');
 
-        timeout = setTimeout(batch, 10);
+        if (chain_type == 'chain_electrum') {
+            if (secexp && secexp.length == 64) {
+                return electrum_wallet( Crypto.util.hexToBytes(secexp) );
+            }
+            seed = strToBytes(str);
+            oldseed = seed;
+            rounds = 100000;
+            timeout = setTimeout(electrum_batch, 0);
+        } else if (chain_type == 'chain_armory') {
+
+            timeout = setTimeout(armory_gen, 0);
+        }
     }
 
     $(document).ready(
@@ -652,9 +703,14 @@
             onInput('#hash', onChangeHash);
             onInput('#sec', onChangePrivKey);
 
-            $('#passphrase').click(update_gen_from);
-            $('#secret').click(update_gen_from);
-            $('#privkey').click(update_gen_from);
+            $('#from_pass').click(update_gen_from);
+            $('#from_hash').click(update_gen_from);
+            $('#from_sec').click(update_gen_from);
+
+            $('#pass').focus(update_gen_from_focus);
+            $('#hash').focus(update_gen_from_focus);
+            $('#sec').focus(update_gen_from_focus);
+
             $('#random').click(gen_random);
 
             $('#uncompressed').click(update_gen_compressed);
@@ -681,11 +737,17 @@
             $('#json').click(onChangeMethod);
             $('#electrum').click(onChangeMethod);
 
-            $('#chain_simple').click(onChangeChain);
+            $('#chain_armory').click(onChangeChain);
             $('#chain_electrum').click(onChangeChain);
+
+            $('#seed').focus(onChangeFocus);
+            $('#memo').focus(onChangeFocus);
 
             onInput($('#range'), onChangeRange);
             onInput($('#seed'), onChangeSeed);
+            onInput($('#memo'), onChangeMemo);
+
+            $('#memo').val(armory_test_codes);
         }
     );
 })(jQuery);

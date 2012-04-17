@@ -43,12 +43,12 @@
                     <div class="row"> 
                         <div class="span10"> 
                             <div class="control-group"> 
-                                <label class="control-label" for="passphrase">Get Address From</label> 
+                                <label class="control-label" for="from_pass">Get Address From</label> 
                                 <div class="controls"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="gen_from"> 
-                                        <button class="btn active" id="passphrase" title="Using SHA256(passphrase) as the secret exponent" type="button">Passphrase</button> 
-                                        <button class="btn" id="secret" title="Using hex-encoded secret exponent (32 bytes)" type="button">Secret Exponent</button> 
-                                        <button class="btn" id="privkey" title="Using Base58Check-encoded secret exponent (ver. 128)" type="button">Private Key</button> 
+                                        <button class="btn active" id="from_pass" title="Using SHA256(passphrase) as the secret exponent" type="button">Passphrase</button> 
+                                        <button class="btn" id="from_hash" title="Using hex-encoded secret exponent (32 bytes)" type="button">Secret Exponent</button> 
+                                        <button class="btn" id="from_sec" title="Using Base58Check-encoded secret exponent (ver. 128)" type="button">Private Key</button> 
                                     </div>
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
                         <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
-                            <button class="btn active" id="chain_simple" type="button">Simple</button> 
+                            <button class="btn active" id="chain_armory" type="button">Armory</button> 
                             <button class="btn" id="chain_electrum" type="button">Electrum</button> 
                         </div>
                     </div>
@@ -183,8 +183,14 @@
                     <label class="control-label" for="seed">Seed</label> 
                     <div class="controls"> 
                         <div class="input-append">
-                            <input id="seed" maxlength="32" class="span3" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
+                            <input id="seed" maxlength="64" class="span5" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
                         </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="chain">Paper Backup</label>
+                    <div class="controls"> 
+                        <textarea class="span5" id="memo" readonly rows="5"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
@@ -199,14 +205,14 @@
                         <div class="btn-group" data-toggle="buttons-radio" id="chain_format"> 
                             <button class="btn active" id="csv" type="button">CSV</button> 
                             <button class="btn" id="json" type="button">JSON</button> 
-                            <button class="btn" id="electrum" type="button">Electrum</button> 
+                            <!--button class="btn" id="electrum" type="button">Electrum</button--> 
                         </div>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="chain">Chain</label>
                     <div class="controls"> 
-                        <textarea class="span8" id="chain" readonly rows="16"></textarea>
+                        <textarea class="span8" id="chain" readonly rows="10"></textarea>
                     </div>
                 </div>
             </fieldset>
@@ -224,6 +230,7 @@
 <script src="js/qrcode.js"></script> 
 <script src="js/rfc1751.js"></script> 
 <script src="js/mnemonic.js"></script> 
+<script src="js/armory.js"></script> 
 <script src="js/brainwallet.js"></script> 
 </body>
 </html> 
