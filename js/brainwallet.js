@@ -638,7 +638,8 @@
         seed = strToBytes(str);
         oldseed = seed;
 
-        //TODO: a better generator
+        //TODO: electrum generator actually uses 100k rounds and works fine
+        //simple chain is just a placeholder and should be rewritten
         rounds = chain_type == 'chain_simple' ? 1 : 100000;
 
         timeout = setTimeout(batch, 10);
