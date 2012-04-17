@@ -495,13 +495,14 @@
     var oldseed = [];
     var seed = [];
     var rounds = 0;
-    var master_pubkey = null;
+    var master_pubkey = [];
     var master_pt = null;
     var master_exp = null;
     var chain_mode = 'csv';
     var addresses = [];
     var addr_change = [];
     var chain_range = 5;
+    var chain_type = 'chain_simple';
 
     function onChangeMethod() {
         chain_mode = $(this).attr('id');
@@ -509,6 +510,8 @@
     }
 
     function update_chain() {
+        if (addresses.length == 0)
+            return;
         var str = '';
         if (chain_mode == 'csv') {
             for (var i = 0; i < addresses.length; i++)
@@ -520,6 +523,7 @@
                 w['keys'].push({'addr':addresses[i][0],'sec':addresses[i][1]});
             str = JSON.stringify(w, null, 4);
         } else if (chain_mode == 'electrum') {
+
             var w = {};
             w['change_addresses'] = [];
             w['fee'] = 0.0001;
@@ -539,6 +543,12 @@
     function onChangeSeed() {
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, gen_timeout);
+    }
+
+    function onChangeChain() {
+        chain_type = $(this).attr('id');
+        rounds = 0;
+        chain_generate();
     }
 
     function onSeedRandom() {
@@ -605,10 +615,9 @@
     function batch() {
         for (var i = 0; i < 1000; i++)
             seed = Crypto.SHA256(seed.concat(oldseed), {asBytes: true});
-
-        rounds += 1000;
-        if (rounds < 100000) {
-            var p = rounds * 100 / 100000;
+        rounds -= 1000;
+        if (rounds > 0) {
+            var p = 100 - rounds * 100 / 100000;
             var pp = Math.floor(p) + '%';
             $('#chain').text('Key strengthening: ' + pp);
             timeout = setTimeout(batch, 10);
@@ -628,7 +637,10 @@
         }
         seed = strToBytes(str);
         oldseed = seed;
-        rounds = 0;
+
+        //TODO: a better generator
+        rounds = chain_type == 'chain_simple' ? 1 : 100000;
+
         timeout = setTimeout(batch, 10);
     }
 
@@ -667,13 +679,12 @@
             $('#csv').click(onChangeMethod);
             $('#json').click(onChangeMethod);
             $('#electrum').click(onChangeMethod);
+
+            $('#chain_simple').click(onChangeChain);
+            $('#chain_electrum').click(onChangeChain);
+
             onInput($('#range'), onChangeRange);
-
             onInput($('#seed'), onChangeSeed);
-            //$('#seed').val('123456');
-            //chain_generate('83945f4f3bb9d14119daa0f4b44fdd20b190c8220398f06c0fa69ec2ae5fe01c');
-            //chain_generate('58f3fe879848f50b870d9f569557c86c49ecb5886fc14bf8a56990edb998beb1');
-
         }
     );
 })(jQuery);
