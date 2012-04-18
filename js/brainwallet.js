@@ -508,7 +508,7 @@
     var chain_mode = 'csv';
     var addresses = [];
     var addr_change = [];
-    var chain_range = 5;
+    var chain_range = 6;
     var chain_type = 'chain_armory';
 
     function onChangeMethod() {
