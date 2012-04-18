@@ -49,26 +49,6 @@ function electrum_get_pubkey(privKey) {
     return pubKey;
 }
 
-// proof of concept
-function electrum_calc_keys(_seed, range) {
-    var seed = Crypto.charenc.UTF8.stringToBytes(_seed);
-
-    // strengthening key : seed -> a few rounds of sha256 -> privKey
-    var oldseed = seed.slice(0);
-    for (var i = 0; i < ELECTRUM_ROUNDS; i++)
-        seed = Crypto.SHA256(seed.concat(oldseed), {asBytes: true});
-
-    var privKey = seed;
-    var pubKey = electrum_get_pubkey(privKey);
-
-    // calculating addresses
-    var addr = [];
-    for (var i = 0; i < range; i++)
-        addr.push(electrum_extend_chain(pubKey, privKey, i, false, true));
-
-    return addr;
-}
-
 var Electrum = new function () {
     var seed;
     var oldseed;
@@ -104,7 +84,10 @@ var Electrum = new function () {
     }
 
     function calcAddr() {
-        var r = electrum_extend_chain(pubKey, privKey, counter, false, true);
+        //first address is always for change
+        var index = counter > 0 ? counter - 1 : counter;
+        var forChange = (counter == 0);
+        var r = electrum_extend_chain(pubKey, privKey, index, forChange, true);
         onUpdate(r);
         counter++;
         if (counter < range) {
@@ -159,6 +142,7 @@ function electrum_test() {
 
     /*
     83945f4f3bb9d14119daa0f4b44fdd20b190c8220398f06c0fa69ec2ae5fe01c
+    18hkLd5yFmx77q4byCSdtDEz4v6Vg64f1E
     1CZSNhisnmSdDe8Kqd84UNxVZr1ZF3dwtv
     19ooYkLtiwqPuFmLxSEDqqgCKhPLSKx1nv
     17Y2QAMMPGT4BWpaCZKd8iAGkwiognVETZ
