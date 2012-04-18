@@ -509,7 +509,7 @@
     var addresses = [];
     var addr_change = [];
     var chain_range = 6;
-    var chain_type = 'chain_armory';
+    var chain_type = 'chain_electrum';
 
     function onChangeMethod() {
         chain_mode = $(this).attr('id');

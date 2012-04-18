@@ -174,23 +174,23 @@
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
                         <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
-                            <button class="btn active" id="chain_armory" type="button">Armory</button> 
-                            <button class="btn" id="chain_electrum" type="button">Electrum</button> 
+                            <button class="btn active" id="chain_electrum" type="button">Electrum</button> 
+                            <button class="btn" id="chain_armory" type="button">Armory</button> 
                         </div>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="chain">Paper Backup</label>
-                    <div class="controls"> 
-                        <textarea class="span5" id="memo" rows="4"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="seed">Seed</label> 
                     <div class="controls"> 
                         <div class="input-append">
-                            <input id="seed" readonly maxlength="64" class="span5" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
+                            <input id="seed" maxlength="64" class="span5" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
                         </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="chain">Paper Backup</label>
+                    <div class="controls"> 
+                        <textarea class="span5" readonly id="memo" rows="4"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
