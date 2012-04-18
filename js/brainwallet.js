@@ -585,6 +585,7 @@
             $('#chain_armory').button('toggle');
             chain_type = 'chain_armory';
         }
+        chain_generate();
     }
 
     function onSeedRandom() {
