@@ -1,5 +1,5 @@
 /*
-    electrum.js : Electrum-like deterministic key generator (public domain).
+    electrum.js : Electrum deterministic wallet implementation (public domain)
 */
 
 var ELECTRUM_ROUNDS = 100000; // wallet ver.4
@@ -125,20 +125,12 @@ var Electrum = new function () {
     return this;
 };
 
-function _electrum_update(r) {
-    console.log(r);
-}
-
-function _electrum_success(privKey) {
-    console.log(Crypto.util.bytesToHex(privKey));
-    Electrum.gen(5, _update);
-}
-
 function electrum_test() {
 
-    var seed = '123456';
-
-    Electrum.init(seed, _electrum_update, _electrum_success);
+    Electrum.init('123456',
+        function(r) { console.log(r); },
+        function(privKey) { Electrum.gen(5, function(r) { console.log(r); } ); }
+    );
 
     /*
     83945f4f3bb9d14119daa0f4b44fdd20b190c8220398f06c0fa69ec2ae5fe01c

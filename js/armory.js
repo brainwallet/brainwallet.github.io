@@ -1,5 +1,5 @@
 /*
-    armory.js : Armory-like deterministic key generator (public domain).
+    armory.js : Armory deterministic wallet implementation (public domain)
 */
 
 function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
