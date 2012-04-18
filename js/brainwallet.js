@@ -181,7 +181,6 @@
                 onChangePass();
             }
         }
-
         $('#from_'+gen_from).button('toggle');
     }
 
@@ -561,6 +560,16 @@
     function onChangeChain() {
         chain_type = $(this).attr('id');
         rounds = 0;
+
+        if (chain_type == 'chain_electrum') {
+            $('#seed').focus();
+        } else {
+            $('#memo').focus();
+        }
+
+        $('#seed').attr('readonly', chain_type != 'chain_electrum');
+        $('#memo').attr('readonly', chain_type != 'chain_armory');
+
         chain_generate();
     }
 
@@ -568,6 +577,10 @@
         var id = $(this).attr('id');
         $('#seed').attr('readonly', id != 'seed');
         $('#memo').attr('readonly', id != 'memo');
+        if (id == 'seed') 
+            $('#chain_electrum').button('toggle');
+        else
+            $('#chain_armory').button('toggle');
     }
 
     function onSeedRandom() {
