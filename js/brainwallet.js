@@ -577,10 +577,14 @@
         var id = $(this).attr('id');
         $('#seed').attr('readonly', id != 'seed');
         $('#memo').attr('readonly', id != 'memo');
-        if (id == 'seed') 
+        if (id == 'seed') {
             $('#chain_electrum').button('toggle');
-        else
+            chain_type = 'chain_electrum';
+        }
+        else {
             $('#chain_armory').button('toggle');
+            chain_type = 'chain_armory';
+        }
     }
 
     function onSeedRandom() {
