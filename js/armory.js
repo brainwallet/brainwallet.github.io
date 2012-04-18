@@ -2,7 +2,7 @@
     armory.js : Armory-like deterministic key generator (public domain).
 */
 
-function armory_extend_keys(pubKey, chainCode, privKey, fromPrivKey) {
+function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
     var chainMod = Crypto.SHA256(Crypto.SHA256(pubKey, {asBytes: true}), {asBytes: true})
     var chainXor = chainMod.slice(0);
     for (var i = 0; i < 32; i++)
@@ -55,6 +55,52 @@ function armory_decode_keys(data) {
     return [privKey, chainCode];
 }
 
+function armory_get_pubkey(privKey) {
+    var curve = getSECCurveByName("secp256k1");
+    var secexp = BigInteger.fromByteArrayUnsigned(privKey);
+    var pt = curve.getG().multiply(secexp);
+    var pubKey = pt.getEncoded();
+    return pubKey;
+}
+
+var Armory = new function() {
+
+    var pubKey;
+    var privKey;
+    var chainCode;
+    var range;
+    var counter;
+    var timeout;
+
+    function calcAddr() {
+        var r = armory_extend_chain(pubKey, chainCode, privKey, true);
+        onUpdate(r);
+        pubKey = r[2];
+        privKey = r[3];
+        counter++;
+        if (counter < range) {
+            timeout = setTimeout(calcAddr, 0);
+        } else {
+            if (onSuccess) onSuccess();
+        }
+    }
+
+    this.gen = function(seed, _range, update, success) {
+        var keys = armory_decode_keys(seed);
+        privKey = keys[0];
+        chainCode = keys[1];
+        pubKey = armory_get_pubkey(privKey);
+        range = _range;
+        counter = 0;
+        onUpdate = update;
+        onSuccess = success;
+        clearTimeout(timeout);
+        calcAddr();
+    };
+
+    return this;
+};
+
 var armory_test_codes = 
 'atuw tnde sghh utho sudi ekgk ohoj odwd ojhw\n\
 ueis hnrt fsht fjes gsgg gswg eutd duus ftfs\n\
@@ -62,21 +108,7 @@ jgjs fghg waug hjah faaw tksn gwig hrrr tdot\n\
 kjuu oeuj kdun adst gfug howu jjes fndd fref';
 
 function armory_test() {
-
-    var keys = armory_decode_keys(armory_test_codes);
-
-    var privKey = keys[0];
-    var chainCode = keys[1];
-
-    var curve = getSECCurveByName("secp256k1");
-    var secexp = BigInteger.fromByteArrayUnsigned(privKey);
-    var pt = curve.getG().multiply(secexp);
-    var pubKey = pt.getEncoded();
-
-    for (var i = 0; i < 5; i++) {
-        r = armory_extend_keys(pubKey, chainCode, privKey, true);
-        console.log(r[0], r[1]);
-        pubKey = r[2];
-        privKey = r[3];
-    }
+    Armory.gen(armory_test_codes, 5, function(r) { console.log(r); } );
 }
+
+
