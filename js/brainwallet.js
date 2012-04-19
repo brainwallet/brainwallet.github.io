@@ -588,8 +588,12 @@
             $('#expo').val(Crypto.util.bytesToHex(pk));
             var codes = armory_encode_keys(pk, cc);
             $('#memo').val(codes);
-        } else {
+        }
+
+        if (chain_type == 'chain_electrum') {
             var seed = Crypto.util.bytesToHex(pk.slice(0,16));
+            //nb! electrum doesn't handle trailing zeros very well
+            if (seed.charAt(0) == '0') seed = seed.substr(1);
             $('#seed').val(seed);
             var codes = mn_encode(seed);
             $('#memo').val(codes);
