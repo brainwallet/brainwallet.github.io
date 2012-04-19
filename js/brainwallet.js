@@ -558,8 +558,10 @@
         var str =  $('#memo').val();
 
         if (chain_type == 'chain_electrum') {
-            var seed = mn_decode(str);
-            $('#seed').val(seed);
+            if (issubset(mn_words, str))  {
+                var seed = mn_decode(str);
+                $('#seed').val(seed);
+            }
         }
 
         if (chain_type == 'chain_armory') {
