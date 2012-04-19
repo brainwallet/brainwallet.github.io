@@ -503,19 +503,17 @@
     var chain_type = 'chain_armory';
 
     function onChangeMethod() {
-        chain_type = $(this).attr('id');
-        if (chain_type == 'chain_electrum') {
-            $('#seed').focus();
-        } else if (chain_type == 'chain_armory') {
-            $('#memo').focus();
+        var id = $(this).attr('id');
+
+        if (chain_type != id) {
+            $('#seed').val('');
+            $('#expo').val('');
+            $('#memo').val('');
+            $('#progress').text('');
+            Electrum.stop();
         }
-        if (chain_type == 'chain_electrum' && $('#expo').val() != 0) {
-            addresses = [];
-            $('#chain').text('');
-            Electrum.gen(chain_range, addr_callback, update_chain);
-            return;
-        }
-        chain_generate();
+
+        chain_type = id;
     }
 
     function onChangeFormat() {
