@@ -572,8 +572,22 @@
 
     function onSeedRandom() {
         clearTimeout(timeout);
-        var bytes = Crypto.util.randomBytes(16);
-        $('#seed').val(Crypto.util.bytesToHex(bytes));
+
+        var cc = Crypto.util.randomBytes(32);
+        var pk = Crypto.util.randomBytes(32);
+
+        if (chain_type == 'chain_armory') {
+
+            $('#seed').val(Crypto.util.bytesToHex(cc));
+            $('#expo').val(Crypto.util.bytesToHex(pk));
+
+            var codes = armory_encode_keys(pk, cc);
+            $('#memo').val(codes);
+        } else {
+
+            $('#seed').val(Crypto.util.bytesToHex(pk.slice(0,16)));
+        }
+
         chain_generate();
     }
 
@@ -636,12 +650,6 @@
         }
 
         if (chain_type == 'chain_armory') {
-
-            if (codes.length == 0) {
-                codes = armory_test_codes;
-                $('#memo').val(codes);
-            }
-
             Armory.gen(codes, chain_range, addr_callback, update_chain);
         }
 

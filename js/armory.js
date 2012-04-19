@@ -1,5 +1,5 @@
 /*
-    armory.js : Armory deterministic wallet implementation (public domain)
+    armory.js : Armory-like deterministic key generator (public domain).
 */
 
 function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
@@ -33,11 +33,33 @@ function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
     return [addr.toString(), sec.toString(), newPub, newPriv];
 }
 
-function _tp2bytes(str) {
+var armory_f = '0123456789abcdef';
+var armory_t = 'asdfghjkwertuion';
+
+function armory_map(str, from, to) {
     var res = '';
     for (var i = 0; i < str.length; i++)
-        res += '0123456789abcdef'.charAt('asdfghjkwertuion'.indexOf(str.charAt(i)));
-    return Crypto.util.hexToBytes(res);
+        res += from.charAt(to.indexOf(str.charAt(i)));
+    return res;
+}
+
+function armory_encode_keys(privKey, chainCode) {
+    var key = privKey.concat(chainCode);
+    var res = [];
+    for (var i = 0; i < 4; i++) {
+        var bytes = key.slice(i * 16, i * 16 + 16);
+        var cs = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
+        var str = Crypto.util.bytesToHex(bytes.concat(cs.slice(0,2)));
+        var code = armory_map(str, armory_t, armory_f);
+        var arr = [];
+        for (var j = 0; j < 9; j++)
+            arr.push(code.substr(j*4, 4));
+        var code = arr.join(' ');
+        res.push(code);
+    }
+    var str = res.join('\n');
+    console.log(str);
+    return str;
 }
 
 function armory_decode_keys(data) {
@@ -45,7 +67,7 @@ function armory_decode_keys(data) {
     var lines = [];
     for (var i = 0; i < keys.length; i++) {
         var k = keys[i].replace(' ','');
-        var raw = _tp2bytes(k)
+        var raw = Crypto.util.hexToBytes(armory_map(k, armory_f, armory_t));
         var data = raw.slice(0, 16);
         var chk = raw.slice(16, 2);
         lines.push(data);
@@ -63,8 +85,7 @@ function armory_get_pubkey(privKey) {
     return pubKey;
 }
 
-var Armory = new function() {
-
+var Armory = new function () {
     var pubKey;
     var privKey;
     var chainCode;
@@ -72,20 +93,20 @@ var Armory = new function() {
     var counter;
     var timeout;
 
-    function calcAddr() {
+    self.calcAddr = function() {
         var r = armory_extend_chain(pubKey, chainCode, privKey, true);
         onUpdate(r);
         pubKey = r[2];
         privKey = r[3];
         counter++;
         if (counter < range) {
-            timeout = setTimeout(calcAddr, 0);
+            timeout = setTimeout(self.calcAddr, 0);
         } else {
             if (onSuccess) onSuccess();
         }
     }
 
-    this.gen = function(seed, _range, update, success) {
+    self.gen = function(seed, _range, update, success) {
         var keys = armory_decode_keys(seed);
         privKey = keys[0];
         chainCode = keys[1];
@@ -98,7 +119,7 @@ var Armory = new function() {
         calcAddr();
     };
 
-    return this;
+    return self;
 };
 
 var armory_test_codes = 
