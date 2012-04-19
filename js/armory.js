@@ -58,7 +58,6 @@ function armory_encode_keys(privKey, chainCode) {
         res.push(code);
     }
     var str = res.join('\n');
-    console.log(str);
     return str;
 }
 
@@ -72,9 +71,13 @@ function armory_decode_keys(data) {
         var chk = raw.slice(16, 2);
         lines.push(data);
     }
-    var privKey = lines[0].concat(lines[1]);
-    var chainCode = lines[2].concat(lines[3]);
-    return [privKey, chainCode];
+    try {
+        var privKey = lines[0].concat(lines[1]);
+        var chainCode = lines[2].concat(lines[3]);
+        return [privKey, chainCode];
+    } catch (errr) {
+        return null;
+    }
 }
 
 function armory_get_pubkey(privKey) {
@@ -108,6 +111,8 @@ var Armory = new function () {
 
     self.gen = function(seed, _range, update, success) {
         var keys = armory_decode_keys(seed);
+        if (keys == null)
+            return;
         privKey = keys[0];
         chainCode = keys[1];
         pubKey = armory_get_pubkey(privKey);

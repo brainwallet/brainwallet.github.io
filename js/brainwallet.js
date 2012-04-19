@@ -508,21 +508,21 @@
 
         if (chain_type == 'chain_electrum') {
             $('#seed').focus();
+//            $('#memo').val('');
+
         } else if (chain_type == 'chain_armory') {
             $('#memo').focus();
         }
 
-        $('#seed').attr('readonly', chain_type != 'chain_electrum');
-        $('#memo').attr('readonly', chain_type != 'chain_armory');
+//        $('#seed').attr('readonly', chain_type != 'chain_electrum');
 
-        if (chain_type == 'chain_electrum') {
-            var pk = $('#expo').val();
-            if (pk.length != 0) {
-                addresses = [];
-                $('#chain').text('');
-                Electrum.gen(chain_range, addr_callback, update_chain);
-                return;
-            }
+        //$('#memo').attr('readonly', chain_type != 'chain_armory');
+
+        if (chain_type == 'chain_electrum' && $('#expo').val() != 0) {
+            addresses = [];
+            $('#chain').text('');
+            Electrum.gen(chain_range, addr_callback, update_chain);
+            return;
         }
 
         chain_generate();
@@ -561,11 +561,33 @@
         $('#expo').val('');
         $('#progress').text('');
         Electrum.stop();
+
+        $('#memo').val( mn_encode(seed) );
+
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, gen_timeout);
     }
 
     function onChangeMemo() {
+
+        var str =  $('#memo').val();
+
+        if (chain_type == 'chain_electrum') {
+            var seed = mn_decode(str);
+            $('#seed').val(seed);
+        }
+
+        if (chain_type == 'chain_armory') {            
+            var keys = armory_decode_keys(str);
+            if (keys != null) {
+                var cc = keys[1];
+                var pk = keys[0];
+                $('#seed').val(Crypto.util.bytesToHex(cc));
+                $('#expo').val(Crypto.util.bytesToHex(pk));
+            }
+        }
+
+
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, gen_timeout);
     }
@@ -577,15 +599,15 @@
         var pk = Crypto.util.randomBytes(32);
 
         if (chain_type == 'chain_armory') {
-
             $('#seed').val(Crypto.util.bytesToHex(cc));
             $('#expo').val(Crypto.util.bytesToHex(pk));
-
             var codes = armory_encode_keys(pk, cc);
             $('#memo').val(codes);
         } else {
-
-            $('#seed').val(Crypto.util.bytesToHex(pk.slice(0,16)));
+            var seed = Crypto.util.bytesToHex(pk.slice(0,16));
+            $('#seed').val(seed);
+            var codes = mn_encode(seed);
+            $('#memo').val(codes);
         }
 
         chain_generate();
