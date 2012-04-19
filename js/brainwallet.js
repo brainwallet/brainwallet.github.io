@@ -140,7 +140,7 @@
         $('#pass').val('');
         $('#hash').focus();
         gen_from = 'hash';
-        $('#secret').button('toggle');
+        $('#from_hash').button('toggle');
         update_gen();
         var bytes = Crypto.util.randomBytes(32);
         $('#hash').val(Crypto.util.bytesToHex(bytes));
