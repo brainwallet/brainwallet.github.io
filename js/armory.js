@@ -9,7 +9,8 @@ function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
         chainXor[i] ^= chainCode[i];
 
     var curve = getSECCurveByName("secp256k1");
-    var secexp, pt;
+    var secexp = null;
+    var pt;
 
     if (fromPrivKey) {
         var A = BigInteger.fromByteArrayUnsigned(chainXor);
@@ -19,15 +20,14 @@ function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
         pt = curve.getG().multiply(secexp);
     } else {
         var A = BigInteger.fromByteArrayUnsigned(chainXor);
-        secexp = BigInteger.fromByteArrayUnsigned(privKey);
         pt = ECPointFp.decodeFrom(curve.getCurve(), pubKey).multiply(A);
     }
 
-    var newPriv = secexp.toByteArrayUnsigned();
+    var newPriv = secexp ? secexp.toByteArrayUnsigned() : [];
     var newPub = pt.getEncoded();
     var h160 = Bitcoin.Util.sha256ripe160(newPub);
     var addr = new Bitcoin.Address(h160);
-    var sec = new Bitcoin.Address(newPriv);
+    var sec = secexp ? new Bitcoin.Address(newPriv) : '';
     sec.version = 128;
 
     return [addr.toString(), sec.toString(), newPub, newPriv];
@@ -96,20 +96,21 @@ var Armory = new function () {
     var counter;
     var timeout;
 
-    self.calcAddr = function() {
+    calcAddr = function() {
         var r = armory_extend_chain(pubKey, chainCode, privKey, true);
         onUpdate(r);
         pubKey = r[2];
         privKey = r[3];
         counter++;
         if (counter < range) {
-            timeout = setTimeout(self.calcAddr, 0);
+            timeout = setTimeout(calcAddr, 0);
         } else {
-            if (onSuccess) onSuccess();
+            if (onSuccess)
+                onSuccess();
         }
     }
 
-    self.gen = function(seed, _range, update, success) {
+    this.gen = function(seed, _range, update, success) {
         var keys = armory_decode_keys(seed);
         if (keys == null)
             return;
@@ -124,16 +125,15 @@ var Armory = new function () {
         calcAddr();
     };
 
-    return self;
+    return this;
 };
 
-var armory_test_codes = 
+function armory_test() {
+    var armory_test_codes = 
 'atuw tnde sghh utho sudi ekgk ohoj odwd ojhw\n\
 ueis hnrt fsht fjes gsgg gswg eutd duus ftfs\n\
 jgjs fghg waug hjah faaw tksn gwig hrrr tdot\n\
 kjuu oeuj kdun adst gfug howu jjes fndd fref';
-
-function armory_test() {
     Armory.gen(armory_test_codes, 5, function(r) { console.log(r); } );
 }
 

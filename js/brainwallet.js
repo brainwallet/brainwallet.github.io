@@ -616,9 +616,7 @@
     }
 
     function electrum_seed_update(r, seed) {
-        var p = (ELECTRUM_ROUNDS - r) * 100 / ELECTRUM_ROUNDS;
-
-        $('#progress').text('hashing: ' + p + '%');
+        $('#progress').text('hashing: ' + r + '%');
         $('#expo').val(Crypto.util.bytesToHex(seed));
     }
 

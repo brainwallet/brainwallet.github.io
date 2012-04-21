@@ -2,40 +2,31 @@
     electrum.js : Electrum deterministic wallet implementation (public domain)
 */
 
-var ELECTRUM_ROUNDS = 100000; // wallet ver.4
-
-function electrum_extend_chain(pubKey, privKey, n, for_change, fromPrivKey) {
+function electrum_extend_chain(pubKey, privKey, n, forChange, fromPrivKey) {
     var curve = getSECCurveByName("secp256k1");
-
-    var mode = for_change ? 1 : 0;
+    var mode = forChange ? 1 : 0;
     var mpk = pubKey.slice(1);
     var bytes = Crypto.charenc.UTF8.stringToBytes(n + ':' + mode + ':').concat(mpk);
     var sequence = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true})
-
-    var secexp;
+    var secexp = null;
     var pt = ECPointFp.decodeFrom(curve.getCurve(), pubKey);
 
     if (fromPrivKey) {
-
         var A = BigInteger.fromByteArrayUnsigned(sequence);
         var B = BigInteger.fromByteArrayUnsigned(privKey);
         var C = curve.getN();
         secexp = A.add(B).mod(C);
         pt = pt.add(curve.getG().multiply(A));
-
     } else {
-
         var A = BigInteger.fromByteArrayUnsigned(sequence);
-        secexp = BigInteger.fromByteArrayUnsigned(privKey)
         pt = pt.add(curve.getG().multiply(A));
-
     }
 
-    var newPriv = secexp.toByteArrayUnsigned();
+    var newPriv = secexp ? secexp.toByteArrayUnsigned(): [];
     var newPub = pt.getEncoded();
     var h160 = Bitcoin.Util.sha256ripe160(newPub);
     var addr = new Bitcoin.Address(h160);
-    var sec = new Bitcoin.Address(newPriv);
+    var sec = secexp ? new Bitcoin.Address(newPriv) : '';
     sec.version = 128;
 
     return [addr.toString(), sec.toString(), newPub, newPriv];
@@ -50,6 +41,7 @@ function electrum_get_pubkey(privKey) {
 }
 
 var Electrum = new function () {
+    var seedRounds = 100000;
     var seed;
     var oldseed;
     var pubKey;
@@ -62,18 +54,13 @@ var Electrum = new function () {
     var onSuccess;
 
     function calcSeed() {
-        if (rounds > 0) {
-
-            onUpdate(rounds, seed);
-
-            var portion = ELECTRUM_ROUNDS / 100;
-
+        if (rounds < seedRounds) {
+            var portion = seedRounds / 100;
+            onUpdate(rounds * 100 / seedRounds, seed);
             for (var i = 0; i < portion; i++)
                 seed = Crypto.SHA256(seed.concat(oldseed), {asBytes: true});
-
-            rounds -= portion;
-
-            if (rounds > 0) {
+            rounds += portion;
+            if (rounds < seedRounds) {
                 timeout = setTimeout(calcSeed, 0);
             } else {
                 privKey = seed;
@@ -84,32 +71,31 @@ var Electrum = new function () {
     }
 
     function calcAddr() {
-        //first address is always for change
-        var index = counter > 0 ? counter - 1 : counter;
         var forChange = (counter == 0);
+        var index = counter > 0 ? counter - 1 : counter;
         var r = electrum_extend_chain(pubKey, privKey, index, forChange, true);
         onUpdate(r);
         counter++;
         if (counter < range) {
             timeout = setTimeout(calcAddr, 0);
         } else {
-            if (onSuccess) onSuccess();
+            if (onSuccess) 
+                onSuccess();
         }
     }
 
-    // public init(seed, update(rounds), success(privKey))
     this.init = function(_seed, update, success) {
         seed = Crypto.charenc.UTF8.stringToBytes(_seed);
         oldseed = seed.slice(0);
-        rounds = 100000;
+        rounds = 0;
         onUpdate = update;
         onSuccess = success;
         clearTimeout(timeout);
         calcSeed();
     };
 
-    // public generate(range, update(address), success())
     this.gen = function(_range, update, success) {
+        addresses = [];
         range = _range;
         counter = 0;
         onUpdate = update;
@@ -127,18 +113,15 @@ var Electrum = new function () {
 
 function electrum_test() {
 
-    Electrum.init('123456',
-        function(r) { console.log(r); },
-        function(privKey) { Electrum.gen(5, function(r) { console.log(r); } ); }
-    );
+    Electrum.init('12345678', function(r) {console.log(r);},
+        function(privKey) {Electrum.gen(5, function(r) {console.log(r);});});
 
     /*
-    83945f4f3bb9d14119daa0f4b44fdd20b190c8220398f06c0fa69ec2ae5fe01c
-    18hkLd5yFmx77q4byCSdtDEz4v6Vg64f1E
-    1CZSNhisnmSdDe8Kqd84UNxVZr1ZF3dwtv
-    19ooYkLtiwqPuFmLxSEDqqgCKhPLSKx1nv
-    17Y2QAMMPGT4BWpaCZKd8iAGkwiognVETZ
-    14zJFDxT5fk1F6NDJyj5sb3CQfhouzkfpw
-    1JqiMeAcWx2pz5rfccpcDyPiwtFdDEGJbz
+    1DLHQhEuLftmAMTiYhw4DvVWhFQ9hnbXio
+    1HvoaBYqebPqFaS7GEZzywTaiTrS8cSaCF
+    1KMtsVJdde66kjgaK5dcte3TiWfFBF2bC7
+    159zjjZB3TadPXE3oeei5MfxTCYu5bqDCd
+    1H4uQ5i3MWSiUdHLJiPop9HWw2fe96CrLR
+    1EkX2PAY21FuqsKVirZS6wkLkSwbbE4EFD
     */
 }
