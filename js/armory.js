@@ -28,7 +28,8 @@ function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
     var h160 = Bitcoin.Util.sha256ripe160(newPub);
     var addr = new Bitcoin.Address(h160);
     var sec = secexp ? new Bitcoin.Address(newPriv) : '';
-    sec.version = 128;
+    if (secexp)
+        sec.version = 128;
 
     return [addr.toString(), sec.toString(), newPub, newPriv];
 }
@@ -136,5 +137,3 @@ jgjs fghg waug hjah faaw tksn gwig hrrr tdot\n\
 kjuu oeuj kdun adst gfug howu jjes fndd fref';
     Armory.gen(armory_test_codes, 5, function(r) { console.log(r); } );
 }
-
-
