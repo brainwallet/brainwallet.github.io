@@ -96,7 +96,7 @@ var Armory = new function () {
     var counter;
     var timeout;
 
-    calcAddr = function() {
+    function calcAddr() {
         var r = armory_extend_chain(pubKey, chainCode, privKey, true);
         onUpdate(r);
         pubKey = r[2];
