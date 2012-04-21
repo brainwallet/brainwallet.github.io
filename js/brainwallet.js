@@ -661,7 +661,9 @@
         }
 
         if (chain_type == 'chain_armory') {
-            Armory.gen(codes, chain_range, addr_callback, update_chain);
+            var uid = Armory.gen(codes, chain_range, addr_callback, update_chain);
+            if (uid)
+                $('#progress').text('uid: ' + uid);
         }
 
     }

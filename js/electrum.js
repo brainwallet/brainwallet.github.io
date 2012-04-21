@@ -96,7 +96,6 @@ var Electrum = new function () {
     };
 
     this.gen = function(_range, update, success) {
-        addresses = [];
         range = _range;
         counter = 0;
         onUpdate = update;

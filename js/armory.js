@@ -89,6 +89,12 @@ function armory_get_pubkey(privKey) {
     return pubKey;
 }
 
+function armory_get_wallet_uid(pubKey) {
+    var h160 = Bitcoin.Util.sha256ripe160(pubKey);
+    var id = [0].concat(h160.slice(0,5)).reverse();
+    return Bitcoin.Base58.encode(id);
+}
+
 var Armory = new function () {
     var pubKey;
     var privKey;
@@ -114,7 +120,7 @@ var Armory = new function () {
     this.gen = function(seed, _range, update, success) {
         var keys = armory_decode_keys(seed);
         if (keys == null)
-            return;
+            return null;
         privKey = keys[0];
         chainCode = keys[1];
         pubKey = armory_get_pubkey(privKey);
@@ -124,6 +130,7 @@ var Armory = new function () {
         onSuccess = success;
         clearTimeout(timeout);
         calcAddr();
+        return armory_get_wallet_uid(pubKey);
     };
 
     return this;
