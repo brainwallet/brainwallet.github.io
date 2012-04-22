@@ -1,2 +1,10 @@
 JavaScript Client-Side Bitcoin Address Generator
+
 http://brainwallet.github.com
+
+Notable features:
+
+- Online converter, including Base58 decoder and encoder
+- OpenSSL point conversion and compressed keys support
+- Armory and Electrum deterministic wallets implementation
+- rfc1751 javascript implementation
