@@ -616,7 +616,7 @@
     }
 
     function electrum_seed_update(r, seed) {
-        $('#progress').text('hashing: ' + r + '%');
+        $('#progress').text('key stretching: ' + r + '%');
         $('#expo').val(Crypto.util.bytesToHex(seed));
     }
 

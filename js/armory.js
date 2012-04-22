@@ -1,10 +1,10 @@
 /*
-    armory.js : Armory deterministic wallet implementation (public domain).
+    armory.js : Armory deterministic wallet implementation (public domain)
 */
 
 function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
-    var chainMod = Crypto.SHA256(Crypto.SHA256(pubKey, {asBytes: true}), {asBytes: true})
-    var chainXor = chainMod.slice(0);
+    var chainXor = Crypto.SHA256(Crypto.SHA256(pubKey, {asBytes: true}), {asBytes: true})
+
     for (var i = 0; i < 32; i++)
         chainXor[i] ^= chainCode[i];
 
