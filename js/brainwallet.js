@@ -773,7 +773,7 @@
 
         var r = '';
         if (txAddr != address)
-            r += 'Warning! Address does not match private key.\n\n';
+            r += 'Warning! Source address does not match private key.\n\n';
 
         var tx = $('#txHex').val();
         url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
