@@ -263,21 +263,6 @@ var TX = new function () {
         return JSON.stringify(r, null, 4);
     };
 
-    function parseScript(str) {
-        if (!str)
-            return [];
-        var chunks = str.split(' ');
-        var script = new Bitcoin.Script();
-        for (var i = 0; i < chunks.length; i++) {
-            var chunk = chunks[i];
-            if (chunk.indexOf('OP_') != -1)
-                script.writeOp(Bitcoin.Opcode.map[chunk]);
-            else
-                script.writeBytes(Crypto.util.hexToBytes(chunk));
-        }
-        return script;
-    }
-
     this.fromBBE = function(text) {
         //deserialize from Bitcoin Block Explorer format
         var sendTx = new Bitcoin.Transaction();
@@ -480,6 +465,19 @@ function btcstr2bignum(btc) {
         var mul = Math.pow(10,diff).toString();
     }
     return value.multiply(new BigInteger(mul));
+}
+
+function parseScript(script) {
+    var newScript = new Bitcoin.Script();
+    var s = script.split(" ");
+    for (var i in s) {
+        if (Bitcoin.Opcode.map.hasOwnProperty(s[i])){
+            newScript.writeOp(Bitcoin.Opcode.map[s[i]]);
+        } else {
+            newScript.writeBytes(Crypto.util.hexToBytes(s[i]));
+        }
+    }
+    return newScript;
 }
 // --->8---
 
