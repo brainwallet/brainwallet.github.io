@@ -1,64 +1,13 @@
 /*
-    tx.js - constructing bitcoin transactions using pure js (public domain)
+    tx.js - Bitcoin transactions for JavaScript (public domain)
 
-    I. Constructing transactions
-
-    To make a working transaction you have to know the following:
-
-    1) Exact hash of the transaction that was used for transferring funds;
-    2) exact script used for that (scriptPubKey, aka connectedScript);
-    3) exact outpoint index (position in the list of tx_outs);
-    4) and (highly desirable) the exact value used in this outpoint.
-
-    Additionally, you have to make sure those outputs weren't already spent.
-
-    Unspent outputs may be obtained from:
-
+    Obtaining inputs:
     1) http://blockchain.info/unspent?address=<address>
     2) http://blockexplorer.com/q/mytransactions/<address>
 
-    (The latter needs parser made by BTCurious.)
-
-    Signing uses random nonce, so don't afraid your signatures are changing.
-
-    Signing process (by justmoon):
-
-    This is one of the most complicated parts of Bitcoin imho. The data
-    that is signed is a double-SHA256 hash of a specially serialized
-    version of the transaction.
-
-    First, the transaction is copied. The input being signed is replaced
-    with the scriptPubKey of the corresponding txout.
-
-    With the default hashType SIGHASH_ALL, we're done now. But for the other
-    hashTypes SIGHASH_NONE and SIGHASH_SINGLE as well as the
-    SIGHASH_ANYONECANPAY flag, some more steps are needed. See the function
-    SignatureHash in script.cpp for details.
-
-    After that, the transaction is serialized and the hashType is appended as a
-    single byte, followed by three zero bytes, e.g. 01000000.
-
-    Then Bitcoin calculates the double SHA256 of that and signs the resulting
-    hash.
-
-    II. Sending transactions
-
-    There are a few sites that allow sending raw transactions:
-
+    Sending transactions:
     1) http://bitsend.rowit.co.uk
-
-    This site allows you to paste a raw transaction in hex (i.e. characters
-    0-9, a-f) this will then be checked it is valid and transmitted over the
-    network. Donations: 13Tn1QkAcqnQvGA7kBiCBH7NbijNcr6GMs (0.05 recommended 
-    per transaction :) )
-
     2) http://www.blockchain.info/pushtx
-
-    This page allows you to paste a raw transaction in hex (i.e. characters
-    0-9, a-f) this will then be checked it is valid and transmitted over the
-    network. All transactions must include a minimum 0.005 BTC fee to
-    blockchain.info: 1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq
-
 */
 
 var TX = new function () {
@@ -334,7 +283,8 @@ function dumpScript(script) {
     return out.join(' ');
 }
 
-//blockchain.info parser (adapted)
+// blockchain.info parser (adapted)
+// uses http://blockchain.info/unspent?address=<address>
 function tx_parseBCI(data, address) {
     var r = jQuery.parseJSON(data);
     var txs = r.unspent_outputs;
@@ -347,8 +297,6 @@ function tx_parseBCI(data, address) {
     var balance = BigInteger.ZERO;
     for (var i in txs) {
         var o = txs[i];
-
-        //use plain hex-encoded hash
         var lilendHash = o.tx_hash;
 
         //convert script back to BBE-compatible text
@@ -357,16 +305,15 @@ function tx_parseBCI(data, address) {
         var value = new BigInteger('' + o.value, 10);
         if (!(lilendHash in unspenttxs))
             unspenttxs[lilendHash] = {};
-
         unspenttxs[lilendHash][i] = {amount: value, script: script};
-
         balance = balance.add(value);
     }
     return {balance:balance, unspenttxs:unspenttxs};
 }
 
-//--->8---
 // blockexplorer parser (by BTCurious)
+// uses http://blockexplorer.com/q/mytransactions/<address>
+// --->8---
 function parseTxs(data, address) {
 
     var address = address.toString();
@@ -484,9 +431,8 @@ function parseScript(script) {
 }
 // --->8---
 
+// Some cross-domain magic (to bypass Access-Control-Allow-Origin)
 function tx_fetch(url, onSuccess, onError) {
-    //some cross-domain magic (to bypass Access-Control-Allow-Origin)
-    //tx_fetch('http://blockchain.info/unspent?address=' + addr, ... );
     var useYQL = true;
     $.ajax({
         url: useYQL ? 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent('select * from html where url="'+url+'"') : url,
@@ -506,17 +452,12 @@ var tx_addr = '12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX';
 var tx_unspent = '{"unspent_outputs":[{"tx_hash":"7a06ea98cd40ba2e3288262b28638cec5337c1456aaf5eedc8e9e5a20f062bdf","tx_index":5,"tx_output_n": 0,"script":"4104184f32b212815c6e522e66686324030ff7e5bf08efb21f8b00614fb7690e19131dd31304c54f37baa40db231c918106bb9fd43373e37ae31a0befc6ecaefb867ac","value": 5000000000,"value_hex": "012a05f200","confirmations":177254}]}';
 
 function tx_test() {
-    var bytes = Bitcoin.Base58.decode(tx_sec);
-    var eckey = new Bitcoin.ECKey(bytes.slice(1, 33));
-
+    var secret = Bitcoin.Base58.decode(tx_sec).slice(1, 33);
+    var eckey = new Bitcoin.ECKey(secret);
     TX.init(eckey);
-
-    TX.parseInputs(tx_unspent);
-    TX.addOutput(tx_dest, 50 * 1e8);
-
+    TX.parseInputs(tx_unspent, TX.getAddress());
+    TX.addOutput(tx_dest, 50.0);
     var sendTx = TX.construct();
-
-    console.log( TX.toBBE(sendTx) );
-    console.log( Crypto.util.bytesToHex(sendTx.serialize()));
+    console.log(TX.toBBE(sendTx));
+    console.log(Crypto.util.bytesToHex(sendTx.serialize()));
 }
-
