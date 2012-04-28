@@ -5,7 +5,7 @@
     var gen_eckey = null;
     var gen_pt = null;
     var gen_ps_reset = false;
-    var gen_timeout = 600;
+    var TIMEOUT = 600;
     var timeout = null;
 
     function parseBase58Check(address) {
@@ -185,8 +185,8 @@
     }
 
     function generate() {
-
         var hash_str = pad($('#hash').val(), 64, '0');
+
         var hash = Crypto.util.hexToBytes(hash_str);
 
         eckey = new Bitcoin.ECKey(hash);
@@ -273,13 +273,12 @@
     function onChangePass() {
         calc_hash();
         clearTimeout(timeout);
-        timeout = setTimeout(generate, gen_timeout);
+        timeout = setTimeout(generate, TIMEOUT);
     }
 
     function onChangeHash() {
         $('#pass').val('');
         gen_ps_reset = true;
-
         clearTimeout(timeout);
 
         if (/[^0123456789abcdef]+/i.test($('#hash').val())) {
@@ -289,7 +288,7 @@
             setErrorState($('#hash'), false);
         }
 
-        timeout = setTimeout(generate, gen_timeout);
+        timeout = setTimeout(generate, TIMEOUT);
     }
 
     function onChangePrivKey() {
@@ -331,7 +330,7 @@
 
         $('#hash').val(Crypto.util.bytesToHex(payload));
 
-        timeout = setTimeout(generate, gen_timeout);
+        timeout = setTimeout(generate, TIMEOUT);
     }
 
     var from = 'hex';
@@ -481,7 +480,7 @@
 
     function onChangeFrom() {
         clearTimeout(timeout);
-        timeout = setTimeout(translate, gen_timeout);
+        timeout = setTimeout(translate, TIMEOUT);
     }
 
     function onInput(id, func) {
@@ -551,7 +550,7 @@
         Electrum.stop();
         $('#memo').val( mn_encode(seed) );
         clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, gen_timeout);
+        timeout = setTimeout(chain_generate, TIMEOUT);
     }
 
     function onChangeMemo() {
@@ -576,7 +575,7 @@
 
 
         clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, gen_timeout);
+        timeout = setTimeout(chain_generate, TIMEOUT);
     }
 
     function onSeedRandom() {
@@ -607,7 +606,7 @@
     function onChangeRange() {
         chain_range = parseInt($('#range').val());
         clearTimeout(timeout);
-        timeout = setTimeout(update_chain_range, gen_timeout);
+        timeout = setTimeout(update_chain_range, TIMEOUT);
     }
 
     function addr_callback(r) {
@@ -668,48 +667,235 @@
 
     }
 
-    $(document).ready(
-        function() {
+    // -- transactions --
 
-            onInput('#pass', onChangePass);
-            onInput('#hash', onChangeHash);
-            onInput('#sec', onChangePrivKey);
+    function txGenSrcAddr() {
+        var sec = $('#txSec').val();
+        var addr = '';
 
-            $('#from_pass').click(update_gen_from);
-            $('#from_hash').click(update_gen_from);
-            $('#from_sec').click(update_gen_from);
-
-            $('#random').click(gen_random);
-
-            $('#uncompressed').click(update_gen_compressed);
-            $('#compressed').click(update_gen_compressed);
-
-            $('#pass').val('correct horse battery staple');
-            calc_hash();
-            generate();
-            $('#pass').focus();
-
-            onInput('#src', onChangeFrom);
-
-            $("body").on("click", "#enc_from .btn", update_enc_from);
-            $("body").on("click", "#enc_to .btn", update_enc_to);
-
-            if (window.location.hash == '#converter')
-                $('#tab-converter').tab('show');
-            else if (window.location.hash == '#chains')
-                $('#tab-chains').tab('show');
-
-            $('#seed_random').click(onSeedRandom);
-
-            $('#csv').click(onChangeFormat);
-            $('#json').click(onChangeFormat);
-
-            $('#chain_armory').click(onChangeMethod);
-            $('#chain_electrum').click(onChangeMethod);
-
-            onInput($('#range'), onChangeRange);
-            onInput($('#seed'), onChangeSeed);
-            onInput($('#memo'), onChangeMemo);
+        try {
+            var res = parseBase58Check(sec); 
+            var version = res[0];
+            var payload = res[1];
+            var eckey = new Bitcoin.ECKey(payload);
+            var curve = getSECCurveByName("secp256k1");
+            var pt = curve.getG().multiply(eckey.priv);
+            eckey.pub = pt.getEncoded();
+            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
+            addr = eckey.getBitcoinAddress();
+        } catch (err) {
         }
-    );
+
+        $('#txAddr').val(addr);
+        $('#txBalance').val('0.00');
+
+        if (addr != "")
+            txGetUnspent();
+    }
+
+    function txOnChangeSec() {
+        clearTimeout(timeout);
+        timeout = setTimeout(txGenSrcAddr, TIMEOUT);
+    }
+    
+    function txSetUnspent(text) {
+
+        if (text.length == 0) {
+            txUnspent = '{"unspent_outputs":[]}';
+            var value = 0;
+        } else {
+            var r = jQuery.parseJSON(text);
+            txUnspent = JSON.stringify(r, null, 4);
+            var value = TX.getBalance(txUnspent);
+        }
+
+        $('#txUnspent').val(txUnspent);
+
+        var fval = Bitcoin.Util.formatValue(value);
+
+        $('#txBalance').val(fval);
+        $('#txValue').val(fval);
+
+        txRebuild();
+    }
+
+    function txUpdateUnspent() {
+        txSetUnspent($('#txUnspent').val());
+    }
+
+    function txOnChangeUnspent() {
+        clearTimeout(timeout);
+        timeout = setTimeout(txUpdateUnspent, TIMEOUT);
+    }
+
+    function txParseUnspent(text) {
+        alert(text);
+        txSetUnspent(text);
+    }
+
+    function txGetUnspent() {
+        var addr = $('#txAddr').val();
+        var url = 'http://blockchain.info/unspent?address=' + addr;
+        url = prompt('Fetching unspent outputs:', url);
+        if (url != null && url != "") {
+            $('#txUnspent').val('');
+            tx_fetch(url, txParseUnspent);
+        }
+    }
+
+    function txOnChangeJSON() {
+        var str = $('#txJSON').val();
+        var sendTx = TX.fromBBE(str);
+        var bytes = sendTx.serialize();
+        var hex = Crypto.util.bytesToHex(bytes);
+        $('#txHex').val(hex);
+    }
+
+    function txOnChangeHex() {
+        var str = $('#txHex').val();
+        str = str.replace(/[^0-9a-fA-f]/g,'');
+        $('#txHex').val(str);
+        var bytes = Crypto.util.hexToBytes(str);
+        var sendTx = TX.deserialize(bytes);
+        var text = TX.toBBE(sendTx);
+        $('#txJSON').val(text);
+    }
+
+    function txOnAddDest() {
+        alert('Not implemented');
+        return false;
+    }
+    
+    function txSent(text) {
+        alert(text);
+    }
+
+    function txSend() {
+        var tx = $('#txHex').val();
+        url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
+        url = prompt('Sending transaction:', url);
+        if (url != null && url != "") {
+            tx_fetch(url, txSent);
+        }
+        return false;
+    }
+
+    function txRebuild() {
+        var sec = $('#txSec').val();
+        var dest = $('#txDest').val();
+        var unspent = $('#txUnspent').val();
+        var fval = parseFloat($('#txValue').val());
+
+        try {
+            var res = parseBase58Check(sec); 
+            var version = res[0];
+            var payload = res[1];
+        } catch (err) {
+            $('#txJSON').val('');
+            $('#txHex').val('');
+            return
+        }
+
+        var eckey = new Bitcoin.ECKey(payload);
+
+        TX.init(eckey);
+        TX.addOutput(dest, fval);
+
+        try {
+            var r = jQuery.parseJSON(unspent);
+            var unspent = r.unspent_outputs;
+        } catch (err) {
+            var unspent = {};
+        }
+
+        var sendTx = TX.construct(unspent);
+        var txJSON = TX.toBBE(sendTx);
+        var buf = sendTx.serialize();
+        var txHex = Crypto.util.bytesToHex(buf);
+        $('#txJSON').val(txJSON);
+        $('#txHex').val(txHex);
+    }
+
+    function txOnChangeDest() {
+        clearTimeout(timeout);
+        timeout = setTimeout(txRebuild, TIMEOUT);
+    }
+
+    function txShowUnspent() {
+        var div = $('#txUnspentForm');
+
+        if (div.hasClass('hide')) {
+            div.removeClass('hide');
+            $('#txShowUnspent').text('Hide Outputs');
+        } else {
+            div.addClass('hide');
+            $('#txShowUnspent').text('Show Outputs');
+        }
+    }
+
+    $(document).ready( function() {
+
+        onInput('#pass', onChangePass);
+        onInput('#hash', onChangeHash);
+        onInput('#sec', onChangePrivKey);
+
+        $('#from_pass').click(update_gen_from);
+        $('#from_hash').click(update_gen_from);
+        $('#from_sec').click(update_gen_from);
+
+        $('#random').click(gen_random);
+
+        $('#uncompressed').click(update_gen_compressed);
+        $('#compressed').click(update_gen_compressed);
+
+        $('#pass').val('correct horse battery staple');
+        calc_hash();
+        generate();
+        $('#pass').focus();
+
+        onInput('#src', onChangeFrom);
+
+        $("body").on("click", "#enc_from .btn", update_enc_from);
+        $("body").on("click", "#enc_to .btn", update_enc_to);
+
+        if (window.location.hash == '#converter')
+            $('#tab-converter').tab('show');
+        else if (window.location.hash == '#chains')
+            $('#tab-chains').tab('show');
+        else if (window.location.hash == '#transactions')
+            $('#tab-transactions').tab('show');
+
+        $('#seed_random').click(onSeedRandom);
+
+        $('#csv').click(onChangeFormat);
+        $('#json').click(onChangeFormat);
+
+        $('#chain_armory').click(onChangeMethod);
+        $('#chain_electrum').click(onChangeMethod);
+
+        onInput($('#range'), onChangeRange);
+        onInput($('#seed'), onChangeSeed);
+        onInput($('#memo'), onChangeMemo);
+
+        // -- transactions -- 
+
+        $('#txSec').val(tx_sec);
+        $('#txAddr').val(tx_addr);
+        $('#txDest').val(tx_dest);
+
+        txSetUnspent(tx_unspent);
+
+        $('#txGetUnspent').click(txGetUnspent);
+
+        onInput($('#txSec'), txOnChangeSec);
+        onInput($('#txUnspent'), txOnChangeUnspent);
+        onInput($('#txHex'), txOnChangeHex);
+        onInput($('#txJSON'), txOnChangeJSON);
+        onInput($('#txDest'), txOnChangeDest);
+        onInput($('#txValue'), txOnChangeDest);
+
+        $('#txAddDest').click(txOnAddDest);
+        $('#txSend').click(txSend);
+
+    });
 })(jQuery);

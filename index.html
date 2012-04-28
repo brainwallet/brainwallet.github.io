@@ -9,7 +9,8 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
-    <!--[if lt IE 9]>
+
+<!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <link href="favicon.ico" rel="shortcut icon">
@@ -17,19 +18,20 @@
 <body>
 <div class="navbar navbar-fixed-top"> 
     <div class="navbar-inner"> 
-        <div class="container">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <a class="brand" href="/">Brainwallet</a> 
-            <div class="nav-collapse">
-                 <ul class="nav">
-                     <li class="active"><a data-toggle="tab" href="#generation">Generator</a></li> 
-                     <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
-                     <li><a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
-                 </ul>
+        <div class="container"> 
+            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
+            <span class="icon-bar"></span> <span class="icon-bar"></span> 
+            <span class="icon-bar"></span> </a> <a class="brand" href="/">Brainwallet</a> 
+            <div class="nav-collapse"> 
+                <ul class="nav">
+                    <li class="active">
+                    <a data-toggle="tab" href="#generation">Generator</a></li> 
+                    <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#transactions" id="tab-transactions">Transactions</a></li> 
+                </ul>
             </div>
         </div>
     </div>
@@ -61,10 +63,9 @@
                             <div class="control-group"> 
                                 <label class="control-label" for="hash">Secret Exponent</label> 
                                 <div class="controls"> 
-                                    <div class="input-append">
-                                        <input class="span5" id="hash" maxlength="64" readonly type="text"><button class="btn" id="random" type="button" title="Random"><i class="icon-repeat"></i></button>
-                                    </div>
-                                    <span class="help-inline errormsg"></span>
+                                    <div class="input-append"> 
+                                        <input class="span5" id="hash" maxlength="64" readonly type="text"><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button> 
+                                    </div><span class="help-inline errormsg"></span> 
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -92,13 +93,13 @@
                             <div class="control-group"> 
                                 <label class="control-label" for="der">Private Key (DER)</label> 
                                 <div class="controls"> 
-                                    <textarea class="span6" id="der" readonly rows="7"></textarea>
+<textarea class="span6" id="der" readonly rows="7"></textarea>
                                 </div>
                             </div>
                             <div class="control-group"> 
                                 <label class="control-label" for="pub">Public Key (SEC)</label> 
                                 <div class="controls"> 
-                                    <textarea class="span5" id="pub" readonly rows="2"></textarea>
+<textarea class="span5" id="pub" readonly rows="2"></textarea>
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -136,30 +137,28 @@
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <textarea class="span6" id="src" rows="10"></textarea>
+<textarea class="span6" id="src" rows="10"></textarea>
                             </div>
-                            <div>
-                                <span id="hint_from">&nbsp;</span>
+                            <div> <span id="hint_from">&nbsp;</span> 
                             </div>
                         </div>
                         <div class="span6"> 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
-                                       <button class="btn active" id="to_hex" type="button">Hex</button> 
-                                       <button class="btn" id="to_text" type="button">Text</button> 
-                                       <button class="btn" id="to_base58" type="button">Base58</button> 
-                                       <button class="btn" id="to_base64" type="button">Base64</button> 
-                                       <button class="btn" id="to_rfc1751" type="button">Rfc1751</button>
-                                       <button class="btn" id="to_mnemonic" type="button">Mnemonic</button> 
+                                        <button class="btn active" id="to_hex" type="button">Hex</button> 
+                                        <button class="btn" id="to_text" type="button">Text</button> 
+                                        <button class="btn" id="to_base58" type="button">Base58</button> 
+                                        <button class="btn" id="to_base64" type="button">Base64</button> 
+                                        <button class="btn" id="to_rfc1751" type="button">Rfc1751</button> 
+                                        <button class="btn" id="to_mnemonic" type="button">Mnemonic</button> 
                                     </div>
-                                </div> 
+                                </div>
                             </div>
                             <div class="control-group"> 
-                                <textarea class="span6" id="dest" readonly rows="10"></textarea>
+<textarea class="span6" id="dest" readonly rows="10"></textarea>
                             </div>
-                            <div>
-                                <span id="hint_to">&nbsp;</span>
+                            <div> <span id="hint_to">&nbsp;</span> 
                             </div>
                         </div>
                     </div>
@@ -182,30 +181,29 @@
                 <div class="control-group"> 
                     <label class="control-label" for="seed">Chain Code</label> 
                     <div class="controls"> 
-                        <div class="input-append">
-                            <input id="seed" maxlength="32" readonly class="span5" type="text"><button class="btn" id="seed_random" type="button" title="Random"><i class="icon-repeat"></i></button>
+                        <div class="input-append"> 
+                            <input class="span5" id="seed" maxlength="32" readonly type="text"><button class="btn" id="seed_random" title="Random" type="button"><i class="icon-repeat"></i></button> 
                         </div>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="expo">Root Key</label> 
                     <div class="controls"> 
-                        <div class="input-append">
-                            <input id="expo" maxlength="64" class="span5" type="text" readonly>
-                        </div>
-                        <span class="help-inline" id="progress"></span>
+                        <div class="input-append"> 
+                            <input class="span5" id="expo" maxlength="64" readonly type="text"> 
+                        </div><span class="help-inline" id="progress"></span> 
                     </div>
                 </div>
                 <div class="control-group"> 
-                    <label class="control-label" for="memo">Paper Backup</label>
+                    <label class="control-label" for="memo">Paper Backup</label> 
                     <div class="controls"> 
-                        <textarea class="span4" id="memo" rows="5"></textarea>
+<textarea class="span4" id="memo" rows="5"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="range">Range</label> 
                     <div class="controls"> 
-                        <input id="range" class="span1" maxlength="3" type="text" value="6">
+                        <input class="span1" id="range" maxlength="3" type="text" value="6"> 
                     </div>
                 </div>
                 <div class="control-group"> 
@@ -218,19 +216,75 @@
                     </div>
                 </div>
                 <div class="control-group"> 
-                    <label class="control-label" for="chain">Chain</label>
+                    <label class="control-label" for="chain">Chain</label> 
                     <div class="controls"> 
-                        <textarea class="span8" id="chain" readonly rows="10"></textarea>
+<textarea class="span8" id="chain" readonly rows="10"></textarea>
                     </div>
                 </div>
             </fieldset>
             </form>
         </div>
-        <hr/> 
+        <div class="tab-pane fade" id="transactions"> 
+            <form action="/" class="form-horizontal" method="get">
+            <fieldset> <legend>Transactions</legend> 
+                <div class="control-group"> 
+                    <label class="control-label" for="txSec">Private Key</label> 
+                    <div class="controls"> 
+                        <input class="span5" id="txSec" type="text"> 
+                        <span class="help-inline errormsg"></span> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txAddr">Source Address</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="txAddr" readonly type="text"> 
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txBalance" readonly type="text"> 
+                        </div>
+                       <button class="btn" id="txGetUnspent" title="Get Outputs" type="button"><i class="icon-repeat"></i></button> 
+                       <button class="btn" type="button" id="txToggle" data-toggle="collapse" data-target="#txUnspentForm">Show Outputs</button>
+                    </div>
+                </div>
+                <div class="collapse" id="txUnspentForm">
+                    <div class="control-group"> 
+                        <label class="control-label" for="txUnspent">Unspent Outputs</label> 
+                        <div class="controls"> 
+                            <textarea class="span8" id="txUnspent" rows="16"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txJSON">JSON Transaction</label> 
+                    <div class="controls"> 
+<textarea class="span8" id="txJSON" rows="16"></textarea>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txHex">Raw Transaction</label> 
+                    <div class="controls"> 
+<textarea class="span8" id="txHex" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txDest">Destination Address</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="txDest" type="text"> 
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text"> 
+                        </div><span class="help-inline errormsg"></span> 
+                        <button class="btn" type="button" id="txAddDest" disabled>+</button>
+                        <button class="btn" type="button" id="txSend">Send Transaction</button>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+        <hr /> 
     </div>
-    <footer> 
-        <p>&copy; Brainwallet 2012 <span class="pull-right"><small>Running live from <a href="https://github.com/brainwallet/brainwallet.github.com">GitHub</a> </small></span></p>
-    </footer>
+    <FOOTER> 
+
+    <p>&copy; Brainwallet 2012 <span class="pull-right"><small>Running live from 
+    <a href="https://github.com/brainwallet/brainwallet.github.com">GitHub</a> 
+    </small></span></p> 
+    </FOOTER> 
 </div>
 <script src="js/jquery-1.7.2.min.js"></script> 
 <script src="js/bootstrap.min.js"></script> 
@@ -240,6 +294,7 @@
 <script src="js/mnemonic.js"></script> 
 <script src="js/armory.js"></script> 
 <script src="js/electrum.js"></script> 
+<script src="js/tx.js"></script> 
 <script src="js/brainwallet.js"></script> 
 </body>
 </html> 
