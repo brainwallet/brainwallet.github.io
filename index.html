@@ -151,20 +151,24 @@
                     </div>
                 </div>
                 <div class="control-group"> 
+                    <label class="control-label" for="range">Range</label> 
+                    <div class="controls"> 
+                        <input class="span2" id="range" maxlength="3" type="text" value="6"> 
+                    </div>
+                </div>
+                <div class="control-group"> 
                     <label class="control-label" for="csv">Wallet Format</label> 
-                    <div class="controls form-inline"> 
-                        <span class="btn-group" data-toggle="buttons-radio" id="chain_format"> 
-                        <button class="btn active" id="csv" type="button">CSV</button> 
-                        <button class="btn" id="json" type="button">JSON</button> 
-                        </span> <label class="span2 checkbox">Range 
-                        <input class="span1" id="range" maxlength="3" type="text" value="6"> 
-                        </label> 
+                    <div class="controls"> 
+                        <div class="btn-group" data-toggle="buttons-radio" id="chain_format"> 
+                            <button class="btn active" id="csv" type="button">CSV</button> 
+                            <button class="btn" id="json" type="button">JSON</button> 
+                        </div>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="chain">Chain</label> 
                     <div class="controls"> 
-<textarea class="span8" id="chain" readonly rows="15"></textarea>
+<textarea class="span8" id="chain" readonly rows="13"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
@@ -233,7 +237,7 @@
                         <input class="span4" id="txDest" type="text"> 
                         <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text"> 
                         </div><span class="help-inline errormsg"></span> 
-                        <button class="btn" id="txAddDest" type="button" title="Not implemented" disabled>+</button> 
+                        <button class="btn" disabled id="txAddDest" title="Not implemented" type="button">+</button> 
                         <button class="btn" id="txSend" type="button">Send Transaction</button> 
                     </div>
                 </div>

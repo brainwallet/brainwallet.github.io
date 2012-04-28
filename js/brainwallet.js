@@ -652,10 +652,8 @@
         Electrum.stop();
 
         if (chain_type == 'chain_electrum') {
-
            if (seed.length == 0)
                return;
-
             Electrum.init(seed, electrum_seed_update, electrum_seed_success);
         }
 
@@ -841,6 +839,15 @@
 
     $(document).ready( function() {
 
+        if (window.location.hash == '#converter')
+            $('#tab-converter').tab('show');
+        else if (window.location.hash == '#chains')
+            $('#tab-chains').tab('show');
+        else if (window.location.hash == '#transactions')
+            $('#tab-transactions').tab('show');
+
+        // generator
+
         onInput('#pass', onChangePass);
         onInput('#hash', onChangeHash);
         onInput('#sec', onChangePrivKey);
@@ -859,17 +866,7 @@
         generate();
         $('#pass').focus();
 
-        onInput('#src', onChangeFrom);
-
-        $("body").on("click", "#enc_from .btn", update_enc_from);
-        $("body").on("click", "#enc_to .btn", update_enc_to);
-
-        if (window.location.hash == '#converter')
-            $('#tab-converter').tab('show');
-        else if (window.location.hash == '#chains')
-            $('#tab-chains').tab('show');
-        else if (window.location.hash == '#transactions')
-            $('#tab-transactions').tab('show');
+        // chains
 
         $('#seed_random').click(onSeedRandom);
 
@@ -883,7 +880,7 @@
         onInput($('#seed'), onChangeSeed);
         onInput($('#memo'), onChangeMemo);
 
-        // -- transactions -- 
+        // transactions
 
         $('#txSec').val(tx_sec);
         $('#txAddr').val(tx_addr);
@@ -905,6 +902,12 @@
 
         $('#txAddDest').click(txOnAddDest);
         $('#txSend').click(txSend);
+
+        // converter
+
+        onInput('#src', onChangeFrom);
+        $("body").on("click", "#enc_from .btn", update_enc_from);
+        $("body").on("click", "#enc_to .btn", update_enc_to);
 
     });
 })(jQuery);
