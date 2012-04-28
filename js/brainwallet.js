@@ -704,7 +704,8 @@
         var r = JSON.parse(text);
         txUnspent = JSON.stringify(r, null, 4);
         $('#txUnspent').val(txUnspent);
-        TX.parseInputs(txUnspent, addr);
+        var address = $('#txAddr').val();
+        TX.parseInputs(txUnspent, address);
         var value = TX.getBalance();
         var fval = Bitcoin.Util.formatValue(value);
         $('#txBalance').val(fval);
