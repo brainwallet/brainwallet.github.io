@@ -201,7 +201,7 @@
             var addr = eckey.getBitcoinAddress();
             setErrorState($('#hash'), false);
         } catch (err) {
-            console.info(err);
+            //console.info(err);
             setErrorState($('#hash'), true, 'Invalid secret exponent (must be non-zero value)');
             return;
         }
@@ -669,6 +669,8 @@
 
     // -- transactions --
 
+    var txType = 'txBCI';
+
     function txGenSrcAddr() {
         var sec = $('#txSec').val();
         var addr = '';
@@ -699,23 +701,14 @@
     }
     
     function txSetUnspent(text) {
-
-        if (text.length == 0) {
-            txUnspent = '{"unspent_outputs":[]}';
-            var value = 0;
-        } else {
-            var r = jQuery.parseJSON(text);
-            txUnspent = JSON.stringify(r, null, 4);
-            var value = TX.getBalance(txUnspent);
-        }
-
+        var r = JSON.parse(text);
+        txUnspent = JSON.stringify(r, null, 4);
         $('#txUnspent').val(txUnspent);
-
+        TX.parseInputs(txUnspent, addr);
+        var value = TX.getBalance();
         var fval = Bitcoin.Util.formatValue(value);
-
         $('#txBalance').val(fval);
         $('#txValue').val(fval);
-
         txRebuild();
     }
 
@@ -729,14 +722,18 @@
     }
 
     function txParseUnspent(text) {
-        alert(text == '' ? 'No unspent outputs' : text);
+        if (text == '')
+            alert('No data');
         txSetUnspent(text);
     }
 
     function txGetUnspent() {
         var addr = $('#txAddr').val();
-        var url = 'http://blockchain.info/unspent?address=' + addr;
-        url = prompt('Fetching unspent outputs:', url);
+
+        var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
+            'http://blockexplorer.com/q/mytransactions/' + addr;
+
+        url = prompt('Download transaction history:', url);
         if (url != null && url != "") {
             $('#txUnspent').val('');
             tx_fetch(url, txParseUnspent);
@@ -773,7 +770,7 @@
     function txSend() {
         var tx = $('#txHex').val();
         url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
-        url = prompt('Sending transaction:', url);
+        url = prompt('Send transaction:', url);
         if (url != null && url != "") {
             tx_fetch(url, txSent);
         }
@@ -781,7 +778,9 @@
     }
 
     function txRebuild() {
+
         var sec = $('#txSec').val();
+        var addr = $('#txAddr').val();
         var dest = $('#txDest').val();
         var unspent = $('#txUnspent').val();
         var fval = parseFloat($('#txValue').val());
@@ -793,7 +792,7 @@
         } catch (err) {
             $('#txJSON').val('');
             $('#txHex').val('');
-            return
+            return;
         }
 
         var eckey = new Bitcoin.ECKey(payload);
@@ -801,14 +800,7 @@
         TX.init(eckey);
         TX.addOutput(dest, fval);
 
-        try {
-            var r = jQuery.parseJSON(unspent);
-            var unspent = r.unspent_outputs;
-        } catch (err) {
-            var unspent = {};
-        }
-
-        var sendTx = TX.construct(unspent);
+        var sendTx = TX.construct();
         var txJSON = TX.toBBE(sendTx);
         var buf = sendTx.serialize();
         var txHex = Crypto.util.bytesToHex(buf);
@@ -831,6 +823,11 @@
             div.addClass('hide');
             $('#txShowUnspent').text('Show Outputs');
         }
+    }
+
+    function txChangeType() {
+        txType = $(this).attr('id');
+        txGetUnspent();
     }
 
     $(document).ready( function() {
@@ -886,6 +883,9 @@
         txSetUnspent(tx_unspent);
 
         $('#txGetUnspent').click(txGetUnspent);
+
+        $('#txBCI').click(txChangeType);
+        $('#txBBE').click(txChangeType);
 
         onInput($('#txSec'), txOnChangeSec);
         onInput($('#txUnspent'), txOnChangeUnspent);

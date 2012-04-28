@@ -240,15 +240,24 @@
                         <input class="span4" id="txAddr" readonly type="text"> 
                         <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txBalance" readonly type="text"> 
                         </div>
-                       <button class="btn" id="txGetUnspent" title="Get Outputs" type="button"><i class="icon-repeat"></i></button> 
-                       <button class="btn" type="button" id="txToggle" data-toggle="collapse" data-target="#txUnspentForm">Show Outputs</button>
+                        <button class="btn" id="txGetUnspent" title="Reload" type="button"><i class="icon-repeat"></i></button> 
+                        <button class="btn" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Toggle Inputs</button> 
                     </div>
                 </div>
-                <div class="collapse" id="txUnspentForm">
+                <div class="collapse" id="txUnspentForm"> 
                     <div class="control-group"> 
-                        <label class="control-label" for="txUnspent">Unspent Outputs</label> 
+                        <label class="control-label" for="txBBE">Get History From</label> 
                         <div class="controls"> 
-                            <textarea class="span8" id="txUnspent" rows="16"></textarea>
+                            <div class="btn-group" data-toggle="buttons-radio" id="txType"> 
+                                <button class="btn active" id="txBCI" type="button">BlockChain Info</button> 
+                                <button class="btn" id="txBBE" type="button">Bitcoin Block Explorer</button> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group"> 
+                        <label class="control-label" for="txUnspent">Transaction History</label> 
+                        <div class="controls"> 
+<textarea class="span8" id="txUnspent" rows="16"></textarea>
                         </div>
                     </div>
                 </div>
@@ -270,8 +279,8 @@
                         <input class="span4" id="txDest" type="text"> 
                         <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text"> 
                         </div><span class="help-inline errormsg"></span> 
-                        <button class="btn" type="button" id="txAddDest" disabled>+</button>
-                        <button class="btn" type="button" id="txSend">Send Transaction</button>
+                        <button class="btn" disabled id="txAddDest" type="button">+</button> 
+                        <button class="btn" id="txSend" type="button">Send Transaction</button> 
                     </div>
                 </div>
             </fieldset>
