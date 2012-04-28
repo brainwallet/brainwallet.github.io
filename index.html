@@ -25,12 +25,12 @@
             <div class="nav-collapse"> 
                 <ul class="nav">
                     <li class="active">
-                    <a data-toggle="tab" href="#generation">Generator</a></li> 
+                    <a data-toggle="tab" href="#generator">Generator</a></li> 
                     <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
                     <li>
-                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
-                    <li>
                     <a data-toggle="tab" href="#transactions" id="tab-transactions">Transactions</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
                 </ul>
             </div>
         </div>
@@ -38,7 +38,9 @@
 </div>
 <div class="container"> 
     <div class="tab-content"> 
-        <div class="tab-pane fade in active" id="generation"> 
+
+<!-- Generator -->
+        <div class="tab-pane fade in active" id="generator"> 
             <form action="/" class="form-horizontal" method="get">
             <fieldset> <legend>Generator</legend> 
                 <div class="control-group"> 
@@ -118,54 +120,8 @@
             </fieldset>
             </form>
         </div>
-        <div class="tab-pane fade" id="converter"> 
-            <form action="/" class="form-inline" method="get">
-            <fieldset> <legend>Converter</legend> 
-                <div class="control-group"> 
-                    <div class="row"> 
-                        <div class="span6"> 
-                            <div class="control-group"> 
-                                <div class="btn-toolbar"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
-                                        <button class="btn active" id="from_hex" type="button">Hex</button> 
-                                        <button class="btn" id="from_text" type="button">Text</button> 
-                                        <button class="btn" id="from_base58" type="button">Base58</button> 
-                                        <button class="btn" id="from_base64" type="button">Base64</button> 
-                                        <button class="btn" id="from_rfc1751" type="button">Rfc1751</button> 
-                                        <button class="btn" id="from_mnemonic" type="button">Mnemonic</button> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-<textarea class="span6" id="src" rows="10"></textarea>
-                            </div>
-                            <div> <span id="hint_from">&nbsp;</span> 
-                            </div>
-                        </div>
-                        <div class="span6"> 
-                            <div class="control-group"> 
-                                <div class="btn-toolbar"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
-                                        <button class="btn active" id="to_hex" type="button">Hex</button> 
-                                        <button class="btn" id="to_text" type="button">Text</button> 
-                                        <button class="btn" id="to_base58" type="button">Base58</button> 
-                                        <button class="btn" id="to_base64" type="button">Base64</button> 
-                                        <button class="btn" id="to_rfc1751" type="button">Rfc1751</button> 
-                                        <button class="btn" id="to_mnemonic" type="button">Mnemonic</button> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-<textarea class="span6" id="dest" readonly rows="10"></textarea>
-                            </div>
-                            <div> <span id="hint_to">&nbsp;</span> 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
+
+<!-- Chains -->
         <div class="tab-pane fade" id="chains"> 
             <form action="/" class="form-horizontal" method="get">
             <fieldset> <legend>Chains</legend> 
@@ -195,12 +151,6 @@
                     </div>
                 </div>
                 <div class="control-group"> 
-                    <label class="control-label" for="memo">Paper Backup</label> 
-                    <div class="controls"> 
-<textarea class="span4" id="memo" rows="5"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
                     <label class="control-label" for="range">Range</label> 
                     <div class="controls"> 
                         <input class="span1" id="range" maxlength="3" type="text" value="6"> 
@@ -221,9 +171,17 @@
 <textarea class="span8" id="chain" readonly rows="10"></textarea>
                     </div>
                 </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="memo">Paper Backup</label> 
+                    <div class="controls"> 
+<textarea class="span8" id="memo" rows="5"></textarea>
+                    </div>
+                </div>
             </fieldset>
             </form>
         </div>
+
+<!-- Transactions -->
         <div class="tab-pane fade" id="transactions"> 
             <form action="/" class="form-horizontal" method="get">
             <fieldset> <legend>Transactions</legend> 
@@ -281,6 +239,56 @@
                         </div><span class="help-inline errormsg"></span> 
                         <button class="btn" disabled id="txAddDest" type="button">+</button> 
                         <button class="btn" id="txSend" type="button">Send Transaction</button> 
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+
+<!-- Converter -->
+        <div class="tab-pane fade" id="converter"> 
+            <form action="/" class="form-inline" method="get">
+            <fieldset> <legend>Converter</legend> 
+                <div class="control-group"> 
+                    <div class="row"> 
+                        <div class="span6"> 
+                            <div class="control-group"> 
+                                <div class="btn-toolbar"> 
+                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
+                                        <button class="btn active" id="from_hex" type="button">Hex</button> 
+                                        <button class="btn" id="from_text" type="button">Text</button> 
+                                        <button class="btn" id="from_base58" type="button">Base58</button> 
+                                        <button class="btn" id="from_base64" type="button">Base64</button> 
+                                        <button class="btn" id="from_rfc1751" type="button">Rfc1751</button> 
+                                        <button class="btn" id="from_mnemonic" type="button">Mnemonic</button> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+<textarea class="span6" id="src" rows="10"></textarea>
+                            </div>
+                            <div> <span id="hint_from">&nbsp;</span> 
+                            </div>
+                        </div>
+                        <div class="span6"> 
+                            <div class="control-group"> 
+                                <div class="btn-toolbar"> 
+                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
+                                        <button class="btn active" id="to_hex" type="button">Hex</button> 
+                                        <button class="btn" id="to_text" type="button">Text</button> 
+                                        <button class="btn" id="to_base58" type="button">Base58</button> 
+                                        <button class="btn" id="to_base64" type="button">Base64</button> 
+                                        <button class="btn" id="to_rfc1751" type="button">Rfc1751</button> 
+                                        <button class="btn" id="to_mnemonic" type="button">Mnemonic</button> 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+<textarea class="span6" id="dest" readonly rows="10"></textarea>
+                            </div>
+                            <div> <span id="hint_to">&nbsp;</span> 
+                            </div>
+                        </div>
                     </div>
                 </div>
             </fieldset>
