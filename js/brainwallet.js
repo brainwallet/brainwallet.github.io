@@ -729,7 +729,7 @@
     }
 
     function txParseUnspent(text) {
-        alert(text);
+        alert(text == '' ? 'No unspent outputs' : text);
         txSetUnspent(text);
     }
 
