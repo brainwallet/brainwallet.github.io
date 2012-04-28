@@ -27,7 +27,7 @@ var TX = new function () {
     }
 
     this.getBalance = function() {
-        return new BigInteger(''+balance, 10);
+        return balance;
     }
 
     this.getAddress = function() {
