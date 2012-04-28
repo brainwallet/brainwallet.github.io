@@ -81,6 +81,10 @@ var TX = new function () {
         return new BigInteger(''+balance, 10);
     }
 
+    this.getAddress = function() {
+        return eckey.getBitcoinAddress().toString();
+    }
+
     this.parseInputs = function(text, address) {
         try {
             var res = tx_parseBCI(text, address);

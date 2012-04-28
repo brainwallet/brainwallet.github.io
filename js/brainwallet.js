@@ -769,9 +769,17 @@
     }
 
     function txSend() {
+
+        var txAddr = $('#txAddr').val();
+        var address = TX.getAddress();
+
+        var r = '';
+        if (txAddr != address)
+            r += 'Warning! Address does not match private key.\n\n';
+
         var tx = $('#txHex').val();
         url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
-        url = prompt('Send transaction:', url);
+        url = prompt(r + 'Send transaction:', url);
         if (url != null && url != "") {
             tx_fetch(url, txSent);
         }
