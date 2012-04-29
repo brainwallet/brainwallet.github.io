@@ -505,11 +505,11 @@
         var id = $(this).attr('id');
 
         if (chain_type != id) {
-            $('#seed').val('');
-            $('#expo').val('');
-            $('#memo').val('');
-            $('#progress').text('');
-            Electrum.stop();
+//            $('#seed').val('');
+//            $('#expo').val('');
+//            $('#memo').val('');
+//            $('#progress').text('');
+            chOnStop();
         }
 
         chain_type = id;
@@ -529,7 +529,6 @@
             return;
         var str = '';
         if (chain_mode == 'csv') {
-
             for (var i = 0; i < addresses.length; i++)
                 str += addr_to_csv(i+1, addresses[i]);
 
@@ -542,12 +541,16 @@
             str = JSON.stringify(w, null, 4);
         }
         $('#chain').text(str);
+
+        chain_range = parseInt($('#range').val());
+        if (addresses.length == chain_range)
+            chOnStop();
     }
 
     function onChangeSeed() {
         $('#expo').val('');
         $('#progress').text('');
-        Electrum.stop();
+        chOnStop();
         $('#memo').val( mn_encode(seed) );
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, TIMEOUT);
@@ -572,15 +575,11 @@
                 $('#expo').val(Crypto.util.bytesToHex(pk));
             }
         }
-
-
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, TIMEOUT);
     }
 
-    function onSeedRandom() {
-        clearTimeout(timeout);
-
+    function chOnPlay() {
         var cc = Crypto.util.randomBytes(32);
         var pk = Crypto.util.randomBytes(32);
 
@@ -599,8 +598,17 @@
             var codes = mn_encode(seed);
             $('#memo').val(codes);
         }
-
         chain_generate();
+    }
+
+    function chOnStop() {
+        Armory.stop();
+        Electrum.stop();
+        $('#chStop').hide();
+        $('#chPlay').show();
+
+        if (chain_type == 'chain_electrum')
+            $('#progress').text('');
     }
 
     function onChangeRange() {
@@ -642,6 +650,11 @@
     }
 
     function chain_generate() {
+
+        clearTimeout(timeout);
+        $('#chPlay').hide();
+        $('#chStop').show();
+
         var seed = $('#seed').val();
         var codes = $('#memo').val();
 
@@ -868,7 +881,8 @@
 
         // chains
 
-        $('#seed_random').click(onSeedRandom);
+        $('#chPlay').click(chOnPlay);
+        $('#chStop').click(chOnStop);
 
         $('#csv').click(onChangeFormat);
         $('#json').click(onChangeFormat);
@@ -908,6 +922,5 @@
         onInput('#src', onChangeFrom);
         $("body").on("click", "#enc_from .btn", update_enc_from);
         $("body").on("click", "#enc_to .btn", update_enc_to);
-
     });
 })(jQuery);

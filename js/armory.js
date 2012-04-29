@@ -133,6 +133,10 @@ var Armory = new function () {
         return armory_get_wallet_uid(pubKey);
     };
 
+    this.stop = function() {
+        clearTimeout(timeout);
+    }
+
     return this;
 };
 
