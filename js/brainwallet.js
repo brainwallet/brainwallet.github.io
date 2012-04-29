@@ -505,10 +505,11 @@
         var id = $(this).attr('id');
 
         if (chain_type != id) {
-//            $('#seed').val('');
-//            $('#expo').val('');
-//            $('#memo').val('');
-//            $('#progress').text('');
+            $('#seed').val('');
+            $('#expo').val('');
+            $('#memo').val('');
+            $('#progress').text('');
+            $('#chain').text('');
             chOnStop();
         }
 
