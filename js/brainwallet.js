@@ -560,6 +560,11 @@
     function onChangeMemo() {
         var str =  $('#memo').val();
 
+        if (str.length == 0) {
+            chOnStop();
+            return;
+        }
+
         if (chain_type == 'chain_electrum') {
             if (issubset(mn_words, str))  {
                 var seed = mn_decode(str);
@@ -576,6 +581,7 @@
                 $('#expo').val(Crypto.util.bytesToHex(pk));
             }
         }
+
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, TIMEOUT);
     }
@@ -651,10 +657,7 @@
     }
 
     function chain_generate() {
-
         clearTimeout(timeout);
-        $('#chPlay').hide();
-        $('#chStop').show();
 
         var seed = $('#seed').val();
         var codes = $('#memo').val();
@@ -675,8 +678,12 @@
             var uid = Armory.gen(codes, chain_range, addr_callback, update_chain);
             if (uid)
                 $('#progress').text('uid: ' + uid);
+            else
+                return;
         }
 
+        $('#chPlay').hide();
+        $('#chStop').show();
     }
 
     // -- transactions --
