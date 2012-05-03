@@ -924,6 +924,7 @@
 
         $('#txAddDest').click(txOnAddDest);
         $('#txSend').click(txSend);
+        $('#txRebuild').click(txRebuild);
 
         // converter
 
