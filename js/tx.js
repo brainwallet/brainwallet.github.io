@@ -305,7 +305,7 @@ function tx_parseBCI(data, address) {
         var value = new BigInteger('' + o.value, 10);
         if (!(lilendHash in unspenttxs))
             unspenttxs[lilendHash] = {};
-        unspenttxs[lilendHash][i] = {amount: value, script: script};
+        unspenttxs[lilendHash][o.tx_output_n] = {amount: value, script: script};
         balance = balance.add(value);
     }
     return {balance:balance, unspenttxs:unspenttxs};
