@@ -432,10 +432,20 @@ function parseScript(script) {
 // --->8---
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
-function tx_fetch(url, onSuccess, onError) {
+function tx_fetch(url, onSuccess, onError, post) {
     var useYQL = true;
+
+    if (useYQL) {
+        q = 'select * from html where url="'+url+'"';
+        if (post) {
+            q = 'use "http://isithackday.com/hacks/htmlpost/htmlpost.xml" as htmlpost;\n';
+            q += 'select * from htmlpost where url="'+url+'" and postdata="'+post+'" and xpath="//p"';
+        }
+        url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
+    }
+
     $.ajax({
-        url: useYQL ? 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent('select * from html where url="'+url+'"') : url,
+        url: url,
         success: function(res) {
             onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
         },

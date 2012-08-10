@@ -784,11 +784,14 @@
     }
     
     function txSent(text) {
-        alert(text);
+        if (!text) {
+            alert("No response!");
+        } else {
+            alert(text);
+        }
     }
 
     function txSend() {
-
         var txAddr = $('#txAddr').val();
         var address = TX.getAddress();
 
@@ -797,10 +800,13 @@
             r += 'Warning! Source address does not match private key.\n\n';
 
         var tx = $('#txHex').val();
-        url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
+
+        //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
+        url = 'http://www.blockchain.info/pushtx';
+        post = 'tx='+tx;
         url = prompt(r + 'Send transaction:', url);
         if (url != null && url != "") {
-            tx_fetch(url, txSent);
+            tx_fetch(url, txSent, txSent, post);
         }
         return false;
     }
@@ -827,6 +833,13 @@
 
         TX.init(eckey);
         TX.addOutput(dest, fval);
+
+        // send change back or it will be sent as fee
+        var balance = parseFloat($('#txBalance').val());
+        if (balance > fval) {
+            var change = balance - fval;
+            TX.addOutput(addr, change);
+        }
 
         var sendTx = TX.construct();
         var txJSON = TX.toBBE(sendTx);
