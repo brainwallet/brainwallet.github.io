@@ -9,4 +9,7 @@ Notable features:
 - Armory and Electrum deterministic wallets implementation
 - RFC 1751 JavaScript implementation
 - Bitcoin transactions editor
+- Signinig and verifying messages with bitcoin address
+
+
 
