@@ -8,7 +8,7 @@ function msg_bytes(message) {
         .concat(Crypto.charenc.UTF8.stringToBytes(message));
 }
 
-function msg_hash(message) {
+function msg_digest(message) {
     var b = msg_bytes("Bitcoin Signed Message:\n").concat(msg_bytes(message));
     return Crypto.SHA256(Crypto.SHA256(b, {asBytes:true}), {asBytes:true});
 }
@@ -57,8 +57,7 @@ function verify_message(address, signature, message) {
     var y = beta.subtract(recid).mod(BN2).equals(BN0) ? beta : p.subtract(beta);
 
     var R = new ECPointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
-    var hash = msg_hash(message);
-    var e = BigInteger.fromByteArrayUnsigned(hash);
+    var e = BigInteger.fromByteArrayUnsigned(msg_digest(message));
     var minus_e = e.negate().mod(order);
     var inv_r = r.modInverse(order);
     var Q = (R.multiply(s).add(G.multiply(minus_e))).multiply(inv_r);
@@ -72,8 +71,7 @@ function sign_message(private_key, message, compressed) {
     if (!private_key)
         return false;
 
-    var digest = msg_hash(message);
-    var signature = private_key.sign(digest);
+    var signature = private_key.sign(msg_digest(message));
     var address = private_key.getBitcoinAddress();
 
     //convert ASN.1-serialized signature to bitcoin-qt format
