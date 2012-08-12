@@ -498,7 +498,7 @@
     // --- chain ---
     var chain_mode = 'csv';
     var addresses = [];
-    var chain_range = 6;
+    var chain_range = parseInt($('#range').val());
     var chain_type = 'chain_armory';
 
     function onChangeMethod() {
@@ -512,6 +512,8 @@
             $('#chain').text('');
             chOnStop();
         }
+
+        $('#elChange').attr('disabled', id != 'chain_electrum');
 
         chain_type = id;
     }
@@ -544,8 +546,9 @@
         $('#chain').text(str);
 
         chain_range = parseInt($('#range').val());
-        if (addresses.length == chain_range)
+        if (addresses.length >= chain_range)
             chOnStop();
+
     }
 
     function onChangeSeed() {
@@ -614,8 +617,15 @@
         $('#chStop').hide();
         $('#chPlay').show();
 
-        if (chain_type == 'chain_electrum')
+        if (chain_type == 'chain_electrum') {
             $('#progress').text('');
+        }
+    }
+
+    function onChangeChange() {
+        chain_range = parseInt($('#range').val());
+        if (addresses.length >= chain_range)
+            onChangeRange();
     }
 
     function onChangeRange() {
@@ -637,7 +647,8 @@
     function electrum_seed_success(privKey) {
         $('#progress').text('');
         $('#expo').val(Crypto.util.bytesToHex(privKey));
-        Electrum.gen(chain_range, addr_callback, update_chain);
+        var addChange = $('#elChange').is(':checked');
+        Electrum.gen(chain_range, addr_callback, update_chain, addChange);
     }
 
     function update_chain_range() {
@@ -647,7 +658,8 @@
         $('#chain').text('');
 
         if (chain_type == 'chain_electrum') {
-            Electrum.gen(chain_range, addr_callback, update_chain);
+            var addChange = $('#elChange').is(':checked');
+            Electrum.gen(chain_range, addr_callback, update_chain, addChange);
         }
 
         if (chain_type == 'chain_armory') {
@@ -987,6 +999,7 @@
         onInput($('#range'), onChangeRange);
         onInput($('#seed'), onChangeSeed);
         onInput($('#memo'), onChangeMemo);
+        $('#elChange').change(onChangeChange);
 
         // transactions
 

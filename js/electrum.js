@@ -53,6 +53,7 @@ var Electrum = new function () {
     var timeout;
     var onUpdate;
     var onSuccess;
+    var addChange;
 
     function calcSeed() {
         if (rounds < seedRounds) {
@@ -72,12 +73,11 @@ var Electrum = new function () {
     }
 
     function calcAddr() {
-        var forChange = (counter == 0);
-        var index = counter > 0 ? counter - 1 : counter;
-        var r = electrum_extend_chain(pubKey, privKey, index, forChange, true);
+        var change = (counter == range);
+        var r = electrum_extend_chain(pubKey, privKey, change ? 0 : counter, change, true);
         onUpdate(r);
         counter++;
-        if (counter < range) {
+        if (counter < range || (addChange && counter <= range)) {
             timeout = setTimeout(calcAddr, 0);
         } else {
             if (onSuccess) 
@@ -95,7 +95,8 @@ var Electrum = new function () {
         calcSeed();
     };
 
-    this.gen = function(_range, update, success) {
+    this.gen = function(_range, update, success, useChange) {
+        addChange = useChange;
         range = _range;
         counter = 0;
         onUpdate = update;
