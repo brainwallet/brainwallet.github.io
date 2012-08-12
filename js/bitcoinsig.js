@@ -2,13 +2,15 @@
     bitcoinsig.js - sign and verify messages with bitcoin address (public domain)
 */
 
-function msg_magic(message) {
-    return "\x18Bitcoin Signed Message:\n" 
-        + String.fromCharCode(message.length) + message;
+function msg_bytes(message) {
+    var x = message.length;
+    return ((x < 0xfd) ? [x] : [0xfd, x & 0xff, x >> 8])
+        .concat(Crypto.charenc.UTF8.stringToBytes(message));
 }
 
-function msg_hash(str) {
-    return Crypto.SHA256(Crypto.SHA256(str, {asBytes:true}), {asBytes:true});
+function msg_hash(message) {
+    var b = msg_bytes("Bitcoin Signed Message:\n").concat(msg_bytes(message));
+    return Crypto.SHA256(Crypto.SHA256(b, {asBytes:true}), {asBytes:true});
 }
 
 function verify_message(address, signature, message) {
@@ -55,7 +57,7 @@ function verify_message(address, signature, message) {
     var y = beta.subtract(recid).mod(BN2).equals(BN0) ? beta : p.subtract(beta);
 
     var R = new ECPointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
-    var hash = msg_hash(msg_magic(message));
+    var hash = msg_hash(message);
     var e = BigInteger.fromByteArrayUnsigned(hash);
     var minus_e = e.negate().mod(order);
     var inv_r = r.modInverse(order);
@@ -70,7 +72,7 @@ function sign_message(private_key, message, compressed) {
     if (!private_key)
         return false;
 
-    var digest = msg_hash(msg_magic(message));
+    var digest = msg_hash(message);
     var signature = private_key.sign(digest);
     var address = private_key.getBitcoinAddress();
 
