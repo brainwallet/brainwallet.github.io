@@ -698,10 +698,15 @@
             var res = parseBase58Check(sec); 
             var version = res[0];
             var payload = res[1];
+            var compressed = false;
+            if (payload.length > 32) {
+                payload.pop();
+                compressed = true;
+            }
             var eckey = new Bitcoin.ECKey(payload);
             var curve = getSECCurveByName("secp256k1");
             var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = pt.getEncoded();
+            eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = eckey.getBitcoinAddress();
         } catch (err) {
@@ -784,11 +789,7 @@
     }
     
     function txSent(text) {
-        if (!text) {
-            alert("No response!");
-        } else {
-            alert(text);
-        }
+        alert(text ? text : 'No response!');
     }
 
     function txSend() {
@@ -827,6 +828,12 @@
             $('#txJSON').val('');
             $('#txHex').val('');
             return;
+        }
+
+        var compressed = false;
+        if (payload.length > 32) {
+            payload.pop();
+            compressed = true;
         }
 
         var eckey = new Bitcoin.ECKey(payload);
@@ -871,14 +878,80 @@
         txGetUnspent();
     }
 
+    // -- sign --
+
+    function updateAddr(from, to) {
+        var sec = from.val();
+        var addr = '';
+        var eckey = null;
+        var compressed = false;
+        try {
+            var res = parseBase58Check(sec); 
+            var version = res[0];
+            var payload = res[1];
+            if (payload.length > 32) {
+                payload.pop();
+                compressed = true;
+            }
+            eckey = new Bitcoin.ECKey(payload);
+            var curve = getSECCurveByName("secp256k1");
+            var pt = curve.getG().multiply(eckey.priv);
+            eckey.pub = getEncoded(pt, compressed);
+            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
+            addr = eckey.getBitcoinAddress();
+            setErrorState(from, false);
+        } catch (err) {
+            setErrorState(from, true, "Bad private key");
+        }
+        to.val(addr);
+        return {"key":eckey, "compressed":compressed};
+    }
+
+    function sgGenAddr() {
+        updateAddr($('#sgSec'), $('#sgAddr'));
+        $('#vrAddr').val($('#sgAddr').val());
+    }
+
+    function sgOnChangeSec() {
+        clearTimeout(timeout);
+        timeout = setTimeout(sgGenAddr, TIMEOUT);
+    }
+
+    function sgSign() {
+        var message = $('#sgMsg').val();
+        var p = updateAddr($('#sgSec'), $('#sgAddr'));
+        var sig = sign_message(p.key, message, p.compressed);
+        $('#sgSig').val(sig);
+    }
+
+    function sgOnChangeMsg() {
+        clearTimeout(timeout);
+        timeout = setTimeout(sgUpdateMsg, TIMEOUT);
+    }
+
+    function sgUpdateMsg() {
+        $('#vrMsg').val($('#sgMsg').val());
+    }
+
+    // -- verify --
+
+    function vrVerify() {
+        var message = $('#vrMsg').val();
+        var addr = $('#vrAddr').val();
+        var sig = $('#vrSig').val();
+        var res = verify_message(addr, sig, message);
+        $('#vrRes').text(res);
+        return false;
+    }
+
+    function vrClearRes() {
+        $('#vrRes').text('');
+    }
+
     $(document).ready( function() {
 
-        if (window.location.hash == '#converter')
-            $('#tab-converter').tab('show');
-        else if (window.location.hash == '#chains')
-            $('#tab-chains').tab('show');
-        else if (window.location.hash == '#transactions')
-            $('#tab-transactions').tab('show');
+        if (window.location.hash)
+            $('#tab-' + window.location.hash.substr(1)).tab('show');
 
         // generator
 
@@ -944,5 +1017,28 @@
         onInput('#src', onChangeFrom);
         $("body").on("click", "#enc_from .btn", update_enc_from);
         $("body").on("click", "#enc_to .btn", update_enc_to);
+
+        // sign
+
+        $('#sgSec').val('5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf');
+        $('#sgAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
+        $('#sgMsg').val("C'est par mon ordre et pour le bien de l'Etat que le porteur du présent a fait ce qu'il a fait.");
+
+        onInput('#sgSec', sgOnChangeSec);
+        onInput('#sgMsg', sgOnChangeMsg);
+
+        $('#sgSign').click(sgSign);
+        $('#sgForm').submit(sgSign);
+
+        // verify
+
+        $('#vrAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
+        $('#vrMsg').val($('#sgMsg').val());
+
+        onInput('#vrAddr', vrClearRes);
+        onInput('#vrMsg', vrClearRes);
+        onInput('#vrSig', vrClearRes);
+        $('#vrVerify').click(vrVerify);
+
     });
 })(jQuery);

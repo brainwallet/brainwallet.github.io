@@ -31,6 +31,10 @@
                     <a data-toggle="tab" href="#transactions" id="tab-transactions">Transactions</a></li> 
                     <li>
                     <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#sign" id="tab-sign">Sign Message</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#verify" id="tab-verify">Verify Message</a></li> 
                 </ul>
             </div>
         </div>
@@ -294,6 +298,83 @@
             </fieldset>
             </form>
         </div>
+
+<!-- Sign -->
+        <div class="tab-pane fade" id="sign"> 
+            <form action="/" class="form-horizontal" method="get" id="sgForm">
+            <fieldset> <legend>Sign Message</legend> 
+                <div class="control-group"> 
+                    <label class="control-label" for="sgSec">Private Key</label> 
+                    <div class="controls"> 
+                        <input class="span5" id="sgSec" type="text"> 
+                        <span class="help-inline errormsg"></span> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="sgAddr">Address</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="sgAddr" readonly type="text"> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="sgMsg">Message</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="sgMsg" rows="10"></textarea>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="sgSig">Signature</label> 
+                    <div class="controls"> 
+                        <input class="span8" id="sgSig" type="text" readonly> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="sgSign"></label> 
+                    <div class="controls"> 
+                        <button class="btn" id="sgSign" type="button">Sign Message</button> 
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+
+<!-- Verify -->
+        <div class="tab-pane fade" id="verify"> 
+            <form action="/" class="form-horizontal" method="get" id="vrForm">
+            <fieldset> <legend>Verify Message</legend> 
+                <div class="control-group"> 
+                    <label class="control-label" for="vrAddr">Address</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="vrAddr" type="text"> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="vrMsg">Message</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="vrMsg" rows="10"></textarea>
+                    </div>
+                </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="vrSig">Signature</label> 
+                    <div class="controls"> 
+                        <input class="span8" id="vrSig" type="text"> 
+                        <span class="help-inline errormsg"></span> 
+                    </div>
+                </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="vrVerify"></label> 
+                    <div class="controls"> 
+                        <button class="btn" id="vrVerify" type="button">Verify Message</button>
+                        <span id="vrRes" class="help-inline errormsg"></span>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+
+
         <hr /> 
     </div>
     <FOOTER> 
@@ -313,6 +394,7 @@
 <script src="js/armory.js"></script> 
 <script src="js/electrum.js"></script> 
 <script src="js/tx.js"></script> 
+<script src="js/bitcoinsig.js"></script> 
 <script src="js/brainwallet.js"></script> 
 </body>
 </html> 
