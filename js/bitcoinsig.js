@@ -1,5 +1,5 @@
 /*
-    bitcoinsig.js - sign and verify bitcoin message (public domain)
+    bitcoinsig.js - sign and verify messages with bitcoin address (public domain)
 */
 
 function msg_magic(message) {
@@ -68,7 +68,7 @@ function verify_message(address, signature, message) {
 
 function sign_message(private_key, message, compressed) {
     if (!private_key)
-        return null;
+        return false;
 
     var digest = msg_hash(msg_magic(message));
     var signature = private_key.sign(digest);
