@@ -219,7 +219,7 @@ var TX = new function () {
     this.fromBBE = function(text) {
         //deserialize from Bitcoin Block Explorer format
         var sendTx = new Bitcoin.Transaction();
-        var r = jQuery.parseJSON(text);
+        var r = JSON.parse(text);
         if (!r)
             return sendTx;
         var tx_ver = r['ver'];
@@ -286,7 +286,7 @@ function dumpScript(script) {
 // blockchain.info parser (adapted)
 // uses http://blockchain.info/unspent?address=<address>
 function tx_parseBCI(data, address) {
-    var r = jQuery.parseJSON(data);
+    var r = JSON.parse(data);
     var txs = r.unspent_outputs;
 
     if (!txs)
@@ -343,7 +343,7 @@ function parseTxs(data, address) {
         if (!txs.hasOwnProperty(a))
             continue;
         var tx = txs[a];
-        if (tx.ver != 1) throw "Unknown version found. Expected version 1, found version "+tx.ver;
+        if (tx.ver != 1) throw "Unknown version found. Expected version 1, found version " + tx.ver;
         
         // Enumerate inputs
         for (var b in tx.in ) {
