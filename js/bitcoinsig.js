@@ -98,17 +98,15 @@ function bitcoinsig_test() {
     a = '17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL'
     s = 'HDiv4Oe9SjM1FFVbKk4m3N34efYiRgkQGGoEm564ldYt44jHVTuX23+WnihNMi4vujvpUs1M529P3kftjDezn9E='
     m = 'test message'
-    console.log('verifying ethalone signature',s);
+    payload = Bitcoin.Base58.decode(k);
+    secret = payload.slice(1, 33);
+    compressed = payload.length == 34;
     console.log(verify_message(a, s, m));
-    console.log('signing', k, a, m);
-    var secret = Bitcoin.Base58.decode(k).slice(1,33);
-    var eckey = new Bitcoin.ECKey(secret);
-    sig = sign_message(eckey, m, false);
-    console.log('verifying',sig);
+    sig = sign_message(new Bitcoin.ECKey(secret), m, compressed);
     console.log(verify_message(a, sig, m));
 }
 
-if (typeof window == 'undefined' && require.main === module) {
+if (typeof require != 'undefined' && require.main === module) {
     window = global; navigator = {}; Bitcoin = {};
     eval(require('fs').readFileSync('./bitcoinjs-min.js')+'');
     eval(require('path').basename(module.filename,'.js')+'_test()');
