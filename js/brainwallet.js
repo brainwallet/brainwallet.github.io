@@ -925,6 +925,7 @@
     }
 
     function sgOnChangeSec() {
+        $('#sgSig').val('');
         clearTimeout(timeout);
         timeout = setTimeout(sgGenAddr, TIMEOUT);
     }
@@ -937,6 +938,7 @@
     }
 
     function sgOnChangeMsg() {
+        $('#sgSig').val('');
         clearTimeout(timeout);
         timeout = setTimeout(sgUpdateMsg, TIMEOUT);
     }
