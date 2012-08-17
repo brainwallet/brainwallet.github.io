@@ -3,9 +3,8 @@
 */
 
 function msg_bytes(message) {
-    var x = message.length;
-    return ((x < 0xfd) ? [x] : [0xfd, x & 0xff, x >> 8])
-        .concat(Crypto.charenc.UTF8.stringToBytes(message));
+    var b = Crypto.charenc.UTF8.stringToBytes(message);
+    return Bitcoin.Util.numToVarInt(b.length).concat(b);
 }
 
 function msg_digest(message) {
