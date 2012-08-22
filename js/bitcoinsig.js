@@ -45,15 +45,10 @@ function verify_message(address, signature, message) {
     var G = ecparams.getG();
     var order = ecparams.getN();
 
-    var BN0 = BigInteger.ZERO;
-    var BN1 = BigInteger.ONE;
-    var BN2 = BN1.add(BN1);
-    var BN4 = BN2.add(BN2);
-
-    var x = r.add(order.multiply(recid.divide(BN2)));
-    var alpha = x.multiply(x).multiply(x).add(b).mod(p);
-    var beta = alpha.modPow(p.add(BN1).divide(BN4), p);
-    var y = beta.subtract(recid).mod(BN2).equals(BN0) ? beta : p.subtract(beta);
+    var x = r.add(order.multiply(recid.divide(BigInteger.valueOf(2))));
+    var alpha = x.multiply(x).multiply(x).add(a.multiply(x)).add(b).mod(p);
+    var beta = alpha.modPow(p.add(BigInteger.ONE).divide(BigInteger.valueOf(4)), p);
+    var y = beta.subtract(recid).isEven() ? beta : p.subtract(beta);
 
     var R = new ECPointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y));
     var e = BigInteger.fromByteArrayUnsigned(msg_digest(message));
