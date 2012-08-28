@@ -458,8 +458,20 @@
                 try { bytes = Crypto.util.base64ToBytes(str); } catch (err) {}
             }
 
+            var ver = '';
             if (to == 'base58') {
-                text = Bitcoin.Base58.encode(bytes);
+                if (bytes.length == 20) { // address
+                    ver = 'Check ver. 0';
+                    var addr = new Bitcoin.Address(bytes);
+                    text = addr.toString();
+                } else if (bytes.length == 32) { // private key 
+                    ver = 'Check ver. 128';
+                    var addr = new Bitcoin.Address(bytes);
+                    addr.version = 128;
+                    text = addr.toString();
+                } else {
+                    text = Bitcoin.Base58.encode(bytes);
+                }
             } else if (to == 'hex') {
                 text = Crypto.util.bytesToHex(bytes);
             } else if (to == 'text') {
@@ -474,7 +486,7 @@
         }
 
         $('#hint_from').text(enct(from) + type + ' (' + bytes.length + ' byte' + (bytes.length == 1 ? ')' : 's)'));
-        $('#hint_to').text(enct(to) + ' (' + text.length + ' character' + (text.length == 1 ? ')' : 's)'));
+        $('#hint_to').text(enct(to) + ver + ' (' + text.length + ' character' + (text.length == 1 ? ')' : 's)'));
         $('#dest').val(text);
     }
 
