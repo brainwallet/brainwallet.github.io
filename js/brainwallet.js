@@ -980,6 +980,10 @@
         if (window.location.hash)
             $('#tab-' + window.location.hash.substr(1)).tab('show');
 
+        $('a[data-toggle="tab"]').on('shown', function (e) {
+            window.location.hash = $(this).attr('href');
+        });
+
         // generator
 
         onInput('#pass', onChangePass);
