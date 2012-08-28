@@ -460,15 +460,11 @@
 
             var ver = '';
             if (to == 'base58') {
-                if (bytes.length == 20) { // address
-                    ver = 'Check ver. 0';
+                if (bytes.length == 20 || bytes.length == 32) {
                     var addr = new Bitcoin.Address(bytes);
+                    addr.version = bytes.length == 32 ? 128 : 0;
                     text = addr.toString();
-                } else if (bytes.length == 32) { // private key 
-                    ver = 'Check ver. 128';
-                    var addr = new Bitcoin.Address(bytes);
-                    addr.version = 128;
-                    text = addr.toString();
+                    ver = 'Check ver.' + addr.version;
                 } else {
                     text = Bitcoin.Base58.encode(bytes);
                 }
