@@ -959,8 +959,15 @@
     function vrVerify() {
         var message = $('#vrMsg').val();
         var sig = $('#vrSig').val();
-        var address = verify_message(sig, message);
-        $('#vrRes').text(address);
+        var res = verify_message(sig, message);
+
+        if (res) {
+            var href = 'https://blockchain.info/address/' + res;
+            var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
+            $('#vrRes').html('Signed by: ' + a);
+        } else {
+            $('#vrRes').text('false');
+        }
         return false;
     }
 
