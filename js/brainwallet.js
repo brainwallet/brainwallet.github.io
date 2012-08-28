@@ -964,7 +964,7 @@
         if (res) {
             var href = 'https://blockchain.info/address/' + res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
-            $('#vrRes').html('Signed by: ' + a);
+            $('#vrRes').html('Matching address: ' + a);
         } else {
             $('#vrRes').text('false');
         }
