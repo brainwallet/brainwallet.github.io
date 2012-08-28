@@ -12,7 +12,7 @@ function msg_digest(message) {
     return Crypto.SHA256(Crypto.SHA256(b, {asBytes:true}), {asBytes:true});
 }
 
-function verify_message(address, signature, message) {
+function verify_message(signature, message) {
     try {
         var sig = Crypto.util.base64ToBytes(signature);
     } catch(err) {
@@ -58,7 +58,7 @@ function verify_message(address, signature, message) {
 
     var public_key = Q.getEncoded(compressed);
     var addr = new Bitcoin.Address(Bitcoin.Util.sha256ripe160(public_key));
-    return addr.toString() == address.toString();
+    return addr.toString();
 }
 
 function sign_message(private_key, message, compressed) {
@@ -80,7 +80,7 @@ function sign_message(private_key, message, compressed) {
             nV += 4;
         sequence[0] = nV;
         var sig = Crypto.util.bytesToBase64(sequence);
-        if (verify_message(address, sig, message))
+        if (verify_message(sig, message) == address)
             return sig;
     }
 
@@ -95,9 +95,9 @@ function bitcoinsig_test() {
     payload = Bitcoin.Base58.decode(k);
     secret = payload.slice(1, 33);
     compressed = payload.length == 34;
-    console.log(verify_message(a, s, m));
+    console.log(verify_message(s, m));
     sig = sign_message(new Bitcoin.ECKey(secret), m, compressed);
-    console.log(verify_message(a, sig, m));
+    console.log(verify_message(sig, m));
 }
 
 if (typeof require != 'undefined' && require.main === module) {

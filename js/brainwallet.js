@@ -929,7 +929,6 @@
 
     function sgGenAddr() {
         updateAddr($('#sgSec'), $('#sgAddr'));
-        $('#vrAddr').val($('#sgAddr').val());
     }
 
     function sgOnChangeSec() {
@@ -959,10 +958,9 @@
 
     function vrVerify() {
         var message = $('#vrMsg').val();
-        var addr = $('#vrAddr').val();
         var sig = $('#vrSig').val();
-        var res = verify_message(addr, sig, message);
-        $('#vrRes').text(res);
+        var address = verify_message(sig, message);
+        $('#vrRes').text(address);
         return false;
     }
 
@@ -1053,8 +1051,6 @@
         $('#sgForm').submit(sgSign);
 
         // verify
-
-        $('#vrAddr').val($('#sgAddr').val());
         $('#vrMsg').val($('#sgMsg').val());
 
         onInput('#vrAddr', vrClearRes);
