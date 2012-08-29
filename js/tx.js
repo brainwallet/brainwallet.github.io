@@ -439,7 +439,7 @@ function tx_fetch(url, onSuccess, onError, post) {
         var q = 'select * from html where url="'+url+'"';
         if (post) {
             var v = url.split('?');
-            q = 'use "http://brainwallet.github.com/htmlpost.xml" as htmlpost; ';
+            q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
             q += 'select * from htmlpost where url="' + v[0] + '" ';
             q += 'and postdata="' + v[1] + '" and xpath="//p"';
         }
