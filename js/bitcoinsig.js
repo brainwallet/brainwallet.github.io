@@ -94,7 +94,7 @@ function bitcoinsig_test() {
     m = 'test message'
     payload = Bitcoin.Base58.decode(k);
     secret = payload.slice(1, 33);
-    compressed = payload.length == 34;
+    compressed = payload.length == 38;
     console.log(verify_message(s, m));
     sig = sign_message(new Bitcoin.ECKey(secret), m, compressed);
     console.log(verify_message(sig, m));
