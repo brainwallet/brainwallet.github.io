@@ -823,8 +823,8 @@
         var tx = $('#txHex').val();
 
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
-        url = 'http://www.blockchain.info/pushtx';
-        post = 'tx='+tx;
+        url = 'http://blockchain.info/pushtx?tx=' + tx;
+        post = true;
         url = prompt(r + 'Send transaction:', url);
         if (url != null && url != "") {
             tx_fetch(url, txSent, txSent, post);

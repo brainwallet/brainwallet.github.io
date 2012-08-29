@@ -436,10 +436,12 @@ function tx_fetch(url, onSuccess, onError, post) {
     var useYQL = true;
 
     if (useYQL) {
-        q = 'select * from html where url="'+url+'"';
+        var q = 'select * from html where url="'+url+'"';
         if (post) {
-            q = 'use "http://isithackday.com/hacks/htmlpost/htmlpost.xml" as htmlpost;\n';
-            q += 'select * from htmlpost where url="'+url+'" and postdata="'+post+'" and xpath="//p"';
+            var v = url.split('?');
+            q = 'use "http://brainwallet.github.com/htmlpost.xml" as htmlpost; ';
+            q += 'select * from htmlpost where url="' + v[0] + '" ';
+            q += 'and postdata="' + v[1] + '" and xpath="//p"';
         }
         url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
     }
