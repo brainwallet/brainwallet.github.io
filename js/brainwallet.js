@@ -752,8 +752,9 @@
         TX.parseInputs(txUnspent, address);
         var value = TX.getBalance();
         var fval = Bitcoin.Util.formatValue(value);
+        var fee = parseFloat($('#txFee').val());
         $('#txBalance').val(fval);
-        $('#txValue').val(fval);
+        $('#txValue').val(fval - fee);
         txRebuild();
     }
 
@@ -838,7 +839,9 @@
         var addr = $('#txAddr').val();
         var dest = $('#txDest').val();
         var unspent = $('#txUnspent').val();
-        var fval = parseFloat($('#txValue').val());
+        var balance = parseFloat($('#txBalance').val());
+        var fval = parseFloat('0'+$('#txValue').val());
+        var fee = parseFloat('0'+$('#txFee').val());
 
         try {
             var res = parseBase58Check(sec); 
@@ -862,9 +865,8 @@
         TX.addOutput(dest, fval);
 
         // send change back or it will be sent as fee
-        var balance = parseFloat($('#txBalance').val());
-        if (balance > fval) {
-            var change = balance - fval;
+        if (balance > fval + fee) {
+            var change = balance - fval - fee;
             TX.addOutput(addr, change);
         }
 
@@ -877,6 +879,15 @@
     }
 
     function txOnChangeDest() {
+        var balance = parseFloat($('#txBalance').val());
+        var fval = parseFloat('0'+$('#txValue').val());
+        var fee = parseFloat('0'+$('#txFee').val());
+
+        if (fval + fee > balance) {
+            fee = balance - fval;
+            $('#txFee').val(fee > 0 ? fee : '0.00');
+        }
+
         clearTimeout(timeout);
         timeout = setTimeout(txRebuild, TIMEOUT);
     }
@@ -896,6 +907,24 @@
     function txChangeType() {
         txType = $(this).attr('id');
         txGetUnspent();
+    }
+
+    function txOnChangeFee() {
+
+        var balance = parseFloat($('#txBalance').val());
+        var fval = parseFloat('0'+$('#txValue').val());
+        var fee = parseFloat('0'+$('#txFee').val());
+
+        if (fval + fee > balance)
+            fval = balance - fee;
+
+        if (fee == 0 && fval == balance - 0.0005)
+            fval = balance
+
+        $('#txValue').val(fval < 0 ? 0 : fval);
+
+        clearTimeout(timeout);
+        timeout = setTimeout(txRebuild, TIMEOUT);
     }
 
     // -- sign --
@@ -1039,6 +1068,7 @@
         onInput($('#txJSON'), txOnChangeJSON);
         onInput($('#txDest'), txOnChangeDest);
         onInput($('#txValue'), txOnChangeDest);
+        onInput($('#txFee'), txOnChangeFee);
 
         $('#txAddDest').click(txOnAddDest);
         $('#txSend').click(txSend);
