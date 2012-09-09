@@ -939,16 +939,23 @@
     function txOnChangeFee() {
 
         var balance = parseFloat($('#txBalance').val());
-        var fval = parseFloat('0'+$('#txValue').val());
         var fee = parseFloat('0'+$('#txFee').val());
 
-        if (fval + fee > balance)
+        var fval = 0;
+        var o = txGetOutputs();
+        for (i in o) {
+            TX.addOutput(o[i].dest, o[i].fval);
+            fval += o[i].fval;
+        }
+
+        if (fval + fee > balance) {
             fval = balance - fee;
+            $('#txValue').val(fval < 0 ? 0 : fval);
+        }
 
-        if (fee == 0 && fval == balance - 0.0005)
-            fval = balance
-
-        $('#txValue').val(fval < 0 ? 0 : fval);
+        if (fee == 0 && fval == balance - 0.0005) {
+            $('#txValue').val(balance);
+        }
 
         clearTimeout(timeout);
         timeout = setTimeout(txRebuild, TIMEOUT);
