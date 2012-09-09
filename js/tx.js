@@ -432,16 +432,15 @@ function parseScript(script) {
 // --->8---
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
-function tx_fetch(url, onSuccess, onError, post) {
+function tx_fetch(url, onSuccess, onError, postdata) {
     var useYQL = true;
 
     if (useYQL) {
         var q = 'select * from html where url="'+url+'"';
-        if (post) {
-            var v = url.split('?');
+        if (postdata) {
             q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-            q += 'select * from htmlpost where url="' + v[0] + '" ';
-            q += 'and postdata="' + v[1] + '" and xpath="//p"';
+            q += 'select * from htmlpost where url="' + url + '" ';
+            q += 'and postdata="' + postdata + '" and xpath="//p"';
         }
         url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
     }

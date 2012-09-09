@@ -805,10 +805,29 @@
     }
 
     function txOnAddDest() {
-        alert('Not implemented');
+        var list = $(document).find('.txCC');
+        var clone = list.last().clone();
+        clone.find('.help-inline').empty();
+        clone.find('.control-label').text('Cc');
+        var dest = clone.find('#txDest');
+        var value = clone.find('#txValue');
+        clone.insertAfter(list.last());
+        onInput(dest, txOnChangeDest);
+        onInput(value, txOnChangeDest);
+        dest.val('');
+        value.val('');
+        $('#txRemoveDest').attr('disabled', false);
         return false;
     }
-    
+
+    function txOnRemoveDest() {
+        var list = $(document).find('.txCC');
+        if (list.size() == 2)
+            $('#txRemoveDest').attr('disabled', true);
+        list.last().remove();
+        return false;
+    }
+
     function txSent(text) {
         alert(text ? text : 'No response!');
     }
@@ -824,23 +843,20 @@
         var tx = $('#txHex').val();
 
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
-        url = 'http://blockchain.info/pushtx?tx=' + tx;
-        post = true;
+        url = 'http://blockchain.info/pushtx';
+        postdata = 'tx=' + tx;
         url = prompt(r + 'Send transaction:', url);
         if (url != null && url != "") {
-            tx_fetch(url, txSent, txSent, post);
+            tx_fetch(url, txSent, txSent, postdata);
         }
         return false;
     }
 
     function txRebuild() {
-
         var sec = $('#txSec').val();
         var addr = $('#txAddr').val();
-        var dest = $('#txDest').val();
         var unspent = $('#txUnspent').val();
         var balance = parseFloat($('#txBalance').val());
-        var fval = parseFloat('0'+$('#txValue').val());
         var fee = parseFloat('0'+$('#txFee').val());
 
         try {
@@ -862,7 +878,13 @@
         var eckey = new Bitcoin.ECKey(payload);
 
         TX.init(eckey);
-        TX.addOutput(dest, fval);
+
+        var fval = 0;
+        var o = txGetOutputs();
+        for (i in o) {
+            TX.addOutput(o[i].dest, o[i].fval);
+            fval += o[i].fval;
+        }
 
         // send change back or it will be sent as fee
         if (balance > fval + fee) {
@@ -870,12 +892,17 @@
             TX.addOutput(addr, change);
         }
 
-        var sendTx = TX.construct();
-        var txJSON = TX.toBBE(sendTx);
-        var buf = sendTx.serialize();
-        var txHex = Crypto.util.bytesToHex(buf);
-        $('#txJSON').val(txJSON);
-        $('#txHex').val(txHex);
+        try {
+            var sendTx = TX.construct();
+            var txJSON = TX.toBBE(sendTx);
+            var buf = sendTx.serialize();
+            var txHex = Crypto.util.bytesToHex(buf);
+            $('#txJSON').val(txJSON);
+            $('#txHex').val(txHex);
+        } catch(err) {
+            $('#txJSON').val('');
+            $('#txHex').val('');
+        }
     }
 
     function txOnChangeDest() {
@@ -925,6 +952,16 @@
 
         clearTimeout(timeout);
         timeout = setTimeout(txRebuild, TIMEOUT);
+    }
+
+    function txGetOutputs() {
+        var res = [];
+        $.each($(document).find('.txCC'), function() {
+            var dest = $(this).find('#txDest').val();
+            var fval = parseFloat('0' + $(this).find('#txValue').val());
+            res.push( {"dest":dest, "fval":fval } );
+        });
+        return res;
     }
 
     // -- sign --
@@ -1071,6 +1108,7 @@
         onInput($('#txFee'), txOnChangeFee);
 
         $('#txAddDest').click(txOnAddDest);
+        $('#txRemoveDest').click(txOnRemoveDest);
         $('#txSend').click(txSend);
         $('#txRebuild').click(txRebuild);
 

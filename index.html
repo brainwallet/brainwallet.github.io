@@ -224,24 +224,27 @@
                         </div>
                     </div>
                 </div>
-                <div class="control-group"> 
+                <div class="control-group txCC"> 
                     <label class="control-label" for="txDest">Destination Address</label> 
                     <div class="controls"> 
-                        <input class="span4" id="txDest" type="text"> 
-                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text"> 
-                        </div><span class="help-inline errormsg"></span> 
+                        <input class="span4" id="txDest" class="txDest" type="text" autocomplete="off"> 
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text" autocomplete="off"> 
+                        </div><span class="help-inline errormsg">
+                            <button class="btn" id="txAddDest" type="button">More</button> 
+                            <button class="btn" id="txRemoveDest" type="button" disabled>Less</button> 
+                        </span> 
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="txJSON">JSON Transaction</label> 
                     <div class="controls"> 
-<textarea class="span8" id="txJSON" rows="16"></textarea>
+                        <textarea class="span8" id="txJSON" rows="17"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
                     <label class="control-label" for="txHex">Raw Transaction</label> 
                     <div class="controls"> 
-<textarea class="span8" id="txHex" rows="5"></textarea>
+                        <textarea class="span8" id="txHex" rows="4"></textarea>
                     </div>
                 </div>
                 <div class="control-group"> 
