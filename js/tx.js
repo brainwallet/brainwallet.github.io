@@ -251,7 +251,7 @@ var TX = new function () {
         for (var i = 0; i < vout_sz; i++) {
             var txo = r['out'][i];
             var fval = parseFloat(txo['value']);
-            var value = new BigInteger('' + Math.floor(fval * 1e8), 10);
+            var value = new BigInteger('' + Math.round(fval * 1e8), 10);
             var script = parseScript(txo['scriptPubKey']);
 
             if (value instanceof BigInteger) {
