@@ -65,7 +65,7 @@ var TX = new function () {
         for (var i in outputs) {
             var address = outputs[i].address;
             var fval = outputs[i].value;
-            var value = new BigInteger('' + Math.floor(fval * 1e8), 10);
+            var value = new BigInteger('' + Math.round(fval * 1e8), 10);
             sendTx.addOutput(new Bitcoin.Address(address), value);
         }
 
