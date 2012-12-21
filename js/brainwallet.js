@@ -743,7 +743,7 @@
         clearTimeout(timeout);
         timeout = setTimeout(txGenSrcAddr, TIMEOUT);
     }
-    
+
     function txSetUnspent(text) {
         var r = JSON.parse(text);
         txUnspent = JSON.stringify(r, null, 4);
@@ -876,6 +876,8 @@
         }
 
         var eckey = new Bitcoin.ECKey(payload);
+
+        eckey.setCompressed(compressed);
 
         TX.init(eckey);
 
