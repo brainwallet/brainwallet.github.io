@@ -567,6 +567,24 @@
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, TIMEOUT);
     }
+    
+    function onChainFromPassphrase() {
+      if (chain_type != 'chain_armory') {   
+        alert('Currently Only Armory Chains are supported, sorry.');
+        return;
+      }
+      var passphrase = prompt('Enter passphrase:', 'Zombie');
+      if (passphrase == '') {
+        return;
+      }
+      var shaObj = new jsSHA(passphrase, "TEXT");
+      var hash = shaObj.getHash("SHA-512", "HEX");
+      var cc = Crypto.util.hexToBytes(hash.substr(0,64));
+      var pk = Crypto.util.hexToBytes(hash.substr(64,128));
+      var str = armory_encode_keys(pk, cc);
+      $('#memo').val(str);
+      onChangeMemo();
+    }
 
     function onChangeMemo() {
         var str =  $('#memo').val();
@@ -1083,6 +1101,7 @@
 
         $('#chPlay').click(chOnPlay);
         $('#chStop').click(chOnStop);
+        $('#chFromPassphrase').click(onChainFromPassphrase);
 
         $('#csv').click(onChangeFormat);
         $('#json').click(onChangeFormat);
