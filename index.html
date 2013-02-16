@@ -35,6 +35,8 @@
                     <a data-toggle="tab" href="#sign" id="tab-sign">Sign Message</a></li> 
                     <li>
                     <a data-toggle="tab" href="#verify" id="tab-verify">Verify Message</a></li> 
+    				<li>
+                    <a data-toggle="tab" href="#read" id="tab-read">Read Transaction Data</a></li>
                 </ul>
             </div>
         </div>
@@ -247,6 +249,14 @@
                         <textarea class="span8" id="txHex" rows="4"></textarea>
                     </div>
                 </div>
+				<div class="control-group"> 
+                    <label class="control-label" for="txHex">Personalized message</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="txMessage" rows="4"></textarea>
+						<button class="btn" id="msgToggle" type="button">Set Message</button> 
+						<span class="help-inline" id="asHexSpan"><nobr><label class="checkbox" for="asHex"><input type="checkbox" id="msgAsHex">Data As Hexstring.</label></nobr></span>
+                    </div>
+                </div>
                 <div class="control-group"> 
                     <label class="control-label" for="txFee">Fee</label> 
                     <div class="controls"> 
@@ -378,6 +388,36 @@
             </form>
         </div>
         <hr /> 
+		
+<!-- Read -->
+        <div class="tab-pane fade" id="read"> 
+            <form action="/" class="form-horizontal" method="get" id="vrForm">
+            <fieldset> <legend>Read Message From Transaction</legend> 
+                <div class="control-group"> 
+                    <label class="control-label" for="msgReadTransactionLabel">JSON Transaction:</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="msgReadTransaction" rows="10"></textarea>
+                    </div>
+                </div>
+				<div class="control-group">
+					<label class="control-label" for="rTr">Resulting Data:</label> 
+					<div class="controls"> 
+					<textarea class="span8" id="msgReadTextArea" rows="10"></textarea>
+					</div>					
+				</div>
+				
+                <div class="control-group"> 
+                    <label class="control-label" for="rTr"></label> 
+                    <div class="controls"> 
+                        <button class="btn" id="msgRead" type="button">Read Message</button>
+						<span class="help-inline" id="toStrSpan"><nobr><label class="checkbox" for="toStr"><input type="checkbox" id="msgReadtoStr" checked="checked">Data To String.</label></nobr></span>
+                        <span id="vrRes" class="help-inline errormsg"></span>
+                    </div>
+                </div>
+            </fieldset>
+            </form>
+        </div>
+        <hr /> 
     </div>
     <FOOTER> 
 
@@ -396,7 +436,8 @@
 <script src="js/armory.js"></script> 
 <script src="js/electrum.js"></script> 
 <script src="js/tx.js"></script> 
-<script src="js/bitcoinsig.js"></script> 
+<script src="js/bitcoinsig.js"></script>
+<script src="js/sprintf-0.6.js"></script>
 <script src="js/brainwallet.js"></script> 
 </body>
 </html> 
