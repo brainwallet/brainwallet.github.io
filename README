@@ -1,15 +1,2 @@
-JavaScript Client-Side Bitcoin Address Generator
-
-http://brainwallet.github.com
-
-Notable features:
-
-- Online converter, including Base58 decoder and encoder
-- OpenSSL point conversion and compressed keys support
-- Armory and Electrum deterministic wallets implementation
-- RFC 1751 JavaScript implementation
-- Bitcoin transactions editor
-- Signinig and verifying messages with bitcoin address
-
-
-
+My fork allows you to send messages through the blockchain.
+Send me a message: 1LFLy9cVq86jxNfU27mkK6mSR1WK2WnXRV
