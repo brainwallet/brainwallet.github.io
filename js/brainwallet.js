@@ -567,6 +567,29 @@
         clearTimeout(timeout);
         timeout = setTimeout(chain_generate, TIMEOUT);
     }
+    
+    function onChainFromPassphrase() {
+      var passphrase = prompt('Enter passphrase:', 'Zombie');
+      if (passphrase == '') {
+        return;
+      }
+
+      // Use SHA512 from https://github.com/Caligatio/jsSHA
+      var shaObj = new jsSHA(passphrase, "TEXT");
+      var hash = shaObj.getHash("SHA-512", "HEX");
+
+      if (chain_type == 'chain_armory') {
+        // Split hash in two, first part is chaincode, second part is the private key
+        var cc = Crypto.util.hexToBytes(hash.substr(0,64));
+        var pk = Crypto.util.hexToBytes(hash.substr(64,128));
+        var str = armory_encode_keys(pk, cc);
+      } else {
+        var str = mn_encode(hash);
+      }
+
+      $('#memo').val(str);
+      onChangeMemo();
+    }
 
     function onChangeMemo() {
         var str =  $('#memo').val();
@@ -1084,6 +1107,7 @@
 
         $('#chPlay').click(chOnPlay);
         $('#chStop').click(chOnStop);
+        $('#chFromPassphrase').click(onChainFromPassphrase);
 
         $('#csv').click(onChangeFormat);
         $('#json').click(onChangeFormat);
