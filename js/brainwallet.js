@@ -1073,6 +1073,7 @@
 
         $('#uncompressed').click(update_gen_compressed);
         $('#compressed').click(update_gen_compressed);
+        gen_compressed = $('#compressed').hasClass('active');
 
         $('#pass').val('correct horse battery staple');
         calc_hash();
