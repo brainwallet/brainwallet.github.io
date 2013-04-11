@@ -1100,7 +1100,6 @@
 
         $('#txSec').val(tx_sec);
         $('#txAddr').val(tx_addr);
-        $('#txDest').val(tx_dest);
 
         txSetUnspent(tx_unspent);
 
