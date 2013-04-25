@@ -23,6 +23,7 @@ function electrum_extend_chain(pubKey, privKey, n, forChange, fromPrivKey) {
     }
 
     var newPriv = secexp ? secexp.toByteArrayUnsigned(): [];
+    for(;newPriv.length<32;) newPriv.unshift(0x00);
     var newPub = pt.getEncoded();
     var h160 = Bitcoin.Util.sha256ripe160(newPub);
     var addr = new Bitcoin.Address(h160);
