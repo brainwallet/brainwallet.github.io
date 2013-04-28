@@ -779,10 +779,12 @@
         var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
             'http://blockexplorer.com/q/mytransactions/' + addr;
 
-        url = prompt('Download transaction history:', url);
+        url = prompt('Press OK to download transaction history:', url);
         if (url != null && url != "") {
             $('#txUnspent').val('');
             tx_fetch(url, txParseUnspent);
+        } else {
+          txSetUnspent($('#txUnspent').val());
         }
     }
 
