@@ -744,6 +744,11 @@
         timeout = setTimeout(txGenSrcAddr, TIMEOUT);
     }
 
+    function txOnChangeAddr() {
+        clearTimeout(timeout);
+        timeout = setTimeout(txGetUnspent, TIMEOUT);
+    }
+
     function txSetUnspent(text) {
         var r = JSON.parse(text);
         txUnspent = JSON.stringify(r, null, 4);
@@ -1112,6 +1117,7 @@
         $('#txBBE').click(txChangeType);
 
         onInput($('#txSec'), txOnChangeSec);
+        onInput($('#txAddr'), txOnChangeAddr);
         onInput($('#txUnspent'), txOnChangeUnspent);
         onInput($('#txHex'), txOnChangeHex);
         onInput($('#txJSON'), txOnChangeJSON);
