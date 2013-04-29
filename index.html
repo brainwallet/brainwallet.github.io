@@ -53,11 +53,12 @@
                             <div class="control-group"> 
                                 <label class="control-label" for="from_pass">Get Address From</label> 
                                 <div class="controls"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_from"> 
-                                        <button class="btn active" id="from_pass" title="Using SHA256(passphrase) as the secret exponent" type="button">Passphrase</button> 
-                                        <button class="btn" id="from_hash" title="Using hex-encoded secret exponent (32 bytes)" type="button">Secret Exponent</button> 
-                                        <button class="btn" id="from_sec" title="Using Base58Check-encoded secret exponent (ver. 128)" type="button">Private Key</button> 
+                                    <div class="btn-group pull-left" data-toggle="buttons-radio" id="gen_from"> 
+                                        <button class="btn active" id="from_pass" title="Single SHA256 of the passphrase" type="button">Passphrase</button> 
+                                        <button class="btn" id="from_hash" title="Hex-encoded secret exponent" type="button">Secret Exponent</button> 
+                                        <button class="btn" id="from_sec" title="Base58-encoded secret exponent" type="button">Private Key</button> 
                                     </div>
+                                    <div class="help-inline" id="genMsg" style="margin: 5px;"></div>
                                 </div>
                             </div>
                             <div class="control-group"> 

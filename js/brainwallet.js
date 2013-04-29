@@ -156,8 +156,13 @@
         $('#sec').parent().parent().removeClass('error');
     }
 
+    function genUpdateLabel() {
+      $('#genMsg').text($('#from_'+gen_from).attr('title'));
+    }
+
     function update_gen_from() {
         gen_from = $(this).attr('id').substring(5);
+        genUpdateLabel();
         update_gen();
         if (gen_from == 'pass') {
             if (gen_ps_reset) {
@@ -1086,6 +1091,8 @@
         calc_hash();
         generate();
         $('#pass').focus();
+
+        genUpdateLabel();
 
         // chains
 
