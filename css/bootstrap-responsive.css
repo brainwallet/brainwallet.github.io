@@ -373,7 +373,7 @@
     width: 32px;
   }
 }
-@media (max-width: 979px) {
+@media (max-width: 939px) {
   body {
     padding-top: 0;
   }

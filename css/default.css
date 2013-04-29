@@ -6,8 +6,6 @@ body {
 input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd; cursor: auto;}
 
 #qr {
-    width: 185px;
-    height: 185px;
     display: inline-block;
 }
 
