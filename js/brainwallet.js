@@ -334,6 +334,8 @@
         timeout = setTimeout(generate, TIMEOUT);
     }
 
+    // --- converter ---
+
     var from = 'hex';
     var to = 'hex';
 
@@ -417,6 +419,12 @@
         }
     }
 
+    function rot13(str) {
+        return str.replace(/[a-zA-Z]/g, function(c) {
+          return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+        });
+    }
+
     function enct(id) {
         return $('#from_'+id).text();
     }
@@ -479,7 +487,9 @@
                 text = mn_encode(Crypto.util.bytesToHex(bytes));
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
-            } 
+            } else if (to == 'rot13') {
+                text = rot13(str);
+            }
         }
 
         $('#hint_from').text(enct(from) + type + ' (' + bytes.length + ' byte' + (bytes.length == 1 ? ')' : 's)'));
