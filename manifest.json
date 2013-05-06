@@ -1,0 +1,15 @@
+{
+    "name": "Bit Kit",
+    "description": "Bitcoin Utilities for Chrome",
+    "version": "0.0.1",
+    "app": {
+    "background": {
+      "scripts": ["main.js"]
+    },
+    "permissions":[
+        "http://blockexplorer.com",
+        "http://blockchain.info"
+    ]
+    },
+    "icons": { "16": "16x16.gif", "128": "128x128.gif" }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "bitkitapp",
+  "version": "0.0.1",
+  "description": "Bitcoin Utilities for Chrome",
+  "keywords": ["bitcoin","bitkit","bit","kit","coin","chrome","packaged","application","app","brainwallet"],
+  "author": "John Henry <john@iamjohnhenry.com>",
+  "homepage": "https://github.com/johnhenry/bitkittapp",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/johnhenry/bitkitapp.git"
+  },
+  "main": "main"
+}
