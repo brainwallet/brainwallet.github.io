@@ -1,0 +1,19 @@
+body { 
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+
+input[disabled],select[disabled],textarea[disabled],input[readonly],select[readonly],textarea[readonly]{background-color:#eeeeee;border-color:#ddd; cursor: auto;}
+
+#qr {
+    display: inline-block;
+}
+
+#qr_addr {
+    position: relative;
+    z-index: 1;
+}
+
+legend {
+    margin-bottom: 0px;
+}
