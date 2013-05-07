@@ -794,7 +794,7 @@
 
         var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
             'http://blockexplorer.com/q/mytransactions/' + addr;
-        url = prompt('Press OK to download transaction history:', url);
+        //url = prompt('Press OK to download transaction history:', url);
         if (url != null && url != "") {
             $('#txUnspent').val('');
             tx_fetch(url, txParseUnspent);
@@ -862,7 +862,7 @@
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
         url = 'http://blockchain.info/pushtx';
         postdata = 'tx=' + tx;
-        url = prompt(r + 'Send transaction:', url);
+        //url = prompt(r + 'Send transaction:', url);
         if (url != null && url != "") {
             tx_fetch(url, txSent, txSent, postdata);
         }
