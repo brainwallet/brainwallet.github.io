@@ -52,34 +52,16 @@
         <div class="tab-pane fade in active" id="generator"> 
             <form action="/" class="form-horizontal" method="get">
             <fieldset> <h1>Generator </h1>
-                        <div id="qr"></div>
-                        <span id="qr_addr"></span>
-                <div class="control-group"> 
-                    <div class="row"> 
-                        <div class="span10"> 
                             <div class="control-group"> 
-                                <label class="control-label" for="from_pass">Get Address From</label> 
+                                <label class="control-label" for="addr">Address</label> 
                                 <div class="controls"> 
-                                    <div class="btn-group pull-left" data-toggle="buttons-radio" id="gen_from"> 
-                                        <button class="btn active" id="from_pass" title="Single SHA256" type="button">Passphrase</button> 
-                                        <button class="btn" id="from_hash" title="Hex-encoded" type="button">Secret Exponent</button> 
-                                        <button class="btn" id="from_sec" title="Base58-encoded" type="button">Private Key</button> 
-                                    </div>
-                                    <div class="help-inline" id="genMsg" style="margin: 5px;"></div>
+                                    <input class="span4" id="addr" readonly type="text"> 
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="pass">Passphrase</label> 
+                                <label class="control-label" for="addr">QR</label> 
                                 <div class="controls"> 
-                                    <input class="span5" id="pass" type="text" x-webkit-speech> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="hash">Secret Exponent</label> 
-                                <div class="controls"> 
-                                    <div class="input-append"> 
-                                        <input class="span5" id="hash" maxlength="64" readonly type="text"><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button> 
-                                    </div><span class="help-inline errormsg"></span> 
+                                    <div id="qr"></div> 
                                 </div>
                             </div>
                             <div class="control-group"> 
@@ -91,41 +73,79 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="sec">Private Key</label> 
-                                <div class="controls"> 
-                                    <input class="span5" id="sec" readonly type="text"> 
-                                    <span class="help-inline errormsg"></span> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="addr">Address</label> 
-                                <div class="controls"> 
-                                    <input class="span4" id="addr" readonly type="text"> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="der">Private Key (DER)</label> 
-                                <div class="controls"> 
-<textarea class="span6" id="der" readonly rows="7"></textarea>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="pub">Public Key (SEC)</label> 
-                                <div class="controls"> 
-<textarea class="span5" id="pub" readonly rows="2"></textarea>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="h160">HASH160</label> 
-                                <div class="controls"> 
-                                    <input class="span4" id="h160" readonly type="text"> 
-                                </div>
-                            </div>
-                        </div>
 
+
+        
+                <div class="control-group"> 
+                    <div class="row"> 
+                        <div class="span10"> 
+                            <div class="control-group"> 
+                                <label class="control-label" for="from_pass">Get Address From</label> 
+                                <div class="controls"> 
+                                    <div class="btn-group pull-left" data-toggle="buttons-radio" id="gen_from"> 
+                                        <button class="btn active" id="from_pass" title="Single SHA256" type="button">Passphrase</button> 
+                                        <button class="btn" id="from_hash" title="Hex-encoded" type="button">Secret Exponent</button> 
+                                        <button class="btn" id="from_sec" title="Base58-encoded" type="button">Private Key</button><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button>  
+                                    </div>
+                                    <div class="help-inline" id="genMsg" style="margin: 5px;"></div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="pass">Passphrase</label> 
+                                <div class="controls"> 
+                                    <input class="span5" id="pass" type="text" x-webkit-speech> 
+                                </div>
+                            </div>
+            <details >
+                <summary>More</summary>
+                <div class="control-group"> 
+                    <label class="control-label" for="hash">Secret Exponent</label> 
+                    <div class="controls"> 
+                        <div class="input-append"> 
+                            <input class="span5" id="hash" maxlength="64" readonly type="text">
+                        </div><span class="help-inline errormsg"></span> 
                     </div>
                 </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="sec">Private Key</label> 
+                    <div class="controls"> 
+                        <input class="span5" id="sec" readonly type="text"> 
+                        <span class="help-inline errormsg"></span> 
+                    </div>
+                </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="der">Private Key (DER)</label> 
+                    <div class="controls"> 
+<textarea class="span6" id="der" readonly rows="7"></textarea>
+                    </div>
+                </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="pub">Public Key (SEC)</label> 
+                    <div class="controls"> 
+<textarea class="span5" id="pub" readonly rows="2"></textarea>-
+                    </div>
+                </div>
+
+                <div class="control-group"> 
+                    <label class="control-label" for="h160">HASH160</label> 
+                    <div class="controls"> 
+                        <input class="span4" id="h160" readonly type="text"> 
+                    </div>
+                </div>
+                </details> 
+                    </div>
+                </div>
+                </div>
+
+
+
+
+
+
+
             </fieldset>
             </form>
         </div>
@@ -198,7 +218,7 @@
                 <div class="control-group"> 
                     <label class="control-label" for="txSec">Private Key</label> 
                     <div class="controls"> 
-                        <input class="span5" id="txSec" type="text"> 
+                        <input class="span5" id="txSec" type="password"> 
                         <span class="help-inline errormsg"></span> 
                     </div>
                 </div>
@@ -324,7 +344,7 @@
                 <div class="control-group"> 
                     <label class="control-label" for="sgSec">Private Key</label> 
                     <div class="controls"> 
-                        <input class="span5" id="sgSec" type="text"> 
+                        <input class="span5" id="sgSec" type="password"> 
                         <span class="help-inline errormsg"></span> 
                     </div>
                 </div>
