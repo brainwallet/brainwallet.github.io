@@ -2,76 +2,51 @@
 <html lang="en"> 
 <head>
     <meta charset="utf-8">
-    <title>Bitkit - Bitcoin Utilities for Chrome</title> 
+    <title>Brainwallet - JavaScript Client-Side Bitcoin Address Generator</title> 
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="bitcoin bitkit bit kit coin chrome packaged application app brainwallet" name="description">
-    <meta content="John Henry" name="author">
+    <meta content="bitcoin address generator" name="description">
+    <meta content="brainwallet" name="author">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <link href="favicon.ico" rel="shortcut icon">
 </head>
 <body>
-<div id="sidebar">
-  <div id="file-tabs-menu">
-    <h1><img src="img/logo/logo.png" /></h1>
-    <ul class="nav" id="file-menu" id="enc_from">
-        <li>
-            <div data-toggle="tab" href="#generate" id="tab-generator" >Generate</div>
-        </li> 
-        <li>
-            <div data-toggle="tab" href="#generate-many" id="tab-generate-many">Generate Many</div>
-        </li> 
-        <li>
-            <div data-toggle="tab" href="#send" id="tab-send">Send</div>
-        </li> 
-        <li>
-            <div data-toggle="tab" href="#convert" id="tab-convert">Convert</div>
-        </li>
-        <li>
-            <div data-toggle="tab" href="#sign" id="tab-sign">Sign &amp; Verify</div>
-        </li>
-        <li>
-            <div data-toggle="tab" href="#about" id="tab-about"><small>About</small></div>
-        </li>
-    </ul>
-  </div>
+<div class="navbar navbar-fixed-top"> 
+    <div class="navbar-inner"> 
+        <div class="container"> 
+            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
+            <span class="icon-bar"></span> <span class="icon-bar"></span> 
+            <span class="icon-bar"></span> </a> <a class="brand" href="/">Brainwallet</a> 
+            <div class="nav-collapse"> 
+                <ul class="nav">
+                    <li class="active">
+                    <a data-toggle="tab" href="#generator">Generator</a></li> 
+                    <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#tx" id="tab-tx">Transactions</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#sign" id="tab-sign">Sign Message</a></li> 
+                    <li>
+                    <a data-toggle="tab" href="#verify" id="tab-verify">Verify Message</a></li> 
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="container"> 
     <div class="tab-content"> 
-    <div class="alert alert-error" id="error">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <strong>Warning!</strong>
-    </div>
-<!-- Generate -->
-        <div class="tab-pane fade in active" id="generate"> 
-            <h1>Generate</h1>
+
+<!-- Generator -->
+        <div class="tab-pane fade in active" id="generator"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset>
-                            <div class="control-group"> 
-                                <label class="control-label" for="addr">Address</label> 
-                                <div class="controls"> 
-                                    <input class="span4" id="addr" readonly type="text"> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="addr">QR Code</label> 
-                                <div class="controls"> 
-                                    <div id="qr"></div> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="uncompressed">Compression</label> 
-                                <div class="controls"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
-                                        <button class="btn active" id="uncompressed" title="Uncompressed keys" type="button">Uncompressed</button>
-                                        <button class="btn" id="compressed" title="Compressed keys" type="button">Compressed</button>
-                                    </div>
-                                </div>
-                            </div>
+            <fieldset> <legend>Generator <span class="pull-right" id="qr_addr"></span></legend> 
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span10"> 
@@ -81,7 +56,7 @@
                                     <div class="btn-group pull-left" data-toggle="buttons-radio" id="gen_from"> 
                                         <button class="btn active" id="from_pass" title="Single SHA256" type="button">Passphrase</button> 
                                         <button class="btn" id="from_hash" title="Hex-encoded" type="button">Secret Exponent</button> 
-                                        <button class="btn" id="from_sec" title="Base58-encoded" type="button">Private Key</button><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button>  
+                                        <button class="btn" id="from_sec" title="Base58-encoded" type="button">Private Key</button> 
                                     </div>
                                     <div class="help-inline" id="genMsg" style="margin: 5px;"></div>
                                 </div>
@@ -89,76 +64,85 @@
                             <div class="control-group"> 
                                 <label class="control-label" for="pass">Passphrase</label> 
                                 <div class="controls"> 
-                                    <input class="span5" id="pass" type="text" x-webkit-speech> 
+                                    <input class="span5" id="pass" type="text"> 
                                 </div>
                             </div>
-            <details >
-                <summary>More</summary>
-                <div class="control-group"> 
-                    <label class="control-label" for="hash">Secret Exponent</label> 
-                    <div class="controls"> 
-                        <div class="input-append"> 
-                            <input class="span5" id="hash" maxlength="64" readonly type="text">
-                        </div><span class="help-inline errormsg"></span> 
-                    </div>
-                </div>
-
-                <div class="control-group"> 
-                    <label class="control-label" for="sec">Private Key</label> 
-                    <div class="controls"> 
-                        <input class="span5" id="sec" readonly type="text"> 
-                        <span class="help-inline errormsg"></span> 
-                    </div>
-                </div>
-
-                <div class="control-group"> 
-                    <label class="control-label" for="der">Private Key (DER)</label> 
-                    <div class="controls"> 
+                            <div class="control-group"> 
+                                <label class="control-label" for="hash">Secret Exponent</label> 
+                                <div class="controls"> 
+                                    <div class="input-append"> 
+                                        <input class="span5" id="hash" maxlength="64" readonly type="text"><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button> 
+                                    </div><span class="help-inline errormsg"></span> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="uncompressed">Point Conversion</label> 
+                                <div class="controls"> 
+                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
+                                        <button class="btn active" id="uncompressed" title="Uncompressed keys (reference client)" type="button">Uncompressed</button>
+                                        <button class="btn" id="compressed" title="Compressed keys (introduced in 0.5.99)" type="button">Compressed</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="sec">Private Key</label> 
+                                <div class="controls"> 
+                                    <input class="span5" id="sec" readonly type="text"> 
+                                    <span class="help-inline errormsg"></span> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="addr">Address</label> 
+                                <div class="controls"> 
+                                    <input class="span4" id="addr" readonly type="text"> 
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="der">Private Key (DER)</label> 
+                                <div class="controls"> 
 <textarea class="span6" id="der" readonly rows="7"></textarea>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="pub">Public Key (SEC)</label> 
+                                <div class="controls"> 
+<textarea class="span5" id="pub" readonly rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="control-group"> 
+                                <label class="control-label" for="h160">HASH160</label> 
+                                <div class="controls"> 
+                                    <input class="span4" id="h160" readonly type="text"> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span2"> 
+                            <div class="pull-right" id="qr"></div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="control-group"> 
-                    <label class="control-label" for="pub">Public Key (SEC)</label> 
-                    <div class="controls"> 
-<textarea class="span5" id="pub" readonly rows="2"></textarea>-
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="h160">HASH160</label> 
-                    <div class="controls"> 
-                        <input class="span4" id="h160" readonly type="text"> 
-                    </div>
-                </div>
-                </details> 
-                    </div>
-                </div>
                 </div>
             </fieldset>
             </form>
         </div>
-<!-- Generate Many -->
-        <div class="tab-pane fade" id="generate-many">
-            <h1>Generate Many</h1>
+
+<!-- Chains -->
+        <div class="tab-pane fade" id="chains"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> 
+            <fieldset> <legend>Chains</legend> 
                 <div class="control-group"> 
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
                         <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
                             <button class="btn active" id="chain_armory" type="button">Armory</button> 
-                            <button class="btn" id="chain_electrum" type="button">Electrum</button>
-                            <button class="btn" id="chPlay" title="Random" type="button"><i class="icon-repeat"></i></button><button class="btn hide" id="chStop" title="Stop" type="button"><i class="icon-stop"></i></button>
+                            <button class="btn" id="chain_electrum" type="button">Electrum</button> 
                         </div>
                     </div>
                 </div>
-<details>
-<summary>More</summary>
                 <div class="control-group"> 
                     <label class="control-label" for="seed">Chain Code</label> 
                     <div class="controls"> 
                         <div class="input-append"> 
-                            <input class="span5" id="seed" maxlength="32" readonly type="text">
+                            <input class="span5" id="seed" maxlength="32" readonly type="text"><button class="btn" id="chPlay" title="Random" type="button"><i class="icon-repeat"></i></button><button class="btn hide" id="chStop" title="Stop" type="button"><i class="icon-stop"></i></button> 
                         </div>
                     </div>
                 </div>
@@ -176,9 +160,6 @@
                         <textarea class="span6" id="memo" rows="4"></textarea>
                     </div>
                 </div>
-</details>
-
-
                 <div class="control-group"> 
                     <label class="control-label" for="range">Range</label> 
                     <div class="controls"> 
@@ -204,21 +185,18 @@
             </fieldset>
             <p id="download">
             <a id="download-button" download target="_blank" >Download addresses.<span id="download-extension"></span></a>
-            <br />
-            Note: There is no download confirmation. Please check your default downloads folder after clicking.
             </p>
             </form>
         </div>
 
-<!-- Send -->
-        <div class="tab-pane fade" id="send">
-            <h1>Send</h1> 
+<!-- Transactions -->
+        <div class="tab-pane fade" id="tx"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> 
+            <fieldset> <legend>Transactions</legend> 
                 <div class="control-group"> 
                     <label class="control-label" for="txSec">Private Key</label> 
                     <div class="controls"> 
-                        <input class="span5" id="txSec" type="password"> 
+                        <input class="span5" id="txSec" type="text"> 
                         <span class="help-inline errormsg"></span> 
                     </div>
                 </div>
@@ -260,8 +238,18 @@
                         </span> 
                     </div>
                 </div>
-
-
+                <div class="control-group"> 
+                    <label class="control-label" for="txJSON">JSON Transaction</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="txJSON" rows="17"></textarea>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txHex">Raw Transaction</label> 
+                    <div class="controls"> 
+                        <textarea class="span8" id="txHex" rows="4"></textarea>
+                    </div>
+                </div>
                 <div class="control-group"> 
                     <label class="control-label" for="txFee">Fee</label> 
                     <div class="controls"> 
@@ -270,38 +258,17 @@
                         <button class="btn" id="txSend" type="button">Send Transaction</button></span> 
                     </div>
                 </div>
-                <details>
-                    <summary>Transaction Details</summary>
-                    <div class="control-group"> 
-
-                        <label class="control-label" for="txJSON">JSON Transaction</label> 
-                        <div class="controls"> 
-                            <textarea class="span8" id="txJSON" rows="17"></textarea>
-                        </div>
-                    </div>
-                    <div class="control-group"> 
-                        <label class="control-label" for="txHex">Raw Transaction</label> 
-                        <div class="controls"> 
-                            <textarea class="span8" id="txHex" rows="4"></textarea>
-                        </div>
-                </div>
-                </details>
-
-
-
             </fieldset>
             </form>
         </div>
 
-<!-- Convert -->
-        <div class="tab-pane fade" id="convert">
-            <h1>Convert</h1> 
+<!-- Converter -->
+        <div class="tab-pane fade" id="converter"> 
             <form action="/" class="form-inline" method="get">
-            <fieldset> 
+            <fieldset> <legend>Converter</legend> 
                 <div class="control-group"> 
                     <div class="row"> 
-                        <h2>From</h2>
-                        <div> 
+                        <div class="span6"> 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
@@ -320,9 +287,7 @@
                             <div> <span id="hint_from">&nbsp;</span> 
                             </div>
                         </div>
-                        <br />
-                        <h2>To</h2>
-                        <div > 
+                        <div class="span6"> 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
@@ -336,7 +301,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="control-group"> 
 <textarea class="span6" id="dest" readonly rows="10"></textarea>
                             </div>
@@ -349,15 +313,14 @@
             </form>
         </div>
 
-<!-- Sign & Verify -->
-        <div class="tab-pane fade" id="sign">
-            <h2>Sign &amp; Verify</h2> 
+<!-- Sign -->
+        <div class="tab-pane fade" id="sign"> 
             <form action="/" class="form-horizontal" method="get" id="sgForm">
-            <fieldset> <h2>Sign</h2> 
+            <fieldset> <legend>Sign Message</legend> 
                 <div class="control-group"> 
                     <label class="control-label" for="sgSec">Private Key</label> 
                     <div class="controls"> 
-                        <input class="span5" id="sgSec" type="password"> 
+                        <input class="span5" id="sgSec" type="text"> 
                         <span class="help-inline errormsg"></span> 
                     </div>
                 </div>
@@ -387,8 +350,12 @@
                 </div>
             </fieldset>
             </form>
-        <form action="/" class="form-horizontal" method="get" id="vrForm">
-            <fieldset> <h2>Verify</h2> 
+        </div>
+
+<!-- Verify -->
+        <div class="tab-pane fade" id="verify"> 
+            <form action="/" class="form-horizontal" method="get" id="vrForm">
+            <fieldset> <legend>Verify Message</legend> 
                 <div class="control-group"> 
                     <label class="control-label" for="vrMsg">Message</label> 
                     <div class="controls"> 
@@ -414,19 +381,15 @@
             </fieldset>
             </form>
         </div>
-
-
-<!-- About -->
-        <div class="tab-pane fade" id="about">
-            <h1>About</h1>
-            <form action="/" class="form-inline" method="get">
-            <fieldset>
-            Source Code: <a href="https://github.com/johnhenry/bitkitapp" target="_blank">https://github.com/johnhenry/bitkitapp</a>
-            <br />
-            Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com" target="_blank">https://github.com/brainwallet/brainwallet.github.com</a>
-            </fieldset>
-        </div>
+        <hr /> 
     </div>
+    <FOOTER> 
+
+    <p>&copy; 2012&#150;2013 Brainwallet<span class="pull-right"><small>Powered by 
+    <a href="http://pages.github.com">GitHub Pages</a> | 
+    <a href="https://github.com/brainwallet/brainwallet.github.com">View Source Code</a> 
+    </small></span></p> 
+    </FOOTER> 
 </div>
 <script src="js/jquery-1.7.2.min.js"></script> 
 <script src="js/bootstrap.min.js"></script> 
@@ -438,6 +401,6 @@
 <script src="js/electrum.js"></script> 
 <script src="js/tx.js"></script> 
 <script src="js/bitcoinsig.js"></script> 
-<script src="js/bitkit.js"></script>
+<script src="js/brainwallet.js"></script> 
 </body>
 </html> 
