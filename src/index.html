@@ -147,15 +147,18 @@
                     <div class="controls"> 
                         <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
                             <button class="btn active" id="chain_armory" type="button">Armory</button> 
-                            <button class="btn" id="chain_electrum" type="button">Electrum</button> 
+                            <button class="btn" id="chain_electrum" type="button">Electrum</button>
+                            <button class="btn" id="chPlay" title="Random" type="button"><i class="icon-repeat"></i></button><button class="btn hide" id="chStop" title="Stop" type="button"><i class="icon-stop"></i></button>
                         </div>
                     </div>
                 </div>
+<details>
+<summary>More</summary>
                 <div class="control-group"> 
                     <label class="control-label" for="seed">Chain Code</label> 
                     <div class="controls"> 
                         <div class="input-append"> 
-                            <input class="span5" id="seed" maxlength="32" readonly type="text"><button class="btn" id="chPlay" title="Random" type="button"><i class="icon-repeat"></i></button><button class="btn hide" id="chStop" title="Stop" type="button"><i class="icon-stop"></i></button> 
+                            <input class="span5" id="seed" maxlength="32" readonly type="text">
                         </div>
                     </div>
                 </div>
@@ -173,6 +176,9 @@
                         <textarea class="span6" id="memo" rows="4"></textarea>
                     </div>
                 </div>
+</details>
+
+
                 <div class="control-group"> 
                     <label class="control-label" for="range">Range</label> 
                     <div class="controls"> 
@@ -196,7 +202,7 @@
                     </div>
                 </div>
             </fieldset>
-            <a id="download" download target="_blank" title="Check your default downloads folder after clicking. There is no download confirmation." >Download</a>
+            <a class="btn" id="download" download target="_blank" title="Check your default downloads folder after clicking. There is no download confirmation." >Download</a>
             </form>
         </div>
 
@@ -250,18 +256,8 @@
                         </span> 
                     </div>
                 </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txJSON">JSON Transaction</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="txJSON" rows="17"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txHex">Raw Transaction</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="txHex" rows="4"></textarea>
-                    </div>
-                </div>
+
+
                 <div class="control-group"> 
                     <label class="control-label" for="txFee">Fee</label> 
                     <div class="controls"> 
@@ -270,6 +266,25 @@
                         <button class="btn" id="txSend" type="button">Send Transaction</button></span> 
                     </div>
                 </div>
+                <details>
+                    <summary>Transaction Details</summary>
+                    <div class="control-group"> 
+
+                        <label class="control-label" for="txJSON">JSON Transaction</label> 
+                        <div class="controls"> 
+                            <textarea class="span8" id="txJSON" rows="17"></textarea>
+                        </div>
+                    </div>
+                    <div class="control-group"> 
+                        <label class="control-label" for="txHex">Raw Transaction</label> 
+                        <div class="controls"> 
+                            <textarea class="span8" id="txHex" rows="4"></textarea>
+                        </div>
+                </div>
+                </details>
+
+
+                
             </fieldset>
             </form>
         </div>
