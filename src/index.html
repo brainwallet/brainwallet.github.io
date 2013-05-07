@@ -32,10 +32,7 @@
             <div data-toggle="tab" href="#convert" id="tab-convert">Convert</div>
         </li>
         <li>
-            <div data-toggle="tab" href="#sign" id="tab-sign">Sign Message</div>
-        </li>
-        <li>
-            <div data-toggle="tab" href="#verify" id="tab-verify">Verify Message</div>
+            <div data-toggle="tab" href="#sign" id="tab-sign">Sign &amp; Verify</div>
         </li>
         <li>
             <div data-toggle="tab" href="#about" id="tab-about"><small>About</small></div>
@@ -49,10 +46,11 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
       <strong>Warning!</strong>
     </div>
-<!-- Generator -->
+<!-- Generate -->
         <div class="tab-pane fade in active" id="generate"> 
+            <h1>Generate</h1>
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Generate</h1>
+            <fieldset>
                             <div class="control-group"> 
                                 <label class="control-label" for="addr">Address</label> 
                                 <div class="controls"> 
@@ -74,9 +72,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
-        
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span10"> 
@@ -129,7 +124,6 @@
 <textarea class="span5" id="pub" readonly rows="2"></textarea>-
                     </div>
                 </div>
-
                 <div class="control-group"> 
                     <label class="control-label" for="h160">HASH160</label> 
                     <div class="controls"> 
@@ -140,21 +134,14 @@
                     </div>
                 </div>
                 </div>
-
-
-
-
-
-
-
             </fieldset>
             </form>
         </div>
-
-<!-- Chains -->
-        <div class="tab-pane fade" id="generate-many"> 
+<!-- Generate Many -->
+        <div class="tab-pane fade" id="generate-many">
+            <h1>Generate Many</h1>
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Generate Many</h1> 
+            <fieldset> 
                 <div class="control-group"> 
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
@@ -213,11 +200,11 @@
             </form>
         </div>
 
-<!-- Transactions -->
+<!-- Send -->
         <div class="tab-pane fade" id="send">
-
+            <h1>Send</h1> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Send</h1> 
+            <fieldset> 
                 <div class="control-group"> 
                     <label class="control-label" for="txSec">Private Key</label> 
                     <div class="controls"> 
@@ -287,12 +274,14 @@
             </form>
         </div>
 
-<!-- Converter -->
-        <div class="tab-pane fade" id="convert"> 
+<!-- Convert -->
+        <div class="tab-pane fade" id="convert">
+            <h1>Convert</h1> 
             <form action="/" class="form-inline" method="get">
-            <fieldset> <h1>Convert</h1> 
+            <fieldset> 
                 <div class="control-group"> 
                     <div class="row"> 
+                        <h2>From</h2>
                         <div> 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
@@ -313,6 +302,7 @@
                             </div>
                         </div>
                         <br />
+                        <h2>To</h2>
                         <div > 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
@@ -340,10 +330,11 @@
             </form>
         </div>
 
-<!-- Sign -->
-        <div class="tab-pane fade" id="sign"> 
+<!-- Sign & Verify -->
+        <div class="tab-pane fade" id="sign">
+            <h2>Sign &amp; Verify</h2> 
             <form action="/" class="form-horizontal" method="get" id="sgForm">
-            <fieldset> <h1>Sign Message</h1> 
+            <fieldset> <h2>Sign</h2> 
                 <div class="control-group"> 
                     <label class="control-label" for="sgSec">Private Key</label> 
                     <div class="controls"> 
@@ -377,12 +368,8 @@
                 </div>
             </fieldset>
             </form>
-        </div>
-
-<!-- Verify -->
-        <div class="tab-pane fade" id="verify"> 
-            <form action="/" class="form-horizontal" method="get" id="vrForm">
-            <fieldset> <h1>Verify Message</h1> 
+        <form action="/" class="form-horizontal" method="get" id="vrForm">
+            <fieldset> <h2>Verify</h2> 
                 <div class="control-group"> 
                     <label class="control-label" for="vrMsg">Message</label> 
                     <div class="controls"> 
@@ -408,10 +395,13 @@
             </fieldset>
             </form>
         </div>
+
+
 <!-- About -->
         <div class="tab-pane fade" id="about">
+            <h1>About</h1>
             <form action="/" class="form-inline" method="get">
-            <fieldset> <h1>About</h1> 
+            <fieldset>
             Source Code: <a href="https://github.com/johnhenry/bitkitapp" target="_blank">https://github.com/johnhenry/bitkitapp</a>
             <br />
             Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com" target="_blank">https://github.com/brainwallet/brainwallet.github.com</a>
