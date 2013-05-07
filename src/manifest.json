@@ -11,5 +11,12 @@
         "http://blockchain.info"
     ]
     },
-    "icons": { "16": "16x16.gif", "128": "128x128.gif" }
+    "icons": { 
+        "8":"img/logo/8.png",
+        "16": "img/logo/16.png",
+        "32": "img/logo/32.png",
+        "64": "img/logo/64.png",
+        "128": "img/logo/128.png",
+        "256": "img/logo/256.png"
+    }
 }
