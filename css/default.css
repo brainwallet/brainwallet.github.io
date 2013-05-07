@@ -17,3 +17,7 @@ input[disabled],select[disabled],textarea[disabled],input[readonly],select[reado
 legend {
     margin-bottom: 0px;
 }
+
+#download{
+    display:none;
+}
