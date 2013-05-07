@@ -58,17 +58,17 @@
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="addr">QR</label> 
+                                <label class="control-label" for="addr">QR Code</label> 
                                 <div class="controls"> 
                                     <div id="qr"></div> 
                                 </div>
                             </div>
                             <div class="control-group"> 
-                                <label class="control-label" for="uncompressed">Point Conversion</label> 
+                                <label class="control-label" for="uncompressed">Compression</label> 
                                 <div class="controls"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
-                                        <button class="btn active" id="uncompressed" title="Uncompressed keys (reference client)" type="button">Uncompressed</button>
-                                        <button class="btn" id="compressed" title="Compressed keys (introduced in 0.5.99)" type="button">Compressed</button>
+                                        <button class="btn active" id="uncompressed" title="Uncompressed keys" type="button">Uncompressed</button>
+                                        <button class="btn" id="compressed" title="Compressed keys" type="button">Compressed</button>
                                     </div>
                                 </div>
                             </div>
@@ -202,7 +202,11 @@
                     </div>
                 </div>
             </fieldset>
-            <a class="btn" id="download" download target="_blank" title="Check your default downloads folder after clicking. There is no download confirmation." >Download</a>
+            <p id="download">
+            <a id="download-button" download target="_blank" >Download addresses.<span id="download-extension"></span></a>
+            <br />
+            Note: There is no download confirmation. Please check your default downloads folder after clicking.
+            </p>
             </form>
         </div>
 
@@ -284,7 +288,7 @@
                 </details>
 
 
-                
+
             </fieldset>
             </form>
         </div>

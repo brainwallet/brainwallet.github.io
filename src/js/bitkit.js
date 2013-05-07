@@ -562,8 +562,9 @@
             str = JSON.stringify(w, null, 4);
         }
         $('#chain').text(str);
-        $('#download').prop('download','addresses.' + chain_mode);
-        $('#download').prop('href','data:Application/octet-stream,' + encodeURIComponent(str));
+        $('#download-button').prop('download','addresses.' + chain_mode);
+        $('#download-button').prop('href','data:Application/octet-stream,' + encodeURIComponent(str));
+        $('#download-extension').html(chain_mode);
         $('#download').css('display','inline-block');
 
 
