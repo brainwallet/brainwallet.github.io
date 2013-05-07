@@ -23,22 +23,31 @@
     <h1><img src="img/logo/logo.png" /></h1>
     <ul class="nav" id="file-menu" id="enc_from">
         <li>
-        <div data-toggle="tab" href="#generator">Generator</div></li> 
-        <li><div data-toggle="tab" href="#chains" id="tab-chains">Chains</div></li> 
+            <div data-toggle="tab" href="#generator" id="tab-generator" >Generator</div>
+        </li> 
         <li>
-        <div data-toggle="tab" href="#tx" id="tab-tx">Transactions</div></li> 
+            <div data-toggle="tab" href="#chains" id="tab-chains">Chains</div>
+        </li> 
         <li>
-        <div data-toggle="tab" href="#converter" id="tab-converter">Converter</div></li> 
+            <div data-toggle="tab" href="#tx" id="tab-tx">Transactions</div>
+        </li> 
         <li>
-        <div data-toggle="tab" href="#sign" id="tab-sign">Sign Message</div></li> 
+            <div data-toggle="tab" href="#converter" id="tab-converter">Converter</div>
+        </li> 
         <li>
-        <div data-toggle="tab" href="#verify" id="tab-verify">Verify Message</div></li>
+            <div data-toggle="tab" href="#sign" id="tab-sign">Sign Message</div>
+        </li>
         <li>
-        <div data-toggle="tab" href="#about" id="tab-about">About</div></li> 
+            <div data-toggle="tab" href="#verify" id="tab-verify">Verify Message</div>
+        </li>
+        <li>
+            <div data-toggle="tab" href="#about" id="tab-about">About</div>
+        </li>
     </ul>
-    <ul class="nav" id="file-menu">
+    <ul class="nav">
         <li>
-        <div data-toggle="tab" href="#generator"><small>&copy; 2012&#150;2013 John Henry</small></div></li> 
+        <div data-toggle="tab" href="#about"><small>&copy; 2012&#150;2013 John Henry </small> </div>
+        </li> 
     </ul>
   </div>
 </div>
@@ -47,10 +56,8 @@
 <!-- Generator -->
         <div class="tab-pane fade in active" id="generator"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Generator </legend>
-                        <div class="span2"> 
-                            <div id="qr"></div>
-                        </div>
+            <fieldset> <h1>Generator </h1>
+                        <div id="qr"></div>
                         <span id="qr_addr"></span>
                 <div class="control-group"> 
                     <div class="row"> 
@@ -131,7 +138,7 @@
 <!-- Chains -->
         <div class="tab-pane fade" id="chains"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Chains</legend> 
+            <fieldset> <h1>Chains</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
@@ -192,7 +199,7 @@
 <!-- Transactions -->
         <div class="tab-pane fade" id="tx"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Transactions</legend> 
+            <fieldset> <h1>Transactions</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="txSec">Private Key</label> 
                     <div class="controls"> 
@@ -265,10 +272,10 @@
 <!-- Converter -->
         <div class="tab-pane fade" id="converter"> 
             <form action="/" class="form-inline" method="get">
-            <fieldset> <legend>Converter</legend> 
+            <fieldset> <h1>Converter</h1> 
                 <div class="control-group"> 
                     <div class="row"> 
-                        <div class="span6"> 
+                        <div> 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
@@ -287,7 +294,8 @@
                             <div> <span id="hint_from">&nbsp;</span> 
                             </div>
                         </div>
-                        <div class="span6"> 
+                        <br />
+                        <div > 
                             <div class="control-group"> 
                                 <div class="btn-toolbar"> 
                                     <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
@@ -301,6 +309,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="control-group"> 
 <textarea class="span6" id="dest" readonly rows="10"></textarea>
                             </div>
@@ -316,7 +325,7 @@
 <!-- Sign -->
         <div class="tab-pane fade" id="sign"> 
             <form action="/" class="form-horizontal" method="get" id="sgForm">
-            <fieldset> <legend>Sign Message</legend> 
+            <fieldset> <h1>Sign Message</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="sgSec">Private Key</label> 
                     <div class="controls"> 
@@ -355,7 +364,7 @@
 <!-- Verify -->
         <div class="tab-pane fade" id="verify"> 
             <form action="/" class="form-horizontal" method="get" id="vrForm">
-            <fieldset> <legend>Verify Message</legend> 
+            <fieldset> <h1>Verify Message</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="vrMsg">Message</label> 
                     <div class="controls"> 
@@ -384,7 +393,7 @@
 <!-- About -->
         <div class="tab-pane fade" id="about">
             <form action="/" class="form-inline" method="get">
-            <fieldset> <legend>About</legend> 
+            <fieldset> <h1>About</h1> 
             Source Code: <a href="https://github.com/johnhenry/bitkitapp">https://github.com/johnhenry/bitkitapp</a>
             <br />
             Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com">https://github.com/brainwallet/brainwallet.github.com</a>
