@@ -141,3 +141,7 @@ body.sidebar-open #sidebar {
 #file-menu li{
   cursor: pointer;
 }
+
+#download{
+  display:none;
+}

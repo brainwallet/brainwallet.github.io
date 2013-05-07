@@ -23,17 +23,17 @@
     <h1><img src="img/logo/logo.png" /></h1>
     <ul class="nav" id="file-menu" id="enc_from">
         <li>
-            <div data-toggle="tab" href="#generator" id="tab-generator" >Generator</div>
+            <div data-toggle="tab" href="#generate" id="tab-generator" >Generate</div>
         </li> 
         <li>
-            <div data-toggle="tab" href="#chains" id="tab-chains">Chains</div>
+            <div data-toggle="tab" href="#generate-many" id="tab-generate-many">Generate Many</div>
         </li> 
         <li>
-            <div data-toggle="tab" href="#tx" id="tab-tx">Transactions</div>
+            <div data-toggle="tab" href="#send" id="tab-send">Send</div>
         </li> 
         <li>
-            <div data-toggle="tab" href="#converter" id="tab-converter">Converter</div>
-        </li> 
+            <div data-toggle="tab" href="#convert" id="tab-convert">Convert</div>
+        </li>
         <li>
             <div data-toggle="tab" href="#sign" id="tab-sign">Sign Message</div>
         </li>
@@ -41,7 +41,7 @@
             <div data-toggle="tab" href="#verify" id="tab-verify">Verify Message</div>
         </li>
         <li>
-            <div data-toggle="tab" href="#about" id="tab-about">About</div>
+            <div data-toggle="tab" href="#about" id="tab-about"><small>About</small></div>
         </li>
     </ul>
   </div>
@@ -49,9 +49,9 @@
 <div class="container"> 
     <div class="tab-content"> 
 <!-- Generator -->
-        <div class="tab-pane fade in active" id="generator"> 
+        <div class="tab-pane fade in active" id="generate"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Generator </h1>
+            <fieldset> <h1>Generate</h1>
                             <div class="control-group"> 
                                 <label class="control-label" for="addr">Address</label> 
                                 <div class="controls"> 
@@ -151,9 +151,9 @@
         </div>
 
 <!-- Chains -->
-        <div class="tab-pane fade" id="chains"> 
+        <div class="tab-pane fade" id="generate-many"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Chains</h1> 
+            <fieldset> <h1>Generate Many</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="chain_simple">Generation Method</label> 
                     <div class="controls"> 
@@ -208,13 +208,14 @@
                     </div>
                 </div>
             </fieldset>
+            <a id="download" download target="_blank" title="Check your default downloads folder after clicking. There is no download confirmation." >Download</a>
             </form>
         </div>
 
 <!-- Transactions -->
-        <div class="tab-pane fade" id="tx"> 
+        <div class="tab-pane fade" id="send"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <h1>Transactions</h1> 
+            <fieldset> <h1>Send</h1> 
                 <div class="control-group"> 
                     <label class="control-label" for="txSec">Private Key</label> 
                     <div class="controls"> 
@@ -285,9 +286,9 @@
         </div>
 
 <!-- Converter -->
-        <div class="tab-pane fade" id="converter"> 
+        <div class="tab-pane fade" id="convert"> 
             <form action="/" class="form-inline" method="get">
-            <fieldset> <h1>Converter</h1> 
+            <fieldset> <h1>Convert</h1> 
                 <div class="control-group"> 
                     <div class="row"> 
                         <div> 
@@ -409,9 +410,9 @@
         <div class="tab-pane fade" id="about">
             <form action="/" class="form-inline" method="get">
             <fieldset> <h1>About</h1> 
-            Source Code: <a href="https://github.com/johnhenry/bitkitapp">https://github.com/johnhenry/bitkitapp</a>
+            Source Code: <a href="https://github.com/johnhenry/bitkitapp" target="_blank">https://github.com/johnhenry/bitkitapp</a>
             <br />
-            Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com">https://github.com/brainwallet/brainwallet.github.com</a>
+            Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com" target="_blank">https://github.com/brainwallet/brainwallet.github.com</a>
             </fieldset>
         </div>
     </div>

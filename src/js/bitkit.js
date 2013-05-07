@@ -262,7 +262,6 @@
 
         var url = 'http://blockchain.info/address/'+addr;
         $('#qr').html('<a href="'+url+'" title="'+addr+'" target="_blank">'+img+'</a>');
-        $('#qr_addr').text($('#addr').val());
     }
 
 
@@ -563,11 +562,16 @@
             str = JSON.stringify(w, null, 4);
         }
         $('#chain').text(str);
+        $('#download').prop('download','addresses.' + chain_mode);
+        $('#download').prop('href','data:Application/octet-stream,' + encodeURIComponent(str));
+        $('#download').css('display','inline-block');
+
+
+
 
         chain_range = parseInt($('#range').val());
         if (addresses.length >= chain_range)
             chOnStop();
-
     }
 
     function onChangeSeed() {
