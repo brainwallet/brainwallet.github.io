@@ -8,7 +8,8 @@
     },
     "permissions":[
         "http://blockexplorer.com",
-        "http://blockchain.info"
+        "http://blockchain.info",
+        "https://github.com/"
     ]
     },
     "icons": { 
