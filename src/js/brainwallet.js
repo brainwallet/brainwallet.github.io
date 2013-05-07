@@ -785,7 +785,7 @@
 
     function txParseUnspent(text) {
         if (text == '')
-            alert('No data');
+            console.log('No data');
         txSetUnspent(text);
     }
 
@@ -794,7 +794,6 @@
 
         var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
             'http://blockexplorer.com/q/mytransactions/' + addr;
-
         url = prompt('Press OK to download transaction history:', url);
         if (url != null && url != "") {
             $('#txUnspent').val('');
@@ -847,7 +846,7 @@
     }
 
     function txSent(text) {
-        alert(text ? text : 'No response!');
+        console.log(text ? text : 'No response!');
     }
 
     function txSend() {
