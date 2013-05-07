@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
   <meta>
-  <author>brainwallet</author>
+  <author>bitkit</author>
   <description>POST method for YQL</description>
   <sampleQuery><![CDATA[ 
 select * from {table} where url='http://example.com'
