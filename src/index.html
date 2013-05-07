@@ -9,6 +9,8 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/default.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
+    <link href="css/ace.css" rel="stylesheet">
 
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -16,40 +18,40 @@
     <link href="favicon.ico" rel="shortcut icon">
 </head>
 <body>
-<div class="navbar navbar-fixed-top"> 
-    <div class="navbar-inner"> 
-        <div class="container"> 
-            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
-            <span class="icon-bar"></span> <span class="icon-bar"></span> 
-            <span class="icon-bar"></span> </a> <a class="brand" href="/"> <img src="img/logo/32.png" /> Bitkit</a> 
-            <div class="nav-collapse"> 
-                <ul class="nav">
-                    <li class="active">
-                    <a data-toggle="tab" href="#generator">Generator</a></li> 
-                    <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#tx" id="tab-tx">Transactions</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#sign" id="tab-sign">Sign Message</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#verify" id="tab-verify">Verify Message</a></li>
-                    <li>
-                    <a data-toggle="tab" href="#about" id="tab-about"><small>About</small></a></li> 
-
-                </ul>
-            </div>
-        </div>
-    </div>
+<div id="sidebar">
+  <div id="file-tabs-menu">
+    <h1><img src="img/logo/logo.png" /></h1>
+    <ul class="nav" id="file-menu" id="enc_from">
+        <li>
+        <div data-toggle="tab" href="#generator">Generator</div></li> 
+        <li><div data-toggle="tab" href="#chains" id="tab-chains">Chains</div></li> 
+        <li>
+        <div data-toggle="tab" href="#tx" id="tab-tx">Transactions</div></li> 
+        <li>
+        <div data-toggle="tab" href="#converter" id="tab-converter">Converter</div></li> 
+        <li>
+        <div data-toggle="tab" href="#sign" id="tab-sign">Sign Message</div></li> 
+        <li>
+        <div data-toggle="tab" href="#verify" id="tab-verify">Verify Message</div></li>
+        <li>
+        <div data-toggle="tab" href="#about" id="tab-about">About</div></li> 
+    </ul>
+    <ul class="nav" id="file-menu">
+        <li>
+        <div data-toggle="tab" href="#generator"><small>&copy; 2012&#150;2013 John Henry</small></div></li> 
+    </ul>
+  </div>
 </div>
 <div class="container"> 
     <div class="tab-content"> 
-
 <!-- Generator -->
         <div class="tab-pane fade in active" id="generator"> 
             <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Generator <span class="pull-right" id="qr_addr"></span></legend> 
+            <fieldset> <legend>Generator </legend>
+                        <div class="span2"> 
+                            <div id="qr"></div>
+                        </div>
+                        <span id="qr_addr"></span>
                 <div class="control-group"> 
                     <div class="row"> 
                         <div class="span10"> 
@@ -119,9 +121,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="span2"> 
-                            <div class="pull-right" id="qr"></div>
-                        </div>
+
                     </div>
                 </div>
             </fieldset>
@@ -382,17 +382,15 @@
             </form>
         </div>
 <!-- About -->
-        <div class="tab-pane fade" id="about"> 
+        <div class="tab-pane fade" id="about">
+            <form action="/" class="form-inline" method="get">
+            <fieldset> <legend>About</legend> 
             Source Code: <a href="https://github.com/johnhenry/bitkitapp">https://github.com/johnhenry/bitkitapp</a>
             <br />
             Inspiration: <a href="https://github.com/brainwallet/brainwallet.github.com">https://github.com/brainwallet/brainwallet.github.com</a>
+            </fieldset>
         </div>
-        <hr /> 
     </div>
-    <FOOTER> 
-
-    <p><span class="pull-right">&copy; 2012&#150;2013 John Henry</span></p> 
-    </FOOTER> 
 </div>
 <script src="js/jquery-1.7.2.min.js"></script> 
 <script src="js/bootstrap.min.js"></script> 
@@ -404,6 +402,7 @@
 <script src="js/electrum.js"></script> 
 <script src="js/tx.js"></script> 
 <script src="js/bitcoinsig.js"></script> 
-<script src="js/bitkit.js"></script> 
+<script src="js/bitkit.js"></script>
+<script src="js/all.js"></script> 
 </body>
 </html> 
