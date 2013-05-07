@@ -48,6 +48,10 @@
 </div>
 <div class="container"> 
     <div class="tab-content"> 
+    <div class="alert alert-error" id="error">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Warning!</strong>
+    </div>
 <!-- Generator -->
         <div class="tab-pane fade in active" id="generate"> 
             <form action="/" class="form-horizontal" method="get">
@@ -213,7 +217,8 @@
         </div>
 
 <!-- Transactions -->
-        <div class="tab-pane fade" id="send"> 
+        <div class="tab-pane fade" id="send">
+
             <form action="/" class="form-horizontal" method="get">
             <fieldset> <h1>Send</h1> 
                 <div class="control-group"> 

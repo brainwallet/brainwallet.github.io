@@ -145,3 +145,8 @@ body.sidebar-open #sidebar {
 #download{
   display:none;
 }
+
+#error{
+  width:256px;
+  display:none;
+}

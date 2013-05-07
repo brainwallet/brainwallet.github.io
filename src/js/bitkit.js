@@ -787,9 +787,14 @@
         timeout = setTimeout(txUpdateUnspent, TIMEOUT);
     }
 
+    function alertError(error){
+        $("#error strong").html(error);
+        $("#error").fadeIn().css("display","inline-block");
+    }
+
     function txParseUnspent(text) {
         if (text == '')
-            console.log('No data');
+            alertError('No data');
         txSetUnspent(text);
     }
 
@@ -850,7 +855,7 @@
     }
 
     function txSent(text) {
-        console.log(text ? text : 'No response!');
+        alertError(text ? text : 'No response!');
     }
 
     function txSend() {
