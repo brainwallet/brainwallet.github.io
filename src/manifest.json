@@ -1,6 +1,8 @@
 {
     "name": "Bit Kit",
     "description": "Bitcoin Utilities for Chrome",
+    "minimum_chrome_version": "25.0",
+    "offline_enabled": true,
     "version": "0.0.1",
     "app": {
     "background": {
