@@ -565,7 +565,9 @@
         $('#chain').text(str);
 
         chain_range = parseInt($('#range').val());
-        if (addresses.length >= chain_range)
+        var change = chain_type == 'chain_electrum' ? parseInt($('#elChange').val()) : 0;
+
+        if (addresses.length > chain_range+change)
             chOnStop();
 
     }
@@ -641,14 +643,10 @@
         }
     }
 
-    function onChangeChange() {
-        chain_range = parseInt($('#range').val());
-        if (addresses.length >= chain_range)
-            onChangeRange();
-    }
-
-    function onChangeRange() {
-        chain_range = parseInt($('#range').val());
+    function onChangeRange()
+    {
+        if ( addresses.length==0 )
+          return;
         clearTimeout(timeout);
         timeout = setTimeout(update_chain_range, TIMEOUT);
     }
@@ -666,18 +664,19 @@
     function electrum_seed_success(privKey) {
         $('#progress').text('');
         $('#expo').val(Crypto.util.bytesToHex(privKey));
-        var addChange = $('#elChange').is(':checked');
+        var addChange = parseInt($('#elChange').val());
         Electrum.gen(chain_range, addr_callback, update_chain, addChange);
     }
 
     function update_chain_range() {
-        chain_range = $('#range').val();
+        chain_range = parseInt($('#range').val());
 
         addresses = [];
         $('#chain').text('');
 
         if (chain_type == 'chain_electrum') {
-            var addChange = $('#elChange').is(':checked');
+            var addChange = parseInt($('#elChange').val());
+            Electrum.stop();
             Electrum.gen(chain_range, addr_callback, update_chain, addChange);
         }
 
@@ -1114,7 +1113,7 @@
         onInput($('#range'), onChangeRange);
         onInput($('#seed'), onChangeSeed);
         onInput($('#memo'), onChangeMemo);
-        $('#elChange').change(onChangeChange);
+        onInput($('#elChange'), onChangeRange);
 
         // transactions
 

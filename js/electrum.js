@@ -74,15 +74,14 @@ var Electrum = new function () {
     }
 
     function calcAddr() {
-        var change = (counter == range);
-        var r = electrum_extend_chain(pubKey, privKey, change ? 0 : counter, change, true);
+        var r = electrum_extend_chain(pubKey, privKey, counter % range, counter >= range, true);
         onUpdate(r);
         counter++;
-        if (counter < range || (addChange && counter <= range)) {
-            timeout = setTimeout(calcAddr, 0);
-        } else {
+        if (counter >= range+addChange) {
             if (onSuccess) 
                 onSuccess();
+        } else {
+            timeout = setTimeout(calcAddr, 0);
         }
     }
 
