@@ -567,7 +567,7 @@
         chain_range = parseInt($('#range').val());
         var change = chain_type == 'chain_electrum' ? parseInt($('#elChange').val()) : 0;
 
-        if (addresses.length > chain_range+change)
+        if (addresses.length >= chain_range+change)
             chOnStop();
 
     }
