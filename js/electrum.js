@@ -7,18 +7,20 @@ function electrum_extend_chain(pubKey, privKey, n, forChange, fromPrivKey) {
     var mode = forChange ? 1 : 0;
     var mpk = pubKey.slice(1);
     var bytes = Crypto.charenc.UTF8.stringToBytes(n + ':' + mode + ':').concat(mpk);
-    var sequence = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true})
+    var sequence = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
     var secexp = null;
     var pt = ECPointFp.decodeFrom(curve.getCurve(), pubKey);
 
+    var A;
+
     if (fromPrivKey) {
-        var A = BigInteger.fromByteArrayUnsigned(sequence);
+        A = BigInteger.fromByteArrayUnsigned(sequence);
         var B = BigInteger.fromByteArrayUnsigned(privKey);
         var C = curve.getN();
         secexp = A.add(B).mod(C);
         pt = pt.add(curve.getG().multiply(A));
     } else {
-        var A = BigInteger.fromByteArrayUnsigned(sequence);
+        A = BigInteger.fromByteArrayUnsigned(sequence);
         pt = pt.add(curve.getG().multiply(A));
     }
 
@@ -38,8 +40,7 @@ function electrum_get_pubkey(privKey) {
     var curve = getSECCurveByName("secp256k1");
     var secexp = BigInteger.fromByteArrayUnsigned(privKey);
     var pt = curve.getG().multiply(secexp);
-    var pubKey = pt.getEncoded();
-    return pubKey;
+    return pt.getEncoded();
 }
 
 var Electrum = new function () {
@@ -105,9 +106,9 @@ var Electrum = new function () {
         calcAddr();
     };
 
-    this.stop = function() {
+    this.stop = function () {
         clearTimeout(timeout);
-    }
+    };
 
     return this;
 };
@@ -115,7 +116,7 @@ var Electrum = new function () {
 function electrum_test() {
 
     Electrum.init('12345678', function(r) {console.log(r);},
-        function(privKey) {Electrum.gen(5, function(r) {console.log(r);});});
+        function() {Electrum.gen(5, function(r) {console.log(r);});});
 
     /*
     1DLHQhEuLftmAMTiYhw4DvVWhFQ9hnbXio
