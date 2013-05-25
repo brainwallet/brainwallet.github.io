@@ -7,7 +7,7 @@
 */
 
 function mn_encode(str) {
-    out = [];
+    var out = [];
     var n = mn_words.length;
     for (var i = 0; i < str.length; i += 8) {
         var x = parseInt(str.substr(i, 8), 16);
