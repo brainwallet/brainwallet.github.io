@@ -1092,7 +1092,11 @@
         $('#compressed').click(update_gen_compressed);
         gen_compressed = $('#compressed').hasClass('active');
 
-        $('#pass').val('correct horse battery staple');
+        var suggest = [];
+        for (var i=0; i < 6; i++)
+            suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
+        $('#pass').val(suggest.join(' '));
+
         calc_hash();
         generate();
         $('#pass').focus();
