@@ -32,7 +32,7 @@ function verify_message(signature, message) {
     if (nV < 27 || nV >= 35)
         return false;
     if (nV >= 31) {
-        compressed = true
+        compressed = true;
         nV -= 4;
     }
     var recid = BigInteger.valueOf(nV - 27);
@@ -88,10 +88,10 @@ function sign_message(private_key, message, compressed) {
 }
 
 function bitcoinsig_test() {
-    k = '5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf'
-    a = '17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL'
-    s = 'HDiv4Oe9SjM1FFVbKk4m3N34efYiRgkQGGoEm564ldYt44jHVTuX23+WnihNMi4vujvpUs1M529P3kftjDezn9E='
-    m = 'test message'
+    var k = '5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf';
+    var a = '17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL';
+    var s = 'HDiv4Oe9SjM1FFVbKk4m3N34efYiRgkQGGoEm564ldYt44jHVTuX23+WnihNMi4vujvpUs1M529P3kftjDezn9E=';
+    var m = 'test message';
     payload = Bitcoin.Base58.decode(k);
     secret = payload.slice(1, 33);
     compressed = payload.length == 38;

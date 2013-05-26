@@ -3,7 +3,7 @@
 */
 
 function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
-    var chainXor = Crypto.SHA256(Crypto.SHA256(pubKey, {asBytes: true}), {asBytes: true})
+    var chainXor = Crypto.SHA256(Crypto.SHA256(pubKey, {asBytes: true}), {asBytes: true});
 
     for (var i = 0; i < 32; i++)
         chainXor[i] ^= chainCode[i];
@@ -12,14 +12,16 @@ function armory_extend_chain(pubKey, chainCode, privKey, fromPrivKey) {
     var secexp = null;
     var pt;
 
+    var A;
+
     if (fromPrivKey) {
-        var A = BigInteger.fromByteArrayUnsigned(chainXor);
+        A = BigInteger.fromByteArrayUnsigned(chainXor);
         var B = BigInteger.fromByteArrayUnsigned(privKey);
         var C = curve.getN();
         secexp = (A.multiply(B)).mod(C);
         pt = curve.getG().multiply(secexp);
     } else {
-        var A = BigInteger.fromByteArrayUnsigned(chainXor);
+        A = BigInteger.fromByteArrayUnsigned(chainXor);
         pt = ECPointFp.decodeFrom(curve.getCurve(), pubKey).multiply(A);
     }
 
@@ -47,18 +49,21 @@ function armory_map(str, from, to) {
 function armory_encode_keys(privKey, chainCode) {
     var key = privKey.concat(chainCode);
     var res = [];
+
+    var str, code;
+
     for (var i = 0; i < 4; i++) {
         var bytes = key.slice(i * 16, i * 16 + 16);
         var cs = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
-        var str = Crypto.util.bytesToHex(bytes.concat(cs.slice(0,2)));
-        var code = armory_map(str, armory_t, armory_f);
+        str = Crypto.util.bytesToHex(bytes.concat(cs.slice(0,2)));
+        code = armory_map(str, armory_t, armory_f);
         var arr = [];
         for (var j = 0; j < 9; j++)
             arr.push(code.substr(j*4, 4));
-        var code = arr.join(' ');
+        code = arr.join(' ');
         res.push(code);
     }
-    var str = res.join('\n');
+    str = res.join('\n');
     return str;
 }
 
@@ -68,9 +73,8 @@ function armory_decode_keys(data) {
     for (var i = 0; i < keys.length; i++) {
         var k = keys[i].replace(' ','');
         var raw = Crypto.util.hexToBytes(armory_map(k, armory_f, armory_t));
-        var data = raw.slice(0, 16);
-        var chk = raw.slice(16, 2);
-        lines.push(data);
+        data = raw.slice(0, 16);
+      lines.push(data);
     }
     try {
         var privKey = lines[0].concat(lines[1]);
@@ -85,8 +89,7 @@ function armory_get_pubkey(privKey) {
     var curve = getSECCurveByName("secp256k1");
     var secexp = BigInteger.fromByteArrayUnsigned(privKey);
     var pt = curve.getG().multiply(secexp);
-    var pubKey = pt.getEncoded();
-    return pubKey;
+    return pt.getEncoded();
 }
 
 function armory_get_wallet_uid(pubKey) {
@@ -102,6 +105,8 @@ var Armory = new function () {
     var range;
     var counter;
     var timeout;
+    var onSuccess;
+    var onUpdate;
 
     function calcAddr() {
         var r = armory_extend_chain(pubKey, chainCode, privKey, true);
@@ -133,9 +138,9 @@ var Armory = new function () {
         return armory_get_wallet_uid(pubKey);
     };
 
-    this.stop = function() {
+    this.stop = function () {
         clearTimeout(timeout);
-    }
+    };
 
     return this;
 };
