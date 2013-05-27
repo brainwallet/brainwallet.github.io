@@ -334,6 +334,15 @@
         timeout = setTimeout(generate, TIMEOUT);
     }
 
+    function genRandomPass() {
+        var suggest = [];
+        for (var i=0; i < 6; i++)
+            suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
+        $('#pass').val(suggest.join(' '));
+        calc_hash();
+        generate();
+    }
+
     // --- converter ---
 
     var from = 'hex';
@@ -1092,13 +1101,9 @@
         $('#compressed').click(update_gen_compressed);
         gen_compressed = $('#compressed').hasClass('active');
 
-        var suggest = [];
-        for (var i=0; i < 6; i++)
-            suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
-        $('#pass').val(suggest.join(' '));
+        $('#genRandomPass').click(genRandomPass);
+        genRandomPass();
 
-        calc_hash();
-        generate();
         $('#pass').focus();
 
         genUpdateLabel();
