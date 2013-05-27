@@ -7,6 +7,7 @@
     var gen_ps_reset = false;
     var TIMEOUT = 600;
     var timeout = null;
+    var genRandomPassLength = 8;
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -336,7 +337,7 @@
 
     function genRandomPass() {
         var suggest = [];
-        for (var i=0; i < 6; i++)
+        for (var i=0; i < genRandomPassLength; i++)
             suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
         $('#pass').val(suggest.join(' '));
         gen_from = 'pass';
