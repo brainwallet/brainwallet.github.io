@@ -339,8 +339,11 @@
         for (var i=0; i < 6; i++)
             suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
         $('#pass').val(suggest.join(' '));
+        gen_from = 'pass';
+        update_gen();
         calc_hash();
         generate();
+        $('#pass').focus();
     }
 
     // --- converter ---
@@ -1103,9 +1106,6 @@
 
         $('#genRandomPass').click(genRandomPass);
         genRandomPass();
-
-        $('#pass').focus();
-
         genUpdateLabel();
 
         // chains
