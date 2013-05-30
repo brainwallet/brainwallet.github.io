@@ -7,7 +7,7 @@
     var gen_ps_reset = false;
     var TIMEOUT = 600;
     var timeout = null;
-    var genRandomPassLength = 6;
+    var genRandomPassLength = 8;
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
