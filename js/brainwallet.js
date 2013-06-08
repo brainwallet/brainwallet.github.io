@@ -7,7 +7,6 @@
     var gen_ps_reset = false;
     var TIMEOUT = 600;
     var timeout = null;
-    var genRandomPassLength = 8;
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -336,10 +335,9 @@
     }
 
     function genRandomPass() {
-        var suggest = [];
-        for (var i=0; i < genRandomPassLength; i++)
-            suggest.push(mn_words[Math.floor(Math.random() * mn_words.length)]);
-        $('#pass').val(suggest.join(' '));
+        // chosen by fair dice roll
+        // guaranted to be random
+        $('#pass').val('correct horse battery staple');
         $('#from_pass').button('toggle');
         $('#pass').focus();
         gen_from = 'pass';
@@ -1106,7 +1104,6 @@
         $('#compressed').click(update_gen_compressed);
         gen_compressed = $('#compressed').hasClass('active');
 
-        $('#genRandomPass').click(genRandomPass);
         genRandomPass();
         genUpdateLabel();
 
