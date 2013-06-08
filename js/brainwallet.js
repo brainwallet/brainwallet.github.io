@@ -261,7 +261,6 @@
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
         $('#genAddrURL').attr('href', 'http://blockchain.info/address/'+addr);
-        $('#genAddrURL').attr('target', '_blank');
         $('#genAddrLabel').text($('#addr').val());
     }
 
