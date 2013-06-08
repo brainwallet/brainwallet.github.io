@@ -253,16 +253,16 @@
         var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
         $('#der').val(der);
 
-        var qr = qrcode(3, 'M');
+        var qrCode = qrcode(3, 'M');
         var text = $('#addr').val();
         text = text.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
-        qr.addData(text);
-        qr.make();
-        img = qr.createImgTag(4);
+        qrCode.addData(text);
+        qrCode.make();
 
-        var url = 'http://blockchain.info/address/'+addr;
-        $('#qr').html('<a href="'+url+'" title="'+addr+'" target="_blank">'+img+'</a>');
-        $('#qr_addr').text($('#addr').val());
+        $('#genAddrQR').html(qrCode.createImgTag(4));
+        $('#genAddrURL').attr('href', 'http://blockchain.info/address/'+addr);
+        $('#genAddrURL').attr('target', '_blank');
+        $('#genAddrLabel').text($('#addr').val());
     }
 
 
