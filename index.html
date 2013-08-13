@@ -236,10 +236,27 @@
                     <div class="controls"> 
                         <input class="span4" id="txDest" class="txDest" type="text" autocomplete="off"> 
                         <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text" autocomplete="off"> 
-                        </div><span class="help-inline errormsg">
+                        </div>
+                        <span class="help-inline errormsg">
                             <button class="btn" id="txAddDest" type="button">+</button> 
                             <button class="btn" id="txRemoveDest" type="button" disabled>&ndash;</button> 
                         </span> 
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label" for="txFee">Fee</label> 
+                    <div class="controls"> 
+                        <input class="span4" disabled="disabled" type="text" style="height:0px;">
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txFee" type="text" value="0.0001">
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group"> 
+                    <label class="control-label">Destination Address<br>(Return Changy)</label> 
+                    <div class="controls"> 
+                        <input class="span4" readonly id="txDest" class="txDest" type="text" autocomplete="off"> 
+                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" readonly type="text" autocomplete="off"> 
+                        </div>
                     </div>
                 </div>
                 <div class="control-group"> 
@@ -255,9 +272,8 @@
                     </div>
                 </div>
                 <div class="control-group"> 
-                    <label class="control-label" for="txFee">Fee</label> 
+                    <label class="control-label">Actions</label> 
                     <div class="controls"> 
-                        <div class="input-prepend"><span class="add-on">BTC</span><input class="span2" id="txFee" type="text" value="0.0005"></div>
                         <span class="help-inline errormsg"><button class="btn" id="txRebuild" type="button" title="ECDSA signatures require a random number which means signing the same data twice results in different sigs.">Re-sign</button>
                         <button class="btn" id="txSend" type="button">Send Transaction</button></span> 
                     </div>

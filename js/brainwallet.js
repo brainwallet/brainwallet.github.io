@@ -757,7 +757,9 @@
         $('#txBalance').val('0.00');
 
         if (addr != "")
+           {$('[id=txDest]:last').val($('#txAddr').val());
             txGetUnspent();
+           }
     }
 
     function txOnChangeSec() {
@@ -766,6 +768,7 @@
     }
 
     function txOnChangeAddr() {
+        $('[id=txDest]:last').val($('#txAddr').val());
         clearTimeout(timeout);
         timeout = setTimeout(txGetUnspent, TIMEOUT);
     }
@@ -780,7 +783,9 @@
         var fval = Bitcoin.Util.formatValue(value);
         var fee = parseFloat($('#txFee').val());
         $('#txBalance').val(fval);
-        $('#txValue').val(fval - fee);
+        var val=fval - fee;
+        val=val.toFixed(8);
+        $('[id=txValue]:last').val(val);
         txRebuild();
     }
 
@@ -836,7 +841,7 @@
         var list = $(document).find('.txCC');
         var clone = list.last().clone();
         clone.find('.help-inline').empty();
-        clone.find('.control-label').text('Cc');
+        clone.find('.control-label').text('Destination Address');
         var dest = clone.find('#txDest');
         var value = clone.find('#txValue');
         clone.insertAfter(list.last());
@@ -912,8 +917,10 @@
         var fval = 0;
         var o = txGetOutputs();
         for (i in o) {
-            TX.addOutput(o[i].dest, o[i].fval);
-            fval += o[i].fval;
+            if (o[i].fval>0)
+               {TX.addOutput(o[i].dest, o[i].fval);
+                fval += o[i].fval;
+               }
         }
 
         // send change back or it will be sent as fee
@@ -936,17 +943,7 @@
     }
 
     function txOnChangeDest() {
-        var balance = parseFloat($('#txBalance').val());
-        var fval = parseFloat('0'+$('#txValue').val());
-        var fee = parseFloat('0'+$('#txFee').val());
-
-        if (fval + fee > balance) {
-            fee = balance - fval;
-            $('#txFee').val(fee > 0 ? fee : '0.00');
-        }
-
-        clearTimeout(timeout);
-        timeout = setTimeout(txRebuild, TIMEOUT);
+        txOnChangeFee();
     }
 
     function txShowUnspent() {
@@ -975,17 +972,15 @@
         var o = txGetOutputs();
         for (i in o) {
             TX.addOutput(o[i].dest, o[i].fval);
-            fval += o[i].fval;
+            if (i!==o.length-1)
+               {fval += o[i].fval;
+               }
         }
 
-        if (fval + fee > balance) {
-            fval = balance - fee;
-            $('#txValue').val(fval < 0 ? 0 : fval);
-        }
-
-        if (fee == 0 && fval == balance - 0.0005) {
-            $('#txValue').val(balance);
-        }
+        var val = balance - fval - fee;
+        val=val.toFixed(8);
+        console.log(val);
+        $('[id=txValue]:last').val(val);
 
         clearTimeout(timeout);
         timeout = setTimeout(txRebuild, TIMEOUT);
@@ -1127,6 +1122,8 @@
         $('#txSec').val(tx_sec);
         $('#txAddr').val(tx_addr);
         $('#txDest').val(tx_dest);
+        $('#txValue').val(0);
+        $('[id=txDest]:last').val(tx_addr);
 
         txSetUnspent(tx_unspent);
 
