@@ -2,9 +2,19 @@
     bitcoinsig.js - sign and verify messages with bitcoin address (public domain)
 */
 
+function msg_numToVarInt(i) {
+    if (i < 0xfd) {
+      return [i];
+    } else if (i <= 0xffff) {
+      return [0xfd, i & 255, i >>> 8]; // BitcoinQT wants big endian here
+    } else {
+        throw ("message too large");
+    }
+}
+
 function msg_bytes(message) {
     var b = Crypto.charenc.UTF8.stringToBytes(message);
-    return Bitcoin.Util.numToVarInt(b.length).concat(b);
+    return msg_numToVarInt(b.length).concat(b);
 }
 
 function msg_digest(message) {
