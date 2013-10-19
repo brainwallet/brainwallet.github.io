@@ -1069,28 +1069,21 @@
         var sig = $('#vrSig').val();
         var res = verify_message(sig, msg);
 
-        var he = 'has-error';
-        var hs = 'has-success';
-
         if ( !msg )
         {
-          $('.vrMsg').addClass(he);
+          $('.vrMsg').addClass('has-error');
           return;
         }
 
         if ( !sig )
         {
-          $('.vrSig').addClass(he);
+          $('.vrSig').addClass('has-error');
           return;
         }
 
-        if ( addr && res==addr )
-        {
-          $('.vrMsg').addClass(hs);
-          $('.vrSig').addClass(hs);
-        }
-
         if (res) {
+            $('.vrMsg').removeClass('has-error');
+            $('.vrSig').removeClass('has-error');
             var href = 'https://blockchain.info/address/' + res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
             $('#vrRes').html('Verified to: ' + a);
