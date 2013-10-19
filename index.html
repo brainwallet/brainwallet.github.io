@@ -1,410 +1,387 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head>
-    <meta charset="utf-8">
-    <title>Brainwallet - JavaScript Client-Side Bitcoin Address Generator</title> 
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="bitcoin address generator" name="description">
-    <meta content="brainwallet" name="author">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/default.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-
-<!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link href="favicon.ico" rel="shortcut icon">
-</head>
-<body onClick="rng_seed_time();" onKeyPress="rng_seed_time();">
-<div class="navbar navbar-fixed-top"> 
-    <div class="navbar-inner"> 
-        <div class="container"> 
-            <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse"> 
-            <span class="icon-bar"></span> <span class="icon-bar"></span> 
-            <span class="icon-bar"></span> </a> <a class="brand" href="/">Brainwallet</a> 
-            <div class="nav-collapse"> 
-                <ul class="nav">
-                    <li class="active">
-                    <a data-toggle="tab" href="#generator">Generator</a></li> 
-                    <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#tx" id="tab-tx">Transactions</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#sign" id="tab-sign">Sign Message</a></li> 
-                    <li>
-                    <a data-toggle="tab" href="#verify" id="tab-verify">Verify Message</a></li> 
-                </ul>
-            </div>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Brainwallet - JavaScript Client-Side Bitcoin Address Generator</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="bitcoin address generator" name="description" />
+    <meta content="brainwallet" name="author" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/brainwallet.css" rel="stylesheet" />
+    <link href="favicon.ico" rel="shortcut icon" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bitcoinjs-min.js"></script>
+    <script src="js/qrcode.js"></script>
+    <script src="js/rfc1751.js"></script>
+    <script src="js/mnemonic.js"></script>
+    <script src="js/armory.js"></script>
+    <script src="js/electrum.js"></script>
+    <script src="js/tx.js"></script>
+    <script src="js/bitcoinsig.js"></script>
+    <script src="js/brainwallet.js"></script>
+  </head>
+  <body onclick="rng_seed_time();" onkeypress="rng_seed_time();">
+    <header class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button class="navbar-toggle" data-target=".bs-navbar-collapse" data-toggle="collapse" type="button"><span class="sr-only">Toggle navigation</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span></button> <a class="navbar-brand" href="/">Brainwallet</a>
         </div>
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active">
+              <a data-toggle="tab" href="#generator">Generator</a></li>
+            <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li>
+            <li><a data-toggle="tab" href="#tx" id="tab-tx">Transactions</a></li>
+            <li><a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li>
+            <li><a data-toggle="tab" href="#sign" id="tab-sign">Sign</a></li>
+            <li><a data-toggle="tab" href="#verify" id="tab-verify">Verify</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div class="container">
+      <div class="tab-content">
+        <!-- Generator -->
+        <div class="tab-pane fade in active" id="generator">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Generator</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="from_pass">Get Address From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="gen_from">
+                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label> <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label> <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="genMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="pass">Passphrase</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="pass" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="hash">Secret Exponent</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-group">
+                    <input class="form-control" id="hash" maxlength="64" readonly="readonly" type="text" />
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="genRandom" title="Generate random exponent" type="button">Random</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label">Point Conversion</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="gen_comp">
+                    <label class="btn btn-default active" title="Uncompressed keys (reference client)"><input id="uncompressed" type="radio" />Uncompressed</label> <label class="btn btn-default" title="Compressed keys (introduced in 0.5.99)"><input id="compressed" type="radio" />Compressed</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sec" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="addr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="addr" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="genAddrQR">QR Code</label>
+                <div class="col-lg-10 controls">
+                  <a href="#" id="genAddrURL" title="Click to view address balance on blockchain.info"><span id="genAddrQR"></span></a>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="der">Private Key (DER)</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="der" readonly="readonly" rows="5"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="pub">Public Key (SEC)</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="pub" readonly="readonly" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="h160">HASH160</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="h160" readonly="readonly" type="text" />
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Chains -->
+        <div class="tab-pane fade" id="chains">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Chains</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chain_simple">Generation Method</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="chain_from">
+                    <label class="btn btn-default active"><input id="chain_armory" type="radio" />Armory</label> <label class="btn btn-default"><input id="chain_electrum" type="radio" />Electrum</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="chMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="seed">Chain Code</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-group">
+                    <input class="form-control" id="seed" maxlength="32" readonly="readonly" type="text" />
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="chPlay" title="Random" type="button">Random</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="expo">Root Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="expo" maxlength="64" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="memo">Paper Backup</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="memo" rows="4"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="range">Primary Addresses</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="range" maxlength="3" type="text" value="5" />
+                </div>
+              </div>
+              <div class="form-group" title="Electrum specific, added to the end of the list">
+                <label class="col-lg-2 control-label" for="range">Change Addresses</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" disabled="disabled" id="elChange" maxlength="3" type="text" value="1" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="csv">Wallet Format</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="chain_format">
+                    <label class="btn btn-default active"><input id="csv" type="radio" />CSV</label> <label class="btn btn-default"><input id="json" type="radio" />JSON</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chain">Chain</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="chain" readonly="readonly" rows="13"></textarea>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Transactions -->
+        <div class="tab-pane fade" id="tx">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Transactions</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txSec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="txSec" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txAddr">Source Address</label>
+                <div class="col-lg-10 controls">
+                  <div class="row">
+                    <div class="col-xs-6">
+                      <input class="form-control" id="txAddr" type="text" />
+                    </div>
+                    <div class="col-xs-3">
+                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txBalance" placeholder="0.00" type="text" /></span>
+                    </div>
+                    <div class="col-xs-2">
+                      <button class="btn btn-default" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="collapse" id="txUnspentForm">
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="txBBE">Get History From</label>
+                  <div class="col-lg-10 controls">
+                    <div class="btn-group" data-toggle="buttons" id="txType">
+                      <label class="btn btn-default active"><input id="txBCI" name="txType" type="radio" />BlockChain Info</label> <label class="btn btn-default"><input id="txBBE" name="txType" type="radio" />Bitcoin Block Explorer</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="txUnspent">Transaction History</label>
+                  <div class="col-lg-10 controls">
+                    <textarea class="form-control" id="txUnspent" rows="16"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group txCC">
+                <label class="col-lg-2 control-label" for="txDest">Destination Address</label>
+                <div class="col-lg-10 controls">
+                  <div class="row">
+                    <div class="col-xs-6">
+                      <input autocomplete="off" class="form-control txDest" id="txDest" type="text" />
+                    </div>
+                    <div class="col-xs-3">
+                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txValue" placeholder="0.00" type="text" /></span>
+                    </div>
+                    <div class="col-xs-3 help-inline">
+                      <button class="btn btn-default" id="txAddDest" type="button">+</button>&nbsp;<button class="btn btn-default" disabled="disabled" id="txRemoveDest" type="button">–</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txJSON">JSON Transaction</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="txJSON" rows="12"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txHex">Raw Transaction</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="txHex" rows="5"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txFee">Fee</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-group">
+                    <span class="input-group-addon">BTC</span> <input class="form-control" id="txFee" type="text" value="0.0005" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <div class="input-group">
+                    <button class="btn btn-default" id="txRebuild" title="ECDSA signatures require a random number which means signing the same data twice results in different sigs." type="button">Re-sign</button> &nbsp;<button class="btn btn-default" id="txSend" type="button">Send Transaction</button>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Converter -->
+        <div class="tab-pane fade" id="converter">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Converter</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Source Encoding</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="enc_from">
+                    <label class="btn btn-default active"><input id="from_hex" name="enc_from" type="radio" />Hex</label> <label class="btn btn-default"><input id="from_text" name="enc_from" type="radio" />Text</label> <label class="btn btn-default"><input id="from_base58" name="enc_from" type="radio" />Base58</label> <label class="btn btn-default"><input id="from_base64" name="enc_from" type="radio" />Base64</label> <label class="btn btn-default"><input id="from_rfc1751" name="enc_from" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="from_mnemonic" name="enc_from" type="radio" />Poetry</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Source Text</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="src" rows="8"></textarea>
+                  <div>
+                    <span id="hint_from">&nbsp;</span>&nbsp;
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Convert To</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="enc_to">
+                    <label class="btn btn-default active"><input id="to_hex" name="enc_to" type="radio" />Hex</label> <label class="btn btn-default"><input id="to_text" name="enc_to" type="radio" />Text</label> <label class="btn btn-default"><input id="to_base58" name="enc_to" type="radio" />Base58</label> <label class="btn btn-default"><input id="to_base64" name="enc_to" type="radio" />Base64</label> <label class="btn btn-default"><input id="to_rfc1751" name="enc_to" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="to_mnemonic" name="enc_to" type="radio" />Poetry</label> <label class="btn btn-default"><input id="to_rot13" name="enc_to" type="radio" />Rot13</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Result</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="dest" readonly="readonly" rows="8"></textarea>
+                  <div>
+                    <span id="hint_to">&nbsp;</span>&nbsp;
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Sign -->
+        <div class="tab-pane fade" id="sign">
+          <form action="/" class="form-horizontal" id="sgForm" method="get" name="sgForm">
+            <fieldset>
+              <legend>Sign Message</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgSec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sgSec" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgAddr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sgAddr" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgMsg">Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="sgMsg" rows="10"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgSig">Signature</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sgSig" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <button class="btn btn-default" id="sgSign" type="button">Sign Message</button>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Verify -->
+        <div class="tab-pane fade" id="verify">
+          <form action="/" class="form-horizontal" id="vrForm" method="get" name="vrForm">
+            <fieldset>
+              <legend>Verify Message</legend>
+              <div class="form-group vrMsg">
+                <label class="col-lg-2 control-label" for="vrMsg">Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="vrMsg" rows="10"></textarea>
+                </div>
+              </div>
+              <div class="form-group vrSig">
+                <label class="col-lg-2 control-label" for="vrSig">Signature</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="vrSig" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <button class="btn btn-default" id="vrVerify" type="button">Verify Message</button>&nbsp;&nbsp;<span class="help-inline errormsg" id="vrRes">&nbsp;</span>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <hr />
+        <footer>
+          <p>
+            &copy; 2012&ndash;2013 Brainwallet<span class="pull-right">Powered by <a href="http://pages.github.com">GitHub Pages</a> &nbsp; <a href="https://github.com/brainwallet/brainwallet.github.com">View Source Code</a></span>
+          </p>
+        </footer>
+      </div>
     </div>
-</div>
-<div class="container"> 
-    <div class="tab-content"> 
+  </body>
+</html>
 
-<!-- Generator -->
-        <div class="tab-pane fade in active" id="generator"> 
-            <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Generator <span class="pull-right" id="genAddrLabel"></span></legend>
-                <div class="control-group"> 
-                    <div class="row"> 
-                        <div class="span10"> 
-                            <div class="control-group"> 
-                                <label class="control-label" for="from_pass">Get Address From</label> 
-                                <div class="controls"> 
-                                    <div class="btn-group pull-left" data-toggle="buttons-radio" id="gen_from"> 
-                                        <button class="btn active" id="from_pass" title="Single SHA256" type="button">Passphrase</button> 
-                                        <button class="btn" id="from_hash" title="Hex-encoded" type="button">Secret Exponent</button> 
-                                        <button class="btn" id="from_sec" title="Base58-encoded" type="button">Private Key</button> 
-                                    </div>
-                                    <div class="help-inline" id="genMsg" style="margin: 5px;"></div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="pass">Passphrase</label> 
-                                <div class="controls"> 
-                                    <div class="input-append">
-                                        <input class="span5" id="pass" type="text"></button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="hash">Secret Exponent</label> 
-                                <div class="controls"> 
-                                    <div class="input-append"> 
-                                        <input class="span5" id="hash" maxlength="64" readonly type="text"><button class="btn" id="random" title="Random" type="button"><i class="icon-repeat"></i></button> 
-                                    </div><span class="help-inline errormsg"></span> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="uncompressed">Point Conversion</label> 
-                                <div class="controls"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="gen_comp"> 
-                                        <button class="btn active" id="uncompressed" title="Uncompressed keys (reference client)" type="button">Uncompressed</button>
-                                        <button class="btn" id="compressed" title="Compressed keys (introduced in 0.5.99)" type="button">Compressed</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="sec">Private Key</label> 
-                                <div class="controls"> 
-                                    <input class="span5" id="sec" readonly type="text"> 
-                                    <span class="help-inline errormsg"></span> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="addr">Address</label> 
-                                <div class="controls"> 
-                                    <input class="span4" id="addr" readonly type="text"> 
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="der">Private Key (DER)</label> 
-                                <div class="controls"> 
-<textarea class="span6" id="der" readonly rows="7"></textarea>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="pub">Public Key (SEC)</label> 
-                                <div class="controls"> 
-<textarea class="span5" id="pub" readonly rows="2"></textarea>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-                                <label class="control-label" for="h160">HASH160</label> 
-                                <div class="controls"> 
-                                    <input class="span4" id="h160" readonly type="text"> 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="span2" class="pull-right"> 
-                            <a id="genAddrURL" href=""><div id="genAddrQR"></div></a>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-
-<!-- Chains -->
-        <div class="tab-pane fade" id="chains"> 
-            <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Chains</legend> 
-                <div class="control-group"> 
-                    <label class="control-label" for="chain_simple">Generation Method</label> 
-                    <div class="controls"> 
-                        <div class="btn-group" data-toggle="buttons-radio" id="chain_from"> 
-                            <button class="btn active" id="chain_armory" type="button">Armory</button> 
-                            <button class="btn" id="chain_electrum" type="button">Electrum</button> 
-                        </div>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="seed">Chain Code</label> 
-                    <div class="controls"> 
-                        <div class="input-append"> 
-                            <input class="span5" id="seed" maxlength="32" readonly type="text"><button class="btn" id="chPlay" title="Random" type="button"><i class="icon-repeat"></i></button><button class="btn hide" id="chStop" title="Stop" type="button"><i class="icon-stop"></i></button> 
-                        </div>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="expo">Root Key</label> 
-                    <div class="controls"> 
-                        <div class="input-append"> 
-                            <input class="span5" id="expo" maxlength="64" readonly type="text"> 
-                        </div><span class="help-inline" id="progress"></span> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="memo">Paper Backup</label> 
-                    <div class="controls"> 
-                        <textarea class="span6" id="memo" rows="4"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="range">Primary Addresses</label>
-                    <div class="controls"> 
-                        <input class="span2" id="range" maxlength="3" type="text" value="5">
-                    </div>
-                </div>
-                <div class="control-group" title="Electrum specific, added to the end of the list">
-                    <label class="control-label" for="range">Change Addresses</label>
-                    <div class="controls">
-                        <input class="span2" id="elChange" maxlength="3" type="text" value="1" disabled>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="csv">Wallet Format</label> 
-                    <div class="controls"> 
-                        <div class="btn-group" data-toggle="buttons-radio" id="chain_format"> 
-                            <button class="btn active" id="csv" type="button">CSV</button> 
-                            <button class="btn" id="json" type="button">JSON</button> 
-                        </div>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="chain">Chain</label> 
-                    <div class="controls"> 
-<textarea class="span8" id="chain" readonly rows="13"></textarea>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-
-<!-- Transactions -->
-        <div class="tab-pane fade" id="tx"> 
-            <form action="/" class="form-horizontal" method="get">
-            <fieldset> <legend>Transactions</legend> 
-                <div class="control-group"> 
-                    <label class="control-label" for="txSec">Private Key</label> 
-                    <div class="controls"> 
-                        <input class="span5" id="txSec" type="text"> 
-                        <span class="help-inline errormsg"></span> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txAddr">Source Address</label> 
-                    <div class="controls"> 
-                        <input class="span4" id="txAddr" type="text">
-                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txBalance" readonly type="text"> 
-                        </div>
-                        <button class="btn" id="txGetUnspent" title="Reload" type="button"><i class="icon-repeat"></i></button> 
-                        <button class="btn" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button> 
-                    </div>
-                </div>
-                <div class="collapse" id="txUnspentForm"> 
-                    <div class="control-group"> 
-                        <label class="control-label" for="txBBE">Get History From</label> 
-                        <div class="controls"> 
-                            <div class="btn-group" data-toggle="buttons-radio" id="txType"> 
-                                <button class="btn active" id="txBCI" type="button">BlockChain Info</button> 
-                                <button class="btn" id="txBBE" type="button">Bitcoin Block Explorer</button> 
-                            </div>
-                        </div>
-                    </div>
-                    <div class="control-group"> 
-                        <label class="control-label" for="txUnspent">Transaction History</label> 
-                        <div class="controls"> 
-<textarea class="span8" id="txUnspent" rows="16"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="control-group txCC"> 
-                    <label class="control-label" for="txDest">Destination Address</label> 
-                    <div class="controls"> 
-                        <input class="span4" id="txDest" class="txDest" type="text" autocomplete="off"> 
-                        <div class="input-prepend"> <span class="add-on">BTC</span><input class="span2" id="txValue" type="text" autocomplete="off"> 
-                        </div><span class="help-inline errormsg">
-                            <button class="btn" id="txAddDest" type="button">+</button> 
-                            <button class="btn" id="txRemoveDest" type="button" disabled>&ndash;</button> 
-                        </span> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txJSON">JSON Transaction</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="txJSON" rows="17"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txHex">Raw Transaction</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="txHex" rows="4"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="txFee">Fee</label> 
-                    <div class="controls"> 
-                        <div class="input-prepend"><span class="add-on">BTC</span><input class="span2" id="txFee" type="text" value="0.0005"></div>
-                        <span class="help-inline errormsg"><button class="btn" id="txRebuild" type="button" title="ECDSA signatures require a random number which means signing the same data twice results in different sigs.">Re-sign</button>
-                        <button class="btn" id="txSend" type="button">Send Transaction</button></span> 
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-
-<!-- Converter -->
-        <div class="tab-pane fade" id="converter"> 
-            <form action="/" class="form-inline" method="get">
-            <fieldset> <legend>Converter</legend> 
-                <div class="control-group"> 
-                    <div class="row"> 
-                        <div class="span6"> 
-                            <div class="control-group"> 
-                                <div class="btn-toolbar"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_from"> 
-                                        <button class="btn active" id="from_hex" type="button">Hex</button> 
-                                        <button class="btn" id="from_text" type="button">Text</button> 
-                                        <button class="btn" id="from_base58" type="button">Base58</button> 
-                                        <button class="btn" id="from_base64" type="button">Base64</button> 
-                                        <button class="btn" id="from_rfc1751" type="button">Rfc1751</button> 
-                                        <button class="btn" id="from_mnemonic" type="button">Poetry</button> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-<textarea class="span6" id="src" rows="10"></textarea>
-                            </div>
-                            <div> <span id="hint_from">&nbsp;</span> 
-                            </div>
-                        </div>
-                        <div class="span6"> 
-                            <div class="control-group"> 
-                                <div class="btn-toolbar"> 
-                                    <div class="btn-group" data-toggle="buttons-radio" id="enc_to"> 
-                                        <button class="btn active" id="to_hex" type="button">Hex</button> 
-                                        <button class="btn" id="to_text" type="button">Text</button> 
-                                        <button class="btn" id="to_base58" type="button">Base58</button> 
-                                        <button class="btn" id="to_base64" type="button">Base64</button> 
-                                        <button class="btn" id="to_rfc1751" type="button">Rfc1751</button> 
-                                        <button class="btn" id="to_mnemonic" type="button">Poetry</button> 
-                                        <button class="btn" id="to_rot13" type="button">Rot13</button> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group"> 
-<textarea class="span6" id="dest" readonly rows="10"></textarea>
-                            </div>
-                            <div> <span id="hint_to">&nbsp;</span> 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-
-<!-- Sign -->
-        <div class="tab-pane fade" id="sign"> 
-            <form action="/" class="form-horizontal" method="get" id="sgForm">
-            <fieldset> <legend>Sign Message</legend> 
-                <div class="control-group"> 
-                    <label class="control-label" for="sgSec">Private Key</label> 
-                    <div class="controls"> 
-                        <input class="span5" id="sgSec" type="text"> 
-                        <span class="help-inline errormsg"></span> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="sgAddr">Address</label> 
-                    <div class="controls"> 
-                        <input class="span4" id="sgAddr" readonly type="text"> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="sgMsg">Message</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="sgMsg" rows="10"></textarea>
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="sgSig">Signature</label> 
-                    <div class="controls"> 
-                        <input class="span8" id="sgSig" type="text" readonly> 
-                    </div>
-                </div>
-                <div class="control-group"> 
-                    <label class="control-label" for="sgSign"></label> 
-                    <div class="controls"> 
-                        <button class="btn" id="sgSign" type="button">Sign Message</button> 
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-
-<!-- Verify -->
-        <div class="tab-pane fade" id="verify"> 
-            <form action="/" class="form-horizontal" method="get" id="vrForm">
-            <fieldset> <legend>Verify Message</legend> 
-                <div class="control-group"> 
-                    <label class="control-label" for="vrMsg">Message</label> 
-                    <div class="controls"> 
-                        <textarea class="span8" id="vrMsg" rows="10"></textarea>
-                    </div>
-                </div>
-
-                <div class="control-group"> 
-                    <label class="control-label" for="vrSig">Signature</label> 
-                    <div class="controls"> 
-                        <input class="span8" id="vrSig" type="text"> 
-                        <span class="help-inline errormsg"></span> 
-                    </div>
-                </div>
-
-                <div class="control-group"> 
-                    <label class="control-label" for="vrVerify"></label> 
-                    <div class="controls"> 
-                        <button class="btn" id="vrVerify" type="button">Verify Message</button>
-                        <span id="vrRes" class="help-inline errormsg"></span>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-        </div>
-        <hr /> 
-    </div>
-    <FOOTER> 
-
-    <p>&copy; 2012&#150;2013 Brainwallet<span class="pull-right"><small>Powered by 
-    <a href="http://pages.github.com">GitHub Pages</a> | 
-    <a href="https://github.com/brainwallet/brainwallet.github.com">View Source Code</a> 
-    </small></span></p> 
-    </FOOTER> 
-</div>
-<script src="js/jquery-1.7.2.min.js"></script> 
-<script src="js/bootstrap.min.js"></script> 
-<script src="js/bitcoinjs-min.js"></script> 
-<script src="js/qrcode.js"></script> 
-<script src="js/rfc1751.js"></script> 
-<script src="js/mnemonic.js"></script> 
-<script src="js/armory.js"></script> 
-<script src="js/electrum.js"></script> 
-<script src="js/tx.js"></script> 
-<script src="js/bitcoinsig.js"></script> 
-<script src="js/brainwallet.js"></script> 
-</body>
-</html> 

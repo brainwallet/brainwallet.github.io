@@ -136,11 +136,11 @@
         }
     }
 
-    function gen_random() {
+    function genRandom() {
         $('#pass').val('');
         $('#hash').focus();
         gen_from = 'hash';
-        $('#from_hash').button('toggle');
+        $('#from_hash').click();
         update_gen();
         var bytes = Crypto.util.randomBytes(32);
         $('#hash').val(Crypto.util.bytesToHex(bytes));
@@ -157,7 +157,7 @@
     }
 
     function genUpdateLabel() {
-      $('#genMsg').text($('#from_'+gen_from).attr('title'));
+      $('#genMsg').text($('#from_'+gen_from).parent().attr('title'));
     }
 
     function update_gen_from() {
@@ -416,7 +416,7 @@
     function update_toolbar(enc) {
         var reselect = false;
         $.each($('#enc_from').children(), function() {
-            var id = $(this).attr('id').substring(5);
+            var id = $(this).children().attr('id').substring(5);
             var disabled = (enc && enc.indexOf(id) == -1);
             if (disabled && $(this).hasClass('active')) {
                 $(this).removeClass('active');
@@ -425,7 +425,7 @@
             $(this).attr('disabled', disabled);
         });
         if (enc && enc.length > 0 && reselect) {
-            $('#from_' + enc[0]).addClass('active');
+            $('#from_' + enc[0]).click();//addClass('active');
             from = enc[0];
         }
     }
@@ -437,7 +437,7 @@
     }
 
     function enct(id) {
-        return $('#from_'+id).text();
+        return $('#from_'+id).parent().text();
     }
 
     function translate() {
@@ -445,8 +445,11 @@
         var str = $('#src').val();
 
         if (str.length == 0) {
-            update_toolbar(null);
-            return;
+          update_toolbar(null);
+          $('#hint_from').text('');
+          $('#hint_to').text('');
+          $('#dest').val('');
+          return;
         }
 
         text = str;
@@ -538,7 +541,7 @@
             $('#seed').val('');
             $('#expo').val('');
             $('#memo').val('');
-            $('#progress').text('');
+            $('#chMsg').text('');
             $('#chain').text('');
             chOnStop();
         }
@@ -585,7 +588,7 @@
 
     function onChangeSeed() {
         $('#expo').val('');
-        $('#progress').text('');
+        $('#chMsg').text('');
         chOnStop();
         $('#memo').val( mn_encode(seed) );
         clearTimeout(timeout);
@@ -646,11 +649,8 @@
     function chOnStop() {
         Armory.stop();
         Electrum.stop();
-        $('#chStop').hide();
-        $('#chPlay').show();
-
         if (chain_type == 'chain_electrum') {
-            $('#progress').text('');
+            $('#chMsg').text('');
         }
     }
 
@@ -668,12 +668,12 @@
     }
 
     function electrum_seed_update(r, seed) {
-        $('#progress').text('key stretching: ' + r + '%');
+        $('#chMsg').text('key stretching: ' + r + '%');
         $('#expo').val(Crypto.util.bytesToHex(seed));
     }
 
     function electrum_seed_success(privKey) {
-        $('#progress').text('');
+        $('#chMsg').text('');
         $('#expo').val(Crypto.util.bytesToHex(privKey));
         var addChange = parseInt($('#elChange').val());
         Electrum.gen(chain_range, addr_callback, update_chain, addChange);
@@ -704,7 +704,7 @@
         var codes = $('#memo').val();
 
         addresses = [];
-        $('#progress').text('');
+        $('#chMsg').text('');
         $('#chain').text('');
 
         Electrum.stop();
@@ -718,13 +718,10 @@
         if (chain_type == 'chain_armory') {
             var uid = Armory.gen(codes, chain_range, addr_callback, update_chain);
             if (uid)
-                $('#progress').text('uid: ' + uid);
+                $('#chMsg').text('uid: ' + uid);
             else
                 return;
         }
-
-        $('#chPlay').hide();
-        $('#chStop').show();
     }
 
     // -- transactions --
@@ -1059,10 +1056,39 @@
 
     // -- verify --
 
+    function vrClearRes() {
+        $('#vrRes').text('');
+        $('.vrMsg').removeClass('has-error');
+        $('.vrSig').removeClass('has-error');
+        $('.vrMsg').removeClass('has-success');
+        $('.vrSig').removeClass('has-success');
+    }
+
     function vrVerify() {
-        var message = $('#vrMsg').val();
+        var msg = $('#vrMsg').val();
         var sig = $('#vrSig').val();
-        var res = verify_message(sig, message);
+        var res = verify_message(sig, msg);
+
+        var he = 'has-error';
+        var hs = 'has-success';
+
+        if ( !msg )
+        {
+          $('.vrMsg').addClass(he);
+          return;
+        }
+
+        if ( !sig )
+        {
+          $('.vrSig').addClass(he);
+          return;
+        }
+
+        if ( addr && res==addr )
+        {
+          $('.vrMsg').addClass(hs);
+          $('.vrSig').addClass(hs);
+        }
 
         if (res) {
             var href = 'https://blockchain.info/address/' + res;
@@ -1071,11 +1097,8 @@
         } else {
             $('#vrRes').text('false');
         }
-        return false;
-    }
 
-    function vrClearRes() {
-        $('#vrRes').text('');
+        return false;
     }
 
     $(document).ready( function() {
@@ -1083,7 +1106,7 @@
         if (window.location.hash)
             $('#tab-' + window.location.hash.substr(1)).tab('show');
 
-        $('a[data-toggle="tab"]').on('shown', function (e) {
+        $('a[data-toggle="tab"]').on('click', function (e) {
             window.location.hash = $(this).attr('href');
         });
 
@@ -1093,15 +1116,10 @@
         onInput('#hash', onChangeHash);
         onInput('#sec', onChangePrivKey);
 
-        $('#from_pass').click(update_gen_from);
-        $('#from_hash').click(update_gen_from);
-        $('#from_sec').click(update_gen_from);
+        $('#genRandom').click(genRandom);
 
-        $('#random').click(gen_random);
-
-        $('#uncompressed').click(update_gen_compressed);
-        $('#compressed').click(update_gen_compressed);
-        gen_compressed = $('#compressed').hasClass('active');
+        $('#gen_from label input').on('change', update_gen_from );
+        $('#gen_comp label input').on('change', update_gen_compressed );
 
         genRandomPass();
         genUpdateLabel();
@@ -1109,13 +1127,9 @@
         // chains
 
         $('#chPlay').click(chOnPlay);
-        $('#chStop').click(chOnStop);
 
-        $('#csv').click(onChangeFormat);
-        $('#json').click(onChangeFormat);
-
-        $('#chain_armory').click(onChangeMethod);
-        $('#chain_electrum').click(onChangeMethod);
+        $('#chain_from label input').on('change', onChangeMethod );
+        $('#chain_format label input').on('change', onChangeFormat );
 
         onInput($('#range'), onChangeRange);
         onInput($('#seed'), onChangeSeed);
@@ -1131,9 +1145,7 @@
         txSetUnspent(tx_unspent);
 
         $('#txGetUnspent').click(txGetUnspent);
-
-        $('#txBCI').click(txChangeType);
-        $('#txBBE').click(txChangeType);
+        $('#txType label input').on('change', txChangeType);
 
         onInput($('#txSec'), txOnChangeSec);
         onInput($('#txAddr'), txOnChangeAddr);
@@ -1152,10 +1164,12 @@
         // converter
 
         onInput('#src', onChangeFrom);
-        $("body").on("click", "#enc_from .btn", update_enc_from);
-        $("body").on("click", "#enc_to .btn", update_enc_to);
+
+        $('#enc_from label input').on('change', update_enc_from );
+        $('#enc_to label input').on('change', update_enc_to );
 
         // sign
+
         $('#sgSec').val('5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf');
         $('#sgAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
         $('#sgMsg').val("C'est par mon ordre et pour le bien de l'Etat que le porteur du présent a fait ce qu'il a fait.");
@@ -1167,12 +1181,12 @@
         $('#sgForm').submit(sgSign);
 
         // verify
-        $('#vrMsg').val($('#sgMsg').val());
 
-        onInput('#vrAddr', vrClearRes);
+        $('#vrMsg').val($('#sgMsg').val());
+        $('#vrVerify').click(vrVerify);
+
         onInput('#vrMsg', vrClearRes);
         onInput('#vrSig', vrClearRes);
-        $('#vrVerify').click(vrVerify);
 
     });
 })(jQuery);
