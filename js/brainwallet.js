@@ -1106,6 +1106,13 @@
         $('.vrSig').removeClass('has-success');
     }
 
+    function vrPermalink()
+    {
+      var msg = $('#vrMsg').val();
+      var sig = $('#vrSig').val();
+      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig);
+    }
+
     function vrVerify() {
         var msg = $('#vrMsg').val();
         var sig = $('#vrSig').val();
@@ -1133,17 +1140,19 @@
             $('#vrRes').text('false');
         }
 
+        window.location.hash='#verify'+vrPermalink();
         return false;
     }
 
     $(document).ready( function() {
 
         if (window.location.hash)
-            $('#tab-' + window.location.hash.substr(1)).tab('show');
+          $('#tab-' + window.location.hash.substr(1).split('?')[0]).tab('show');
 
         $('a[data-toggle="tab"]').on('click', function (e) {
             window.location.hash = $(this).attr('href');
         });
+
 
         // generator
 
@@ -1218,11 +1227,30 @@
 
         // verify
 
-        $('#vrMsg').val($('#sgMsg').val());
-        $('#vrVerify').click(vrVerify);
+        var vrMsg = '';
+        var vrSig = '';
+        if ( window.location.hash && window.location.hash.indexOf('?')!=-1 )
+        {
+          var args = window.location.hash.split('?')[1].split('&');
+          for ( var i=0; i<args.length; i++ )
+          {
+            var arg = args[i].split('=');
+            if ( arg[0]=='vrMsg')
+              vrMsg=decodeURIComponent(arg[1]);
+            else if ( arg[0]=='vrSig')
+              vrSig=decodeURIComponent(arg[1]);
+          }
+        }
 
+        $('#vrMsg').val(vrMsg?vrMsg:$('#sgMsg').val());
+        $('#vrSig').val(vrSig);
+
+        $('#vrVerify').click(vrVerify);
         onInput('#vrMsg', vrClearRes);
         onInput('#vrSig', vrClearRes);
+
+        if (vrMsg && vrSig)
+          vrVerify();
 
     });
 })(jQuery);
