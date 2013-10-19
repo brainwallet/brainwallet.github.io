@@ -45,8 +45,10 @@ var TX = new function () {
         inputs = res.unspenttxs;
     }
 
-    this.construct = function() {
-        var sendTx = new Bitcoin.Transaction();
+    this.rebuild = function(sendTx, resign) {
+        if (!resign)
+          sendTx = new Bitcoin.Transaction();
+
         var selectedOuts = [];
         for (var hash in inputs) {
             if (!inputs.hasOwnProperty(hash))
@@ -58,7 +60,8 @@ var TX = new function () {
                 var b64hash = Crypto.util.bytesToBase64(Crypto.util.hexToBytes(hash));
                 var txin = new Bitcoin.TransactionIn({outpoint: {hash: b64hash, index: index}, script: script, sequence: 4294967295});
                 selectedOuts.push(txin);
-                sendTx.addInput(txin);
+                if (!resign)
+                  sendTx.addInput(txin);
             }
         }
 
@@ -66,7 +69,8 @@ var TX = new function () {
             var address = outputs[i].address;
             var fval = outputs[i].value;
             var value = new BigInteger('' + Math.round(fval * 1e8), 10);
-            sendTx.addOutput(new Bitcoin.Address(address), value);
+            if (!resign)
+              sendTx.addOutput(new Bitcoin.Address(address), value);
         }
 
         var hashType = 1;
@@ -84,6 +88,14 @@ var TX = new function () {
         }
         return sendTx;
     };
+
+    this.construct = function() {
+      return this.rebuild(null, false);
+    }
+
+    this.resign = function(sendTx) {
+      return this.rebuild(sendTx, true);
+    }
 
     function uint(f, size) {
         if (f.length < size)

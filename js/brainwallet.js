@@ -727,6 +727,7 @@
     // -- transactions --
 
     var txType = 'txBCI';
+    var txFrom = 'txFromSec';
 
     function txGenSrcAddr() {
         var sec = $('#txSec').val();
@@ -932,6 +933,29 @@
         }
     }
 
+    function txSign() {
+        if (txFrom=='txFromSec')
+        {
+          txRebuild();
+          return;
+        }
+
+        var str = $('#txJSON').val();
+        var sendTx = TX.fromBBE(str);
+
+        try {
+            sendTx = TX.resign(sendTx);
+            var txJSON = TX.toBBE(sendTx);
+            var buf = sendTx.serialize();
+            var txHex = Crypto.util.bytesToHex(buf);
+            $('#txJSON').val(txJSON);
+            $('#txHex').val(txHex);
+        } catch(err) {
+            $('#txJSON').val('');
+            $('#txHex').val('');
+        }
+    }
+
     function txOnChangeDest() {
         var balance = parseFloat($('#txBalance').val());
         var fval = parseFloat('0'+$('#txValue').val());
@@ -961,6 +985,24 @@
     function txChangeType() {
         txType = $(this).attr('id');
         txGetUnspent();
+    }
+
+    function txChangeFrom() {
+      txFrom = $(this).attr('id');
+      var bFromKey = txFrom=='txFromSec' || txFrom=='txFromPass';
+      $('#txSec').attr('readonly', !bFromKey);
+      $('#txJSON').attr('readonly', txFrom!='txFromJSON');
+      $('#txHex').attr('readonly', txFrom!='txFromRaw');
+      $('#txDest').attr('readonly', !bFromKey);
+      $('#txFee').attr('readonly', !bFromKey);
+      $('#txAddr').attr('readonly', !bFromKey);
+      $('#txUnspent').attr('readonly', !bFromKey);
+      if ( txFrom=='txFromRaw' )
+        $('#txHex').focus();
+      else if ( txFrom=='txFromJSON' )
+        $('#txJSON').focus();
+      else if ( bFromKey )
+        $('#txSec').focus();
     }
 
     function txOnChangeFee() {
@@ -1139,6 +1181,7 @@
 
         $('#txGetUnspent').click(txGetUnspent);
         $('#txType label input').on('change', txChangeType);
+        $('#txFrom label input').on('change', txChangeFrom);
 
         onInput($('#txSec'), txOnChangeSec);
         onInput($('#txAddr'), txOnChangeAddr);
@@ -1152,7 +1195,7 @@
         $('#txAddDest').click(txOnAddDest);
         $('#txRemoveDest').click(txOnRemoveDest);
         $('#txSend').click(txSend);
-        $('#txRebuild').click(txRebuild);
+        $('#txSign').click(txSign);
 
         // converter
 
