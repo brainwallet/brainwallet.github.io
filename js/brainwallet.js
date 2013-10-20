@@ -1157,6 +1157,7 @@
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
       $('#crLabel').text($(this).text());
       gen_update();
+      $('.dropdown-toggle').dropdown('toggle');
       return false;
     }
 
