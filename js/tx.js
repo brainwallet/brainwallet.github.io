@@ -30,8 +30,10 @@ var TX = new function () {
         return balance;
     }
 
-    this.getAddress = function() {
-        return eckey.getBitcoinAddress().toString();
+    this.getAddress = function(addrtype) {
+        var addr = new Bitcoin.Address(eckey.getPubKeyHash());
+        addr.version = addrtype ? addrtype : 0;
+        return addr.toString();
     }
 
     this.parseInputs = function(text, address) {

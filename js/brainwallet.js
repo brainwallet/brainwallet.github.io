@@ -8,6 +8,9 @@
     var TIMEOUT = 600;
     var timeout = null;
 
+    var PUBLIC_KEY_VERSION = 0;
+    var PRIVATE_KEY_VERSION = 0x80;
+
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
         var end = bytes.length - 4;
@@ -203,7 +206,6 @@
             gen_pt = curve.getG().multiply(eckey.priv);
             gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
             gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-            var addr = eckey.getBitcoinAddress();
             setErrorState($('#hash'), false);
         } catch (err) {
             //console.info(err);
@@ -233,18 +235,20 @@
 
         var hash160 = eckey.getPubKeyHash();
 
-        var addr = eckey.getBitcoinAddress();
-        $('#addr').val(addr);
-
         var h160 = Crypto.util.bytesToHex(hash160);
         $('#h160').val(h160);
+
+        var addr = new Bitcoin.Address(hash160);
+        addr.version = PUBLIC_KEY_VERSION;
+        $('#addr').val(addr);
 
         var payload = hash;
 
         if (compressed)
             payload.push(0x01);
 
-        var sec = new Bitcoin.Address(payload); sec.version = 128;
+        var sec = new Bitcoin.Address(payload);
+        sec.version = PRIVATE_KEY_VERSION;
         $('#sec').val(sec);
 
         var pub = Crypto.util.bytesToHex(getEncoded(gen_pt, compressed));
@@ -260,7 +264,7 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', 'http://blockchain.info/address/'+addr);
+        $('#genAddrURL').attr('href', (PUBLIC_KEY_VERSION==48?'http://explorer.litecoin.net/address/':'http://blockchain.info/address/')+addr);
         $('#genAddrLabel').text($('#addr').val());
     }
 
@@ -485,7 +489,7 @@
             if (to == 'base58') {
                 if (bytes.length == 20 || bytes.length == 32) {
                     var addr = new Bitcoin.Address(bytes);
-                    addr.version = bytes.length == 32 ? 128 : 0;
+                    addr.version = bytes.length == 32 ? PRIVATE_KEY_VERSION : PUBLIC_KEY_VERSION;
                     text = addr.toString();
                     ver = 'Check ver.' + addr.version;
                 } else {
@@ -747,7 +751,8 @@
             var pt = curve.getG().multiply(eckey.priv);
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = eckey.getBitcoinAddress();
+            addr = new Bitcoin.Address(eckey.getPubKeyHash());
+            addr.version = PUBLIC_KEY_VERSION;
         } catch (err) {
         }
 
@@ -1060,7 +1065,8 @@
             var pt = curve.getG().multiply(eckey.priv);
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = eckey.getBitcoinAddress();
+            addr = new Bitcoin.Address(eckey.getPubKeyHash());
+            addr.version = PUBLIC_KEY_VERSION;
             setErrorState(from, false);
         } catch (err) {
             setErrorState(from, true, "Bad private key");
@@ -1082,7 +1088,7 @@
     function sgSign() {
         var message = $('#sgMsg').val();
         var p = updateAddr($('#sgSec'), $('#sgAddr'));
-        var sig = sign_message(p.key, message, p.compressed);
+        var sig = sign_message(p.key, message, p.compressed, PUBLIC_KEY_VERSION);
         $('#sgSig').val(sig);
     }
 
@@ -1116,7 +1122,7 @@
     function vrVerify() {
         var msg = $('#vrMsg').val();
         var sig = $('#vrSig').val();
-        var res = verify_message(sig, msg);
+        var res = verify_message(sig, msg, PUBLIC_KEY_VERSION);
 
         if ( !msg )
         {
@@ -1133,7 +1139,7 @@
         if (res) {
             $('.vrMsg').removeClass('has-error');
             $('.vrSig').removeClass('has-error');
-            var href = 'https://blockchain.info/address/' + res;
+            var href = (PUBLIC_KEY_VERSION=48?'http://explorer.litecoin.net/address/':'https://blockchain.info/address/')+res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
             $('#vrRes').html('Verified to: ' + a);
         } else {
@@ -1144,6 +1150,15 @@
         return false;
     }
 
+    function crChange()
+    {
+      var addrtype = parseInt($(this).attr('value'));
+      PUBLIC_KEY_VERSION = addrtype;
+      PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
+      $('#crLabel').text($(this).text());
+      gen_update();
+    }
+
     $(document).ready( function() {
 
         if (window.location.hash)
@@ -1152,7 +1167,6 @@
         $('a[data-toggle="tab"]').on('click', function (e) {
             window.location.hash = $(this).attr('href');
         });
-
 
         // generator
 
@@ -1251,6 +1265,10 @@
 
         if (vrMsg && vrSig)
           vrVerify();
+
+        // currency select
+
+        $('#crCurrency ul li a').on('click', crChange);
 
     });
 })(jQuery);

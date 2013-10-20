@@ -37,6 +37,14 @@
             <li><a data-toggle="tab" href="#sign" id="tab-sign">Sign</a></li>
             <li><a data-toggle="tab" href="#verify" id="tab-verify">Verify</a></li>
           </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li class="dropdown" id="crCurrency">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="crSelect"><span id="crLabel">BTC</span>&nbsp;<b class="caret">&nbsp;</b></a>
+              <ul aria-labelledby="crSelect" class="dropdown-menu" role="menu">
+                <li><a href="#" value="0">BTC</a></li>
+                <li><a href="#" value="48">LTC</a></li>
+              </ul></li>
+          </ul>
         </nav>
       </div>
     </header>
@@ -97,7 +105,7 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="genAddrQR">QR Code</label>
                 <div class="col-lg-10 controls">
-                  <a href="#" id="genAddrURL" title="Click to view address balance on blockchain.info"><span id="genAddrQR"></span></a>
+                  <a href="#" id="genAddrURL" title="Click to view address history (external link)"><span id="genAddrQR"></span></a>
                 </div>
               </div>
               <div class="form-group">
@@ -193,9 +201,7 @@
                 <label class="col-lg-2 control-label" for="txFrom">Build Transaction From</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="txFrom">
-                    <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />Private Key</label>
-                    <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label>
-                    <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
+                    <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />Private Key</label> <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label> <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
                   </div>&nbsp;&nbsp;<span class="help-inline" id="genMsg">&nbsp;</span>
                 </div>
               </div>
@@ -256,13 +262,13 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="txJSON">JSON Transaction</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="txJSON" rows="12" readonly></textarea>
+                  <textarea class="form-control" id="txJSON" readonly="readonly" rows="12"></textarea>
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="txHex">Raw Transaction</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="txHex" rows="5"  readonly></textarea>
+                  <textarea class="form-control" id="txHex" readonly="readonly" rows="5"></textarea>
                 </div>
               </div>
               <div class="form-group">
@@ -394,3 +400,4 @@
     </div>
   </body>
 </html>
+

@@ -22,7 +22,7 @@ function msg_digest(message) {
     return Crypto.SHA256(Crypto.SHA256(b, {asBytes:true}), {asBytes:true});
 }
 
-function verify_message(signature, message) {
+function verify_message(signature, message, addrtype) {
     try {
         var sig = Crypto.util.base64ToBytes(signature);
     } catch(err) {
@@ -68,15 +68,17 @@ function verify_message(signature, message) {
 
     var public_key = Q.getEncoded(compressed);
     var addr = new Bitcoin.Address(Bitcoin.Util.sha256ripe160(public_key));
+    addr.version = addrtype ? addrtype : 0;
     return addr.toString();
 }
 
-function sign_message(private_key, message, compressed) {
+function sign_message(private_key, message, compressed, addrtype) {
     if (!private_key)
         return false;
 
     var signature = private_key.sign(msg_digest(message));
-    var address = private_key.getBitcoinAddress();
+    var address = new Bitcoin.Address(private_key.getPubKeyHash());
+    address.version = addrtype ? addrtype : 0;
 
     //convert ASN.1-serialized signature to bitcoin-qt format
     var obj = Bitcoin.ECDSA.parseSig(signature);
@@ -90,7 +92,7 @@ function sign_message(private_key, message, compressed) {
             nV += 4;
         sequence[0] = nV;
         var sig = Crypto.util.bytesToBase64(sequence);
-        if (verify_message(sig, message) == address)
+        if (verify_message(sig, message, addrtype) == address)
             return sig;
     }
 
