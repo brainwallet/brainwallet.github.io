@@ -752,7 +752,7 @@
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = PUBLIC_KEY_VERSION;
+            addr.version = (version-128)&255;
         } catch (err) {
         }
 
@@ -1066,13 +1066,13 @@
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = PUBLIC_KEY_VERSION;
+            addr.version = (version-128)&255;
             setErrorState(from, false);
         } catch (err) {
             setErrorState(from, true, "Bad private key");
         }
         to.val(addr);
-        return {"key":eckey, "compressed":compressed};
+        return {"key":eckey, "compressed":compressed, "addrtype":version};
     }
 
     function sgGenAddr() {
@@ -1088,7 +1088,7 @@
     function sgSign() {
         var message = $('#sgMsg').val();
         var p = updateAddr($('#sgSec'), $('#sgAddr'));
-        var sig = sign_message(p.key, message, p.compressed, PUBLIC_KEY_VERSION);
+        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
         $('#sgSig').val(sig);
     }
 
@@ -1139,7 +1139,7 @@
         if (res) {
             $('.vrMsg').removeClass('has-error');
             $('.vrSig').removeClass('has-error');
-            var href = (PUBLIC_KEY_VERSION=48?'http://explorer.litecoin.net/address/':'https://blockchain.info/address/')+res;
+            var href = (PUBLIC_KEY_VERSION==48?'http://explorer.litecoin.net/address/':'https://blockchain.info/address/')+res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
             $('#vrRes').html('Verified to: ' + a);
         } else {

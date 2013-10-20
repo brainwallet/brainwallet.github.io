@@ -68,6 +68,7 @@ function verify_message(signature, message, addrtype) {
 
     var public_key = Q.getEncoded(compressed);
     var addr = new Bitcoin.Address(Bitcoin.Util.sha256ripe160(public_key));
+
     addr.version = addrtype ? addrtype : 0;
     return addr.toString();
 }
