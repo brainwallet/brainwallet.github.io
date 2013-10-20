@@ -1110,6 +1110,7 @@
         $('.vrSig').removeClass('has-error');
         $('.vrMsg').removeClass('has-success');
         $('.vrSig').removeClass('has-success');
+        window.location.hash='#verify';
     }
 
     function vrPermalink()
