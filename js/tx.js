@@ -208,13 +208,14 @@ var TX = new function () {
             var hash = Crypto.util.base64ToBytes(txin.outpoint.hash);
             var n = txin.outpoint.index;
             var prev_out = {'hash': Crypto.util.bytesToHex(hash.reverse()), 'n': n};
+            var seq = txin.sequence;
 
             if (n == 4294967295) {
                 var cb = Crypto.util.bytesToHex(txin.script.buffer);
-                r['in'].push({'prev_out': prev_out, 'coinbase' : cb});
+                r['in'].push({'prev_out': prev_out, 'coinbase' : cb, 'sequence':seq});
             } else {
                 var ss = dumpScript(txin.script);
-                r['in'].push({'prev_out': prev_out, 'scriptSig' : ss});
+                r['in'].push({'prev_out': prev_out, 'scriptSig' : ss, 'sequence':seq});
             }
         }
 
@@ -249,13 +250,15 @@ var TX = new function () {
             else
                 var script = parseScript(txi['scriptSig']);
 
+            var seq = txi['sequence'] === undefined ? 4294967295 : txi['sequence'];
+
             var txin = new Bitcoin.TransactionIn({
                 outpoint: { 
                     hash: Crypto.util.bytesToBase64(hash.reverse()),
                     index: n
                 },
                 script: new Bitcoin.Script(script),
-                sequence: 4294967295
+                sequence: seq
             });
             sendTx.addInput(txin);
         }
