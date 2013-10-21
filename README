@@ -10,6 +10,4 @@ Notable features:
 - RFC 1751 JavaScript implementation
 - Bitcoin transactions editor
 - Signing and verifying messages with bitcoin address
-
-
-
+- Litecoin support
