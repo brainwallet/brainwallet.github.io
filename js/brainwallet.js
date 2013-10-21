@@ -990,7 +990,6 @@
 
     function txChangeType() {
         txType = $(this).attr('id');
-        txGetUnspent();
     }
 
     function txChangeFrom() {
@@ -1002,7 +1001,6 @@
       $('#txDest').attr('readonly', !bFromKey);
       $('#txFee').attr('readonly', !bFromKey);
       $('#txAddr').attr('readonly', !bFromKey);
-      $('#txUnspent').attr('readonly', !bFromKey);
       if ( txFrom=='txFromRaw' )
         $('#txHex').focus();
       else if ( txFrom=='txFromJSON' )
