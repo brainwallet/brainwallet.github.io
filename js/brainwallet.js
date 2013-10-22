@@ -1152,12 +1152,12 @@
 
     function crChange()
     {
-      var addrtype = parseInt($(this).attr('value'));
-      PUBLIC_KEY_VERSION = addrtype;
+      var crName = $(this).text();
+      PUBLIC_KEY_VERSION = crName=='LTC'?48:0;
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
-      $('#crLabel').text($(this).text());
-      gen_update();
+      $('#crName').text(crName);
       $('#crSelect').dropdown('toggle');
+      gen_update();
       return false;
     }
 

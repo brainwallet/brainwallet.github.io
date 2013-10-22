@@ -39,10 +39,10 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown" id="crCurrency">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="crSelect"><span id="crLabel">BTC</span>&nbsp;<b class="caret">&nbsp;</b></a>
-              <ul aria-labelledby="crSelect" class="dropdown-menu" role="menu">
-                <li><a href="#" value="0">BTC</a></li>
-                <li><a href="#" value="48">LTC</a></li>
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="crSelect"><span id="crName">BTC</span>&nbsp;<b class="caret">&nbsp;</b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">BTC</a></li>
+                <li><a href="#">LTC</a></li>
               </ul></li>
           </ul>
         </nav>
@@ -202,7 +202,7 @@
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="txFrom">
                     <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />Private Key</label> <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label> <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="genMsg">&nbsp;</span>
+                  </div>
                 </div>
               </div>
               <div class="form-group">
@@ -233,7 +233,7 @@
                   <div class="col-lg-10 controls">
                     <div class="btn-group" data-toggle="buttons" id="txType">
                       <label class="btn btn-default active"><input id="txBCI" name="txType" type="radio" />BlockChain Info</label> <label class="btn btn-default"><input id="txBBE" name="txType" type="radio" />Bitcoin Block Explorer</label>
-                    </div>&nbsp;<span class="help-inline"><button class="btn btn-default" id="txGetUnspent" type="button"><span class="help-inline"><span class="help-inline"><span class="help-inline"><span class="help-inline">Download</span></span></span></span></button></span>
+                    </div>&nbsp;<button class="btn btn-default help-inline" id="txGetUnspent" type="button">Download</button>
                   </div>
                 </div>
                 <div class="form-group">
