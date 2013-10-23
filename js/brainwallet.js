@@ -1001,6 +1001,8 @@
       $('#txDest').attr('readonly', !bFromKey);
       $('#txFee').attr('readonly', !bFromKey);
       $('#txAddr').attr('readonly', !bFromKey);
+      $('#txBalance').attr('readonly', !bFromKey);
+      $('#txValue').attr('readonly', !bFromKey);
       if ( txFrom=='txFromRaw' )
         $('#txHex').focus();
       else if ( txFrom=='txFromJSON' )
