@@ -998,11 +998,15 @@
       $('#txSec').attr('readonly', !bFromKey);
       $('#txJSON').attr('readonly', txFrom!='txFromJSON');
       $('#txHex').attr('readonly', txFrom!='txFromRaw');
-      $('#txDest').attr('readonly', !bFromKey);
       $('#txFee').attr('readonly', !bFromKey);
       $('#txAddr').attr('readonly', !bFromKey);
       $('#txBalance').attr('readonly', !bFromKey);
-      $('#txValue').attr('readonly', !bFromKey);
+
+      $.each($(document).find('.txCC'), function() {
+        $(this).find('#txDest').attr('readonly', !bFromKey);
+        $(this).find('#txValue').attr('readonly', !bFromKey);
+      });
+
       if ( txFrom=='txFromRaw' )
         $('#txHex').focus();
       else if ( txFrom=='txFromJSON' )
