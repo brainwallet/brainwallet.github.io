@@ -314,8 +314,8 @@
             return;
         };
 
-        if (version != 128) {
-            setErrorState($('#sec'), true, 'Invalid private key version (must be 128)');
+        if (version != PRIVATE_KEY_VERSION) {
+            setErrorState($('#sec'), true, 'Invalid private key version');
             return;
         } else if (payload.length < 32) {
             setErrorState($('#sec'), true, 'Invalid payload (must be 32 or 33 bytes)');
