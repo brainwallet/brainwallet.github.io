@@ -266,7 +266,7 @@
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
         $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
-        $('#genAddrLabel').text($('#addr').val());
+        $('#genAddrURL').attr('title', addr);
     }
 
 
