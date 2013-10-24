@@ -126,17 +126,13 @@
     }
 
     function setErrorState(field, err, msg) {
-        group = field.closest('.control-group');
-
+        var group = field.closest('.controls');
         if (err) {
-            group.addClass('error');
+            group.addClass('has-error');
+            group.attr('title',msg);
         } else {
-            group.removeClass('error');
-        }
-
-        var e = group.find('.errormsg');
-        if (e) {
-            e.text(msg||'');
+            group.removeClass('has-error');
+            group.attr('title','');
         }
     }
 
