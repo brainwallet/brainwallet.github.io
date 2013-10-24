@@ -10,6 +10,7 @@
 
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
+    var ADDRESS_URL_PREFIX = 'http://blockexplorer.com/address/'
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -264,7 +265,7 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', (PUBLIC_KEY_VERSION==48?'http://explorer.litecoin.net/address/':'http://blockchain.info/address/')+addr);
+        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
         $('#genAddrLabel').text($('#addr').val());
     }
 
@@ -1145,7 +1146,7 @@
         if (res) {
             $('.vrMsg').removeClass('has-error');
             $('.vrSig').removeClass('has-error');
-            var href = (PUBLIC_KEY_VERSION==48?'http://explorer.litecoin.net/address/':'https://blockchain.info/address/')+res;
+            var href = ADDRESS_URL_PREFIX+res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
             $('#vrRes').html('Verified to: ' + a);
         } else {
@@ -1158,10 +1159,10 @@
 
     function crChange()
     {
-      var crName = $(this).text();
-      PUBLIC_KEY_VERSION = crName=='LTC'?48:0;
+      PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
-      $('#crName').text(crName);
+      ADDRESS_URL_PREFIX = $(this).attr('href');
+      $('#crName').text($(this).text());
       $('#crSelect').dropdown('toggle');
       gen_update();
       return false;
