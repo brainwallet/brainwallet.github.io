@@ -26,8 +26,19 @@ var TX = new function () {
         outputs.push({address: addr, value: fval});
     }
 
+    this.removeOutputs = function() {
+        outputs = [];
+    }
+
     this.getBalance = function() {
         return balance;
+    }
+
+    this.getFee = function(sendTx) {
+       var out = BigInteger.ZERO;
+       for (var i in outputs)
+            out += new BigInteger('' + Math.round(outputs[i].value * 1e8), 10);
+        return balance-out;
     }
 
     this.getAddress = function(addrtype) {
@@ -66,6 +77,7 @@ var TX = new function () {
                   sendTx.addInput(txin);
             }
         }
+
 
         for (var i in outputs) {
             var address = outputs[i].address;
@@ -265,6 +277,7 @@ var TX = new function () {
 
         var vout_sz = r['vout_sz'];
 
+        TX.removeOutputs();
         for (var i = 0; i < vout_sz; i++) {
             var txo = r['out'][i];
             var fval = parseFloat(txo['value']);
@@ -282,6 +295,7 @@ var TX = new function () {
             });
 
             sendTx.addOutput(txout);
+            TX.addOutput(txo,fval);
         }
         sendTx.lock_time = r['lock_time'];
         return sendTx;

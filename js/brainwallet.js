@@ -944,15 +944,14 @@
         }
 
         var str = $('#txJSON').val();
+        TX.removeOutputs();
         var sendTx = TX.fromBBE(str);
 
         try {
             sendTx = TX.resign(sendTx);
-            var txJSON = TX.toBBE(sendTx);
-            var buf = sendTx.serialize();
-            var txHex = Crypto.util.bytesToHex(buf);
-            $('#txJSON').val(txJSON);
-            $('#txHex').val(txHex);
+            $('#txJSON').val(TX.toBBE(sendTx));
+            $('#txHex').val(Crypto.util.bytesToHex(sendTx.serialize()));
+            $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
         } catch(err) {
             $('#txJSON').val('');
             $('#txHex').val('');
