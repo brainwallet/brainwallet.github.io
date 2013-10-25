@@ -817,10 +817,16 @@
 
     function txOnChangeJSON() {
         var str = $('#txJSON').val();
-        var sendTx = TX.fromBBE(str);
-        var bytes = sendTx.serialize();
-        var hex = Crypto.util.bytesToHex(bytes);
-        $('#txHex').val(hex);
+        try {
+          var sendTx = TX.fromBBE(str);
+          $('txJSON').removeClass('has-error');
+          var bytes = sendTx.serialize();
+          var hex = Crypto.util.bytesToHex(bytes);
+          $('#txHex').val(hex);
+          setErrorState($('#txJSON'), false, '');
+        } catch (err) {
+          setErrorState($('#txJSON'), true, 'syntax error');
+        }
     }
 
     function txOnChangeHex() {

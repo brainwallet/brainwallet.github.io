@@ -35,10 +35,13 @@ var TX = new function () {
     }
 
     this.getFee = function(sendTx) {
-       var out = BigInteger.ZERO;
-       for (var i in outputs)
-            out += new BigInteger('' + Math.round(outputs[i].value * 1e8), 10);
-        return balance-out;
+        var out = BigInteger.ZERO;
+        for (var i in outputs) {
+            var fval = outputs[i].value;
+            value = new BigInteger('' + Math.round(fval*1e8), 10);
+            out = out.add(value);
+        }
+        return balance.subtract(out);
     }
 
     this.getAddress = function(addrtype) {
@@ -77,7 +80,6 @@ var TX = new function () {
                   sendTx.addInput(txin);
             }
         }
-
 
         for (var i in outputs) {
             var address = outputs[i].address;
