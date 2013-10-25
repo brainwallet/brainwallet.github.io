@@ -934,6 +934,7 @@
             var txJSON = TX.toBBE(sendTx);
             var buf = sendTx.serialize();
             var txHex = Crypto.util.bytesToHex(buf);
+            setErrorState($('#txJSON'), false, '');
             $('#txJSON').val(txJSON);
             $('#txHex').val(txHex);
         } catch(err) {
