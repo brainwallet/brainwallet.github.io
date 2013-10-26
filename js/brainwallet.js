@@ -756,7 +756,7 @@
         $('#txAddr').val(addr);
         $('#txBalance').val('0.00');
 
-        if (addr != "")
+        if (addr != "" && txFrom=='txFromSec')
             txGetUnspent();
     }
 
@@ -998,7 +998,6 @@
     function txChangeFrom() {
       txFrom = $(this).attr('id');
       var bFromKey = txFrom=='txFromSec' || txFrom=='txFromPass';
-      $('#txSec').attr('readonly', !bFromKey);
       $('#txJSON').attr('readonly', txFrom!='txFromJSON');
       $('#txHex').attr('readonly', txFrom!='txFromRaw');
       $('#txFee').attr('readonly', !bFromKey);
