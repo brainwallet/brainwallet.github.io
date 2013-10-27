@@ -1151,7 +1151,7 @@
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
             $('#vrRes').html('Verified to: ' + a);
         } else {
-            $('#vrRes').text('false');
+            $('#vrRes').text('Verification error');
         }
 
         window.location.hash='#verify'+vrPermalink();
