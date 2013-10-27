@@ -1149,9 +1149,9 @@
             $('.vrSig').removeClass('has-error');
             var href = ADDRESS_URL_PREFIX+res;
             var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
-            $('#vrRes').html('Verified to: ' + a);
+            $('#vrRes').html('verified to: ' + a);
         } else {
-            $('#vrRes').text('Verification error');
+            $('#vrRes').text('not verified');
         }
 
         window.location.hash='#verify'+vrPermalink();
