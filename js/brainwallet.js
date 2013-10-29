@@ -136,6 +136,18 @@
         }
     }
 
+    function showHidePassphrase() {
+        var pass = $('#pass');
+        if (pass.attr('type') == 'password') {
+            pass.attr('type', 'text');
+            $('#hidePassphrase').html('Hide');
+        }
+        else {
+            pass.attr('type', 'password');
+            $('#hidePassphrase').html('Show');
+        }
+    }
+
     function genRandom() {
         $('#pass').val('');
         $('#hash').focus();
@@ -1184,6 +1196,7 @@
         onInput('#hash', onChangeHash);
         onInput('#sec', onChangePrivKey);
 
+        $('#hidePassphrase').click(showHidePassphrase);
         $('#genRandom').click(genRandom);
 
         $('#gen_from label input').on('change', update_gen_from );
