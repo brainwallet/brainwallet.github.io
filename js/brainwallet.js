@@ -309,11 +309,6 @@
         else { // 'pbkdf2'
             var passphrase = $('#pass').val();
 
-            //var salt = CryptoJS.SHA256('brainwallet'); // not ideal as we have a global shared salt but nothing we can do here since we don't have extra information. The user really needs to manually salt their password with custom information.
-            //var pbkdf2Hash = CryptoJS.PBKDF2(passphrase, salt, { keySize: 256/32, iterations: pbkdf2_iteration, hasher:CryptoJS.algo.SHA256 });
-            //var hashString = pbkdf2Hash.toString();
-            //$('#hash').val(hashString);
-
             var salt = sjcl.hash.sha256.hash('brainwallet'); // not ideal as we have a global shared salt but nothing we can do here since we don't have extra stored per-user info. The user really needs to manually salt their password with custom information.
             var pbkdf2Hash = sjcl.misc.pbkdf2(passphrase, salt, pbkdf2_iteration, 256);
             var hashString = sjcl.codec.hex.fromBits(pbkdf2Hash);
