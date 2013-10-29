@@ -5,6 +5,8 @@
     var gen_eckey = null;
     var gen_pt = null;
     var gen_ps_reset = false;
+    var hash_method = 'sha256';
+    var pbkdf2_iteration = 100000;
     var TIMEOUT = 600;
     var timeout = null;
 
@@ -133,6 +135,39 @@
         } else {
             group.removeClass('has-error');
             group.attr('title','');
+        }
+    }
+
+    function toggleSecureHash() {
+        if (hash_method == 'sha256') {
+            hash_method = 'pbkdf2';
+            $('#from_pass').parent().attr('title', 'PBKDF2 (' + pbkdf2_iteration + ' iterations)');
+            $('#secureHash').html('Use Normal');
+        }
+        else {
+            hash_method = 'sha256';
+            $('#from_pass').parent().attr('title', 'Single SHA256');
+            $('#secureHash').html('Use Secure');
+        }
+
+        $('#pass').focus();
+        gen_from = 'pass';
+        $('#from_pass').click();
+        update_gen();
+
+        calc_hash();
+        generate();
+    }
+
+    function showHidePassphrase() {
+        var pass = $('#pass');
+        if (pass.attr('type') == 'password') {
+            pass.attr('type', 'text');
+            $('#hidePassphrase').html('Hide');
+        }
+        else {
+            pass.attr('type', 'password');
+            $('#hidePassphrase').html('Show');
         }
     }
 
@@ -267,14 +302,33 @@
 
 
     function calc_hash() {
-        var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
-        $('#hash').val(Crypto.util.bytesToHex(hash));
+        if (hash_method == 'sha256') {
+            var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
+            $('#hash').val(Crypto.util.bytesToHex(hash));
+        }
+        else { // 'pbkdf2'
+            var passphrase = $('#pass').val();
+
+            var salt = sjcl.hash.sha256.hash('brainwallet'); // not ideal as we have a global shared salt but nothing we can do here since we don't have extra stored per-user info. The user really needs to manually salt their password with custom information.
+            var pbkdf2Hash = sjcl.misc.pbkdf2(passphrase, salt, pbkdf2_iteration, 256);
+            var hashString = sjcl.codec.hex.fromBits(pbkdf2Hash);
+            $('#hash').val(hashString);
+        }
     }
 
     function onChangePass() {
-        calc_hash();
-        clearTimeout(timeout);
-        timeout = setTimeout(generate, TIMEOUT);
+        if (hash_method == 'sha256') {
+            calc_hash();
+            clearTimeout(timeout);
+            timeout = setTimeout(generate, TIMEOUT);
+        }
+        else { // hash is too slow, just do it before we generate
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                calc_hash();
+                generate();
+            }, TIMEOUT);
+        }
     }
 
     function onChangeHash() {
@@ -1184,6 +1238,8 @@
         onInput('#hash', onChangeHash);
         onInput('#sec', onChangePrivKey);
 
+        $('#secureHash').click(toggleSecureHash);
+        $('#hidePassphrase').click(showHidePassphrase);
         $('#genRandom').click(genRandom);
 
         $('#gen_from label input').on('change', update_gen_from );
