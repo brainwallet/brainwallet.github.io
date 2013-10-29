@@ -21,6 +21,9 @@
     <script src="js/tx.js"></script>
     <script src="js/bitcoinsig.js"></script>
     <script src="js/brainwallet.js"></script>
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/pbkdf2.js"></script>
+    <script src="http://crypto.stanford.edu/sjcl/sjcl.js"></script> <!-- figure out license for this for redistribution since this is BSD rather than the public domain license this is using -->
   </head>
   <body onclick="rng_seed_time();" onkeypress="rng_seed_time();">
     <header class="navbar navbar-inverse navbar-fixed-top">
@@ -77,6 +80,7 @@
                   <div class="input-group">
                     <input class="form-control" id="pass" type="text" />
                     <div class="input-group-btn">
+                      <button class="btn btn-default" id="secureHash" title="Choose 'Secure' to use PBKDF2 for a more secure hash" type="button">Use Secure</button>
                       <button class="btn btn-default" id="hidePassphrase" title="Show/Hide Passphrase" type="button">Hide</button>
                     </div>
                   </div>
