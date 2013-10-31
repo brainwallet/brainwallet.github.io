@@ -1166,6 +1166,7 @@
       $('#crName').text($(this).text());
       $('#crSelect').dropdown('toggle');
       gen_update();
+      translate();
       return false;
     }
 
