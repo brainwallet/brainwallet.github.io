@@ -880,7 +880,7 @@
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
         url = 'http://blockchain.info/pushtx';
         postdata = 'tx=' + tx;
-        url = prompt(r + 'Send transaction:', url);
+        url = prompt(r + 'Press OK to send transaction to:', url);
         if (url != null && url != "") {
             tx_fetch(url, txSent, txSent, postdata);
         }
