@@ -14,12 +14,14 @@ var TX = new function () {
 
     var inputs = [];
     var outputs = [];
-    var eckey = null;
+    var eckeys = null;
     var balance = 0;
+    var redemption_script = null;
 
-    this.init = function(_eckey) {
+    this.init = function(_eckeys, _redemption_script) {
         outputs = [];
-        eckey = _eckey;
+        eckeys = _eckeys;
+        redemption_script = _redemption_script;
     }
 
     this.addOutput = function(addr, fval) {
@@ -42,12 +44,6 @@ var TX = new function () {
             out = out.add(value);
         }
         return balance.subtract(out);
-    }
-
-    this.getAddress = function(addrtype) {
-        var addr = new Bitcoin.Address(eckey.getPubKeyHash());
-        addr.version = addrtype ? addrtype : 0;
-        return addr.toString();
     }
 
     this.parseInputs = function(text, address) {
@@ -89,17 +85,22 @@ var TX = new function () {
               sendTx.addOutput(new Bitcoin.Address(address), value);
         }
 
-        var hashType = 1;
+        var hashType = 1; // SIGHASH_ALL
         for (var i = 0; i < sendTx.ins.length; i++) {
             var connectedScript = selectedOuts[i].script;
-            var hash = sendTx.hashTransactionForSignature(connectedScript, i, hashType);
-            var pubKeyHash = connectedScript.simpleOutPubKeyHash();
-            var signature = eckey.sign(hash);
-            signature.push(parseInt(hashType, 10));
-            var pubKey = eckey.getPub();
+            var hash = sendTx.hashTransactionForSignature(redemption_script, i, hashType);
             var script = new Bitcoin.Script();
-            script.writeBytes(signature);
-            script.writeBytes(pubKey);
+
+            // No idea why this remains in Bitcoin code...
+            script.writeOp(0);
+
+            for (var j = 0; j < eckeys.length; j++ ) {
+                var signature = eckeys[j].sign(hash);
+                signature.push(parseInt(hashType, 10));
+                script.writeBytes(signature);
+            }
+
+            script.writeBytes(redemption_script.buffer);
             sendTx.ins[i].script = script;
         }
         return sendTx;
@@ -490,18 +491,19 @@ function tx_fetch(url, onSuccess, onError, postdata) {
     });
 }
 
-var tx_dest = '15ArtCgi3wmpQAAfYx4riaFmo4prJA4VsK';
+var tx_dest = '1Ce8WxgwjarzLtV6zkUGgdwmAe5yjHoPXX';
 var tx_sec = '5KdttCmkLPPLN4oDet53FBdPxp4N1DWoGCiigd3ES9Wuknhm8uT';
-var tx_addr = '12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX';
+var tx_addr = '32c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX';
 var tx_unspent = '{"unspent_outputs":[{"tx_hash":"7a06ea98cd40ba2e3288262b28638cec5337c1456aaf5eedc8e9e5a20f062bdf","tx_index":5,"tx_output_n": 0,"script":"4104184f32b212815c6e522e66686324030ff7e5bf08efb21f8b00614fb7690e19131dd31304c54f37baa40db231c918106bb9fd43373e37ae31a0befc6ecaefb867ac","value": 5000000000,"value_hex": "012a05f200","confirmations":177254}]}';
 
 function tx_test() {
-    var secret = Bitcoin.Base58.decode(tx_sec).slice(1, 33);
-    var eckey = new Bitcoin.ECKey(secret);
-    TX.init(eckey);
-    TX.parseInputs(tx_unspent, TX.getAddress());
-    TX.addOutput(tx_dest, 50.0);
-    var sendTx = TX.construct();
-    console.log(TX.toBBE(sendTx));
-    console.log(Crypto.util.bytesToHex(sendTx.serialize()));
+    //TODO
+    //var secret = Bitcoin.Base58.decode(tx_sec).slice(1, 33);
+    //var eckey = new Bitcoin.ECKey(secret);
+    //TX.init(eckey);
+    //TX.parseInputs(tx_unspent, tx_addr);
+    //TX.addOutput(tx_dest, 50.0);
+    //var sendTx = TX.construct();
+    //console.log(TX.toBBE(sendTx));
+    //console.log(Crypto.util.bytesToHex(sendTx.serialize()));
 }

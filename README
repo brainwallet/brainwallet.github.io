@@ -1,13 +1,12 @@
-JavaScript Client-Side Bitcoin Address Generator
+JavaScript Client-Side Multisignature P2SH Address and Transaction Generator
 
-http://brainwallet.github.com
+http://github.com/sarchar/brainwallet.github.com
 
 Notable features:
 
+- Create Multisignature P2SH Addresses (supports 1/2/3 of 3)
+- Spend from P2SH multisignature outputs
 - Online converter, including Base58 decoder and encoder
 - OpenSSL point conversion and compressed keys support
-- Armory and Electrum deterministic wallets implementation
 - RFC 1751 JavaScript implementation
 - Bitcoin transactions editor
-- Signing and verifying messages with bitcoin address
-- Litecoin support

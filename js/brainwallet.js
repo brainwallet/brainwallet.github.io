@@ -1,6 +1,7 @@
 (function($){
 
-    var gen_from = 'pass';
+    var req_count = 2;
+    var outof_count = 3;
     var gen_compressed = false;
     var gen_eckey = null;
     var gen_pt = null;
@@ -136,123 +137,80 @@
         }
     }
 
-    function genRandom() {
-        $('#pass').val('');
-        $('#hash').focus();
-        gen_from = 'hash';
-        $('#from_hash').click();
-        update_gen();
-        var bytes = Crypto.util.randomBytes(32);
-        $('#hash').val(Crypto.util.bytesToHex(bytes));
-        generate();
+    function reqUpdateLabel() {
+      $('#reqMsg').text($('#req_'+req_count).parent().attr('title'));
     }
 
-    function update_gen() {
-        setErrorState($('#hash'), false);
-        setErrorState($('#sec'), false);
-        $('#pass').attr('readonly', gen_from != 'pass');
-        $('#hash').attr('readonly', gen_from != 'hash');
-        $('#sec').attr('readonly', gen_from != 'sec');
-        $('#sec').parent().parent().removeClass('error');
+    function update_req_count() {
+        req_count = parseInt($(this).attr('id').substring(4));
+        reqUpdateLabel();
+        clearTimeout(timeout);
+        timeout = setTimeout(generate_redemption_script, TIMEOUT);
     }
 
-    function genUpdateLabel() {
-      $('#genMsg').text($('#from_'+gen_from).parent().attr('title'));
+    function update_outof() {
+        $("#pub1_group").removeClass('hidden');
+        $("#pub2_group").removeClass('hidden').addClass((outof_count < 2) ? 'hidden' : '');
+        $("#pub3_group").removeClass('hidden').addClass((outof_count < 3) ? 'hidden' : '');
     }
 
-    function update_gen_from() {
-        gen_from = $(this).attr('id').substring(5);
-        genUpdateLabel();
-        update_gen();
-        if (gen_from == 'pass') {
-            if (gen_ps_reset) {
-                gen_ps_reset = false;
-                onChangePass();
-            }
-            $('#pass').focus();
-        } else if (gen_from == 'hash') {
-            $('#hash').focus();
-        } else if (gen_from == 'sec') {
-            $('#sec').focus();
-        }
+    function outofUpdateLabel() {
+      $('#outofMsg').text($('#outof_'+outof_count).parent().attr('title'));
     }
 
-    function update_gen_from_focus() {
-        gen_from = $(this).attr('id');
-        update_gen();
-        if (gen_from == 'pass') {
-            if (gen_ps_reset) {
-                gen_ps_reset = false;
-                onChangePass();
-            }
-        }
-        $('#from_'+gen_from).button('toggle');
+    function update_outof_count() {
+        outof_count = parseInt($(this).attr('id').substring(6))
+        outofUpdateLabel();
+        update_outof();
+        clearTimeout(timeout);
+        timeout = setTimeout(generate_redemption_script, TIMEOUT);
     }
 
-    function generate() {
-        var hash_str = pad($('#hash').val(), 64, '0');
+    function generate_redemption_script() {
+        var pub1_str = pad($('#pub1').val(), 65, '0');
+        var pub1 = Crypto.util.hexToBytes(pub1_str);
 
-        var hash = Crypto.util.hexToBytes(hash_str);
+        var pub2_str = pad($('#pub2').val(), 65, '0');
+        var pub2 = Crypto.util.hexToBytes(pub2_str);
 
-        eckey = new Bitcoin.ECKey(hash);
+        var pub3_str = pad($('#pub3').val(), 65, '0');
+        var pub3 = Crypto.util.hexToBytes(pub3_str);
 
-        gen_eckey = eckey;
+        var pubkey1 = new Bitcoin.ECKey();
+        pubkey1.pub = pub1;
+        pubkey1.pubKeyHash = Bitcoin.Util.sha256ripe160(pubkey1.pub);
 
-        try {
-            var curve = getSECCurveByName("secp256k1");
-            gen_pt = curve.getG().multiply(eckey.priv);
-            gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
-            gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-            setErrorState($('#hash'), false);
-        } catch (err) {
-            //console.info(err);
-            setErrorState($('#hash'), true, 'Invalid secret exponent (must be non-zero value)');
-            return;
+        var pubkey2 = new Bitcoin.ECKey();
+        pubkey2.pub = pub2;
+        pubkey2.pubKeyHash = Bitcoin.Util.sha256ripe160(pubkey2.pub);
+
+        var pubkey3 = new Bitcoin.ECKey();
+        pubkey3.pub = pub3;
+        pubkey3.pubKeyHash = Bitcoin.Util.sha256ripe160(pubkey3.pub);
+
+        // New versions of BitcoinJS-lib have createMultiSigOutputScript, but the one 
+        // currently in brainwallet at github doesn't have it, so we must build the
+        // script manually.
+        var redemption_script = new Bitcoin.Script();
+
+        redemption_script.writeOp([Bitcoin.Opcode.map["OP_1"], Bitcoin.Opcode.map["OP_2"], Bitcoin.Opcode.map["OP_3"]][req_count - 1]);
+        
+        var pubkeys = new Array(pub1, pub2, pub3);
+        for( var i = 0; i < 3 && i < outof_count; i++ ) {
+            redemption_script.writeBytes(pubkeys[i]);
         }
 
-        gen_update();
-    }
+        redemption_script.writeOp(Bitcoin.Opcode.map["OP_1"] + (pubkeys.length - 1));
+        redemption_script.writeOp(Bitcoin.Opcode.map["OP_CHECKMULTISIG"]);
 
-    function update_gen_compressed() {
-        setErrorState($('#hash'), false);
-        setErrorState($('#sec'), false);
-        gen_compressed = $(this).attr('id') == 'compressed';
-        gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
-        gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-        gen_update();
-    }
+        var redemption_script_str = Crypto.util.bytesToHex(redemption_script.buffer);
+        $("#redemption_script").val(redemption_script_str);
 
-    function gen_update() {
-
-        var eckey = gen_eckey;
-        var compressed = gen_compressed;
-
-        var hash_str = pad($('#hash').val(), 64, '0');
-        var hash = Crypto.util.hexToBytes(hash_str);
-
-        var hash160 = eckey.getPubKeyHash();
-
-        var h160 = Crypto.util.bytesToHex(hash160);
-        $('#h160').val(h160);
-
-        var addr = new Bitcoin.Address(hash160);
-        addr.version = PUBLIC_KEY_VERSION;
-        $('#addr').val(addr);
-
-        var payload = hash;
-
-        if (compressed)
-            payload.push(0x01);
-
-        var sec = new Bitcoin.Address(payload);
-        sec.version = PRIVATE_KEY_VERSION;
-        $('#sec').val(sec);
-
-        var pub = Crypto.util.bytesToHex(getEncoded(gen_pt, compressed));
-        $('#pub').val(pub);
-
-        var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
-        $('#der').val(der);
+        // Hash the script to produce the bitcoin address:
+        var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(redemption_script.buffer);
+        var p2sh_addr = new Bitcoin.Address(redemptionScriptHash160);
+        p2sh_addr.version = 5;
+        $("#addr").val('' + p2sh_addr);
 
         var qrCode = qrcode(3, 'M');
         var text = $('#addr').val();
@@ -265,85 +223,18 @@
         $('#genAddrURL').attr('title', addr);
     }
 
-
-    function calc_hash() {
-        var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
-        $('#hash').val(Crypto.util.bytesToHex(hash));
-    }
-
-    function onChangePass() {
-        calc_hash();
+    function onChangePublicKey() {
         clearTimeout(timeout);
-        timeout = setTimeout(generate, TIMEOUT);
+        timeout = setTimeout(generate_redemption_script, TIMEOUT);
     }
 
-    function onChangeHash() {
-        $('#pass').val('');
-        gen_ps_reset = true;
-        clearTimeout(timeout);
-
-        if (/[^0123456789abcdef]+/i.test($('#hash').val())) {
-            setErrorState($('#hash'), true, 'Erroneous characters (must be 0..9-a..f)');
-            return;
-        } else {
-            setErrorState($('#hash'), false);
-        }
-
-        timeout = setTimeout(generate, TIMEOUT);
-    }
-
-    function onChangePrivKey() {
-
-        clearTimeout(timeout);
-
-        $('#pass').val('');
-        gen_ps_reset = true;
-
-        var sec = $('#sec').val();
-
-        try { 
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-        } catch (err) {
-            setErrorState($('#sec'), true, 'Invalid private key checksum');
-            return;
-        };
-
-        if (version != PRIVATE_KEY_VERSION) {
-            setErrorState($('#sec'), true, 'Invalid private key version');
-            return;
-        } else if (payload.length < 32) {
-            setErrorState($('#sec'), true, 'Invalid payload (must be 32 or 33 bytes)');
-            return;
-        }
-
-        setErrorState($('#sec'), false);
-
-        if (payload.length > 32) {
-            payload.pop();
-            gen_compressed = true;
-            $('#compressed').button('toggle');
-        } else {
-            gen_compressed = false;
-            $('#uncompressed').button('toggle');
-        }
-
-        $('#hash').val(Crypto.util.bytesToHex(payload));
-
-        timeout = setTimeout(generate, TIMEOUT);
-    }
-
-    function genRandomPass() {
-        // chosen by fair dice roll
-        // guaranted to be random
-        $('#pass').val('correct horse battery staple');
-        $('#from_pass').button('toggle');
-        $('#pass').focus();
-        gen_from = 'pass';
-        update_gen();
-        calc_hash();
-        generate();
+    function initializePublicKeys() {
+        $('#pub1').val('045b18a4e0153f0b4a8864976d0c3e55ff6845857f8ee818ca5aa22fbdcfaf51f408005b719d7226310d191f993960055681de48a12ff430b7ca2f6298fbae19d5');
+        $('#pub2').val('04edb36cd12605e32115916817d064733513992abcb69c12c2a3fe8a349d1bfe52f164e801f3d16b6dc5caaf8a901490a0a5c30ccde5a2e19b7f8a345d968ebf53');
+        $('#pub3').val('04757f731c485c1e387a110a2441965c93c699d03aecaa9447154acbc0c28c23044dca44dbc63304957ed36ca0a16b800a31cd2ca8732ca8a7c5709c646c538bcc');
+        $('#pub1').focus();
+        reqUpdateLabel();
+        generate_redemption_script();
     }
 
     // --- converter ---
@@ -529,245 +420,31 @@
         });
     }
 
-    // --- chain ---
-    var chain_mode = 'csv';
-    var addresses = [];
-    var chain_range = parseInt($('#range').val());
-    var chain_type = 'chain_armory';
-
-    function onChangeMethod() {
-        var id = $(this).attr('id');
-
-        if (chain_type != id) {
-            $('#seed').val('');
-            $('#expo').val('');
-            $('#memo').val('');
-            $('#chMsg').text('');
-            $('#chain').text('');
-            chOnStop();
-        }
-
-        $('#elChange').attr('disabled', id != 'chain_electrum');
-
-        chain_type = id;
-    }
-
-    function onChangeFormat() {
-        chain_mode = $(this).attr('id');
-        update_chain();
-    }
-
-    function addr_to_csv(i, r) {
-        return i + ', "' + r[0] +'", "' + r[1] +'"\n';
-    }
-
-    function update_chain() {
-        if (addresses.length == 0)
-            return;
-        var str = '';
-        if (chain_mode == 'csv') {
-            for (var i = 0; i < addresses.length; i++)
-                str += addr_to_csv(i+1, addresses[i]);
-
-        } else if (chain_mode == 'json') {
-
-            var w = {};
-            w['keys'] = [];
-            for (var i = 0; i < addresses.length; i++)
-                w['keys'].push({'addr':addresses[i][0],'sec':addresses[i][1]});
-            str = JSON.stringify(w, null, 4);
-        }
-        $('#chain').text(str);
-
-        chain_range = parseInt($('#range').val());
-        var change = chain_type == 'chain_electrum' ? parseInt($('#elChange').val()) : 0;
-
-        if (addresses.length >= chain_range+change)
-            chOnStop();
-
-    }
-
-    function onChangeSeed() {
-        $('#expo').val('');
-        $('#chMsg').text('');
-        chOnStop();
-        $('#memo').val( mn_encode(seed) );
-        clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, TIMEOUT);
-    }
-
-    function onChangeMemo() {
-        var str =  $('#memo').val();
-
-        if (str.length == 0) {
-            chOnStop();
-            return;
-        }
-
-        if (chain_type == 'chain_electrum') {
-            if (issubset(mn_words, str))  {
-                var seed = mn_decode(str);
-                $('#seed').val(seed);
-            }
-        }
-
-        if (chain_type == 'chain_armory') {
-            var keys = armory_decode_keys(str);
-            if (keys != null) {
-                var cc = keys[1];
-                var pk = keys[0];
-                $('#seed').val(Crypto.util.bytesToHex(cc));
-                $('#expo').val(Crypto.util.bytesToHex(pk));
-            }
-        }
-
-        clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, TIMEOUT);
-    }
-
-    function chOnPlay() {
-        var cc = Crypto.util.randomBytes(32);
-        var pk = Crypto.util.randomBytes(32);
-
-        if (chain_type == 'chain_armory') {
-            $('#seed').val(Crypto.util.bytesToHex(cc));
-            $('#expo').val(Crypto.util.bytesToHex(pk));
-            var codes = armory_encode_keys(pk, cc);
-            $('#memo').val(codes);
-        }
-
-        if (chain_type == 'chain_electrum') {
-            var seed = Crypto.util.bytesToHex(pk.slice(0,16));
-            //nb! electrum doesn't handle trailing zeros very well
-            if (seed.charAt(0) == '0') seed = seed.substr(1);
-            $('#seed').val(seed);
-            var codes = mn_encode(seed);
-            $('#memo').val(codes);
-        }
-        chain_generate();
-    }
-
-    function chOnStop() {
-        Armory.stop();
-        Electrum.stop();
-        if (chain_type == 'chain_electrum') {
-            $('#chMsg').text('');
-        }
-    }
-
-    function onChangeRange()
-    {
-        if ( addresses.length==0 )
-          return;
-        clearTimeout(timeout);
-        timeout = setTimeout(update_chain_range, TIMEOUT);
-    }
-
-    function addr_callback(r) {
-        addresses.push(r);
-        $('#chain').append(addr_to_csv(addresses.length,r));
-    }
-
-    function electrum_seed_update(r, seed) {
-        $('#chMsg').text('key stretching: ' + r + '%');
-        $('#expo').val(Crypto.util.bytesToHex(seed));
-    }
-
-    function electrum_seed_success(privKey) {
-        $('#chMsg').text('');
-        $('#expo').val(Crypto.util.bytesToHex(privKey));
-        var addChange = parseInt($('#elChange').val());
-        Electrum.gen(chain_range, addr_callback, update_chain, addChange);
-    }
-
-    function update_chain_range() {
-        chain_range = parseInt($('#range').val());
-
-        addresses = [];
-        $('#chain').text('');
-
-        if (chain_type == 'chain_electrum') {
-            var addChange = parseInt($('#elChange').val());
-            Electrum.stop();
-            Electrum.gen(chain_range, addr_callback, update_chain, addChange);
-        }
-
-        if (chain_type == 'chain_armory') {
-            var codes = $('#memo').val();
-            Armory.gen(codes, chain_range, addr_callback, update_chain);
-        }
-    }
-
-    function chain_generate() {
-        clearTimeout(timeout);
-
-        var seed = $('#seed').val();
-        var codes = $('#memo').val();
-
-        addresses = [];
-        $('#chMsg').text('');
-        $('#chain').text('');
-
-        Electrum.stop();
-
-        if (chain_type == 'chain_electrum') {
-           if (seed.length == 0)
-               return;
-            Electrum.init(seed, electrum_seed_update, electrum_seed_success);
-        }
-
-        if (chain_type == 'chain_armory') {
-            var uid = Armory.gen(codes, chain_range, addr_callback, update_chain);
-            if (uid)
-                $('#chMsg').text('uid: ' + uid);
-            else
-                return;
-        }
-    }
-
     // -- transactions --
 
     var txType = 'txBCI';
     var txFrom = 'txFromSec';
 
-    function txGenSrcAddr() {
-        var sec = $('#txSec').val();
-        var addr = '';
+    function txOnChangeRedemptionScript() {
+        var bytes = Crypto.util.hexToBytes($('#txRedemptionScript').val());
+        var redemption_script = new Bitcoin.Script(bytes);
 
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-            var compressed = false;
-            if (payload.length > 32) {
-                payload.pop();
-                compressed = true;
-            }
-            var eckey = new Bitcoin.ECKey(payload);
-            var curve = getSECCurveByName("secp256k1");
-            var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = getEncoded(pt, compressed);
-            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
-        } catch (err) {
+        // Hash the script to produce the bitcoin address:
+        var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(redemption_script.buffer);
+        var p2sh_addr = new Bitcoin.Address(redemptionScriptHash160);
+        p2sh_addr.version = 5;
+        $("#txAddr").val('' + p2sh_addr);
+
+        // Show/Hide private key spaces depending on M
+        var m = redemption_script.buffer[0] - Bitcoin.Opcode.map["OP_1"] + 1;
+        if( m < 1 || m > 3 ) {
+            setErrorState($('#txOnChangeRedemptionScript'), true, 'Redemption script is not valid');
+            return;
         }
 
-        $('#txAddr').val(addr);
-        $('#txBalance').val('0.00');
-
-        if (addr != "" && txFrom=='txFromSec')
-            txGetUnspent();
-    }
-
-    function txOnChangeSec() {
-        clearTimeout(timeout);
-        timeout = setTimeout(txGenSrcAddr, TIMEOUT);
-    }
-
-    function txOnChangeAddr() {
-        clearTimeout(timeout);
-        timeout = setTimeout(txGetUnspent, TIMEOUT);
+        $("#txSec1_group").removeClass('hidden');
+        $("#txSec2_group").removeClass('hidden').addClass((m < 2) ? 'hidden' : '');
+        $("#txSec3_group").removeClass('hidden').addClass((m < 3) ? 'hidden' : '');
     }
 
     function txSetUnspent(text) {
@@ -868,14 +545,13 @@
     }
 
     function txSend() {
-        var txAddr = $('#txAddr').val();
-        var address = TX.getAddress();
-
         var r = '';
-        if (txAddr != address)
-            r += 'Warning! Source address does not match private key.\n\n';
-
         var tx = $('#txHex').val();
+
+        // Disabled for now because Blockchain.info can't verify
+        // signatures on these transactions properly yet.
+        alert("Since Blockchain.info cannot correctly verify the signatures in a multi-signature transaction correctly yet, pushing is disabled. In order to broadcast this transaction, you need to use another service.  Bitcoind/Bitcoin-Qt are known to work.");
+        return;
 
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
         url = 'http://blockchain.info/pushtx';
@@ -887,21 +563,14 @@
         return false;
     }
 
-    function txRebuild() {
-        var sec = $('#txSec').val();
-        var addr = $('#txAddr').val();
-        var unspent = $('#txUnspent').val();
-        var balance = parseFloat($('#txBalance').val());
-        var fee = parseFloat('0'+$('#txFee').val());
-
+    function txKey(i) {
+        var sec = $('#txSec' + i).val();
         try {
             var res = parseBase58Check(sec); 
             var version = res[0];
             var payload = res[1];
         } catch (err) {
-            $('#txJSON').val('');
-            $('#txHex').val('');
-            return;
+            return null;
         }
 
         var compressed = false;
@@ -911,10 +580,41 @@
         }
 
         var eckey = new Bitcoin.ECKey(payload);
-
         eckey.setCompressed(compressed);
+        return eckey;
+    }
 
-        TX.init(eckey);
+    function txRebuild() {
+        var bytes = Crypto.util.hexToBytes($('#txRedemptionScript').val());
+        var redemption_script = new Bitcoin.Script(bytes);
+        var m = redemption_script.buffer[0] - Bitcoin.Opcode.map["OP_1"] + 1;
+
+        var eckey1 = (m >= 1) ? txKey(1) : null;
+        var eckey2 = (m >= 2) ? txKey(2) : null;
+        var eckey3 = (m >= 3) ? txKey(3) : null;
+
+        if( (m >= 3 && (eckey3 == null || eckey2 == null || eckey1 == null))
+           || (m >= 2 && (eckey2 == null || eckey1 == null))
+           || (m >= 1 && (eckey1 == null)) ) {
+            $('#txJSON').val('');
+            $('#txHex').val('');
+            return;
+        }
+
+        var eckeys = new Array();
+        if( m >= 1 )
+            eckeys.push(eckey1);
+        if( m >= 2 )
+            eckeys.push(eckey2);
+        if( m >= 3 )
+            eckeys.push(eckey3);
+
+        var addr = $('#txAddr').val();
+        var unspent = $('#txUnspent').val();
+        var balance = parseFloat($('#txBalance').val());
+        var fee = parseFloat('0'+$('#txFee').val());
+
+        TX.init(eckeys, redemption_script);
 
         var fval = 0;
         var o = txGetOutputs();
@@ -924,10 +624,12 @@
         }
 
         // send change back or it will be sent as fee
-        if (balance > fval + fee) {
-            var change = balance - fval - fee;
-            TX.addOutput(addr, change);
-        }
+        // Current BitcoinJS won't let us return the change to ourselves.
+        // It throwns an exception in Bitcoin.Address.decodeString complaining about "Version 5" addresses.
+        // if (balance > fval + fee) {
+        //     var change = balance - fval - fee;
+        //     TX.addOutput(addr, change);
+        // }
 
         try {
             var sendTx = TX.construct();
@@ -938,6 +640,9 @@
             $('#txJSON').val(txJSON);
             $('#txHex').val(txHex);
         } catch(err) {
+            if( ('' + err) == 'Version 5 not supported!' ) {
+                alert("The current version of BitcoinJS does not support spending to P2SH addresses yet.")
+            }
             $('#txJSON').val('');
             $('#txHex').val('');
         }
@@ -946,8 +651,8 @@
     function txSign() {
         if (txFrom=='txFromSec')
         {
-          txRebuild();
-          return;
+            txRebuild();
+            return;
         }
 
         var str = $('#txJSON').val();
@@ -995,28 +700,6 @@
         txType = $(this).attr('id');
     }
 
-    function txChangeFrom() {
-      txFrom = $(this).attr('id');
-      var bFromKey = txFrom=='txFromSec' || txFrom=='txFromPass';
-      $('#txJSON').attr('readonly', txFrom!='txFromJSON');
-      $('#txHex').attr('readonly', txFrom!='txFromRaw');
-      $('#txFee').attr('readonly', !bFromKey);
-      $('#txAddr').attr('readonly', !bFromKey);
-      $('#txBalance').attr('readonly', !bFromKey);
-
-      $.each($(document).find('.txCC'), function() {
-        $(this).find('#txDest').attr('readonly', !bFromKey);
-        $(this).find('#txValue').attr('readonly', !bFromKey);
-      });
-
-      if ( txFrom=='txFromRaw' )
-        $('#txHex').focus();
-      else if ( txFrom=='txFromJSON' )
-        $('#txJSON').focus();
-      else if ( bFromKey )
-        $('#txSec').focus();
-    }
-
     function txOnChangeFee() {
 
         var balance = parseFloat($('#txBalance').val());
@@ -1052,112 +735,6 @@
         return res;
     }
 
-    // -- sign --
-
-    function updateAddr(from, to) {
-        var sec = from.val();
-        var addr = '';
-        var eckey = null;
-        var compressed = false;
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-            if (payload.length > 32) {
-                payload.pop();
-                compressed = true;
-            }
-            eckey = new Bitcoin.ECKey(payload);
-            var curve = getSECCurveByName("secp256k1");
-            var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = getEncoded(pt, compressed);
-            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
-            setErrorState(from, false);
-        } catch (err) {
-            setErrorState(from, true, "Bad private key");
-        }
-        to.val(addr);
-        return {"key":eckey, "compressed":compressed, "addrtype":version};
-    }
-
-    function sgGenAddr() {
-        updateAddr($('#sgSec'), $('#sgAddr'));
-    }
-
-    function sgOnChangeSec() {
-        $('#sgSig').val('');
-        clearTimeout(timeout);
-        timeout = setTimeout(sgGenAddr, TIMEOUT);
-    }
-
-    function sgSign() {
-        var message = $('#sgMsg').val();
-        var p = updateAddr($('#sgSec'), $('#sgAddr'));
-        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-        $('#sgSig').val(sig);
-    }
-
-    function sgOnChangeMsg() {
-        $('#sgSig').val('');
-        clearTimeout(timeout);
-        timeout = setTimeout(sgUpdateMsg, TIMEOUT);
-    }
-
-    function sgUpdateMsg() {
-        $('#vrMsg').val($('#sgMsg').val());
-    }
-
-    // -- verify --
-
-    function vrClearRes() {
-        $('#vrRes').text('');
-        $('.vrMsg').removeClass('has-error');
-        $('.vrSig').removeClass('has-error');
-        $('.vrMsg').removeClass('has-success');
-        $('.vrSig').removeClass('has-success');
-        window.location.hash='#verify';
-    }
-
-    function vrPermalink()
-    {
-      var msg = $('#vrMsg').val();
-      var sig = $('#vrSig').val();
-      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig);
-    }
-
-    function vrVerify() {
-        var msg = $('#vrMsg').val();
-        var sig = $('#vrSig').val();
-        var res = verify_message(sig, msg, PUBLIC_KEY_VERSION);
-
-        if ( !msg )
-        {
-          $('.vrMsg').addClass('has-error');
-          return;
-        }
-
-        if ( !sig )
-        {
-          $('.vrSig').addClass('has-error');
-          return;
-        }
-
-        if (res) {
-            $('.vrMsg').removeClass('has-error');
-            $('.vrSig').removeClass('has-error');
-            var href = ADDRESS_URL_PREFIX+res;
-            var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
-            $('#vrRes').html('verified to: ' + a);
-        } else {
-            $('#vrRes').text('not verified');
-        }
-
-        window.location.hash='#verify'+vrPermalink();
-        return false;
-    }
-
     function crChange()
     {
       PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
@@ -1165,7 +742,6 @@
       ADDRESS_URL_PREFIX = $(this).attr('href');
       $('#crName').text($(this).text());
       $('#crSelect').dropdown('toggle');
-      gen_update();
       translate();
       return false;
     }
@@ -1181,44 +757,34 @@
 
         // generator
 
-        onInput('#pass', onChangePass);
-        onInput('#hash', onChangeHash);
-        onInput('#sec', onChangePrivKey);
+        onInput('#pub1', onChangePublicKey);
+        onInput('#pub2', onChangePublicKey);
+        onInput('#pub3', onChangePublicKey);
 
-        $('#genRandom').click(genRandom);
+        $('#req_count label input').on('change', update_req_count );
+        $('#outof_count label input').on('change', update_outof_count );
 
-        $('#gen_from label input').on('change', update_gen_from );
-        $('#gen_comp label input').on('change', update_gen_compressed );
-
-        genRandomPass();
-        genUpdateLabel();
-
-        // chains
-
-        $('#chPlay').click(chOnPlay);
-
-        $('#chain_from label input').on('change', onChangeMethod );
-        $('#chain_format label input').on('change', onChangeFormat );
-
-        onInput($('#range'), onChangeRange);
-        onInput($('#seed'), onChangeSeed);
-        onInput($('#memo'), onChangeMemo);
-        onInput($('#elChange'), onChangeRange);
+        initializePublicKeys();
+        reqUpdateLabel();
+        outofUpdateLabel();
 
         // transactions
 
-        $('#txSec').val(tx_sec);
-        $('#txAddr').val(tx_addr);
+        $("#txRedemptionScript").val('524104520ee4e1784521633bce92245367948081e1b81e59a19b2fefbe93d47c29e042000b16ea4d826a62e4eb30790c556f298870d0255f33aba91092123b11f961c8410498d2ffaba0eec39a2c403939fe5c0969271b279940720fc69e10e0664ba66f709110a5816dad3e378caec62f45c58f7226729749d0b4413cf47c5ffe3c89a79f4104d4b2d7638724d660671b9b8c3fc728f2abe486168c3bc7df868909d1d8e6f168162848c0777c3471c0ad7bb075c284445bf27c96131b0ca642b30cbf5f862cf653ae');
+        txOnChangeRedemptionScript();
+
+        $("#txSec1").val('5KNVGaQirviYX8qKSwCePBvYaxDGxtudTwggCdFieCEHGLnDvje');
+        $("#txSec2").val('5Jij3wX4T4BxKvJeAWq8mmfgoSPNCR6fMhMCFuXpibE4ECCxsiU');
+        $("#txSec3").val('5K2GJtSnxu9xGpPTQU7X1F1HZCeHuFvBA5PncS79kLz1SsQUqQp');
+
         $('#txDest').val(tx_dest);
 
         txSetUnspent(tx_unspent);
 
         $('#txGetUnspent').click(txGetUnspent);
         $('#txType label input').on('change', txChangeType);
-        $('#txFrom label input').on('change', txChangeFrom);
 
-        onInput($('#txSec'), txOnChangeSec);
-        onInput($('#txAddr'), txOnChangeAddr);
+        onInput($('#txRedemptionScript'), txOnChangeRedemptionScript);
         onInput($('#txUnspent'), txOnChangeUnspent);
         onInput($('#txHex'), txOnChangeHex);
         onInput($('#txJSON'), txOnChangeJSON);
@@ -1237,45 +803,6 @@
 
         $('#enc_from label input').on('change', update_enc_from );
         $('#enc_to label input').on('change', update_enc_to );
-
-        // sign
-
-        $('#sgSec').val('5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf');
-        $('#sgAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
-        $('#sgMsg').val("C'est par mon ordre et pour le bien de l'Etat que le porteur du présent a fait ce qu'il a fait.");
-
-        onInput('#sgSec', sgOnChangeSec);
-        onInput('#sgMsg', sgOnChangeMsg);
-
-        $('#sgSign').click(sgSign);
-        $('#sgForm').submit(sgSign);
-
-        // verify
-
-        var vrMsg = '';
-        var vrSig = '';
-        if ( window.location.hash && window.location.hash.indexOf('?')!=-1 )
-        {
-          var args = window.location.hash.split('?')[1].split('&');
-          for ( var i=0; i<args.length; i++ )
-          {
-            var arg = args[i].split('=');
-            if ( arg[0]=='vrMsg')
-              vrMsg=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrSig')
-              vrSig=decodeURIComponent(arg[1]);
-          }
-        }
-
-        $('#vrMsg').val(vrMsg?vrMsg:$('#sgMsg').val());
-        $('#vrSig').val(vrSig);
-
-        $('#vrVerify').click(vrVerify);
-        onInput('#vrMsg', vrClearRes);
-        onInput('#vrSig', vrClearRes);
-
-        if (vrMsg && vrSig)
-          vrVerify();
 
         // currency select
 
