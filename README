@@ -1,6 +1,6 @@
 JavaScript Client-Side Multisignature P2SH Address and Transaction Generator
 
-http://github.com/sarchar/brainwallet.github.com
+http://github.com/ms-brainwallet/ms-brainwallet.github.io
 
 Notable features:
 
@@ -10,3 +10,4 @@ Notable features:
 - OpenSSL point conversion and compressed keys support
 - RFC 1751 JavaScript implementation
 - Bitcoin transactions editor
+

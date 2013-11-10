@@ -159,6 +159,10 @@
     }
 
     function update_outof_count() {
+        // TODO - this must remain '3' for now, as only M-of-3 multisigs are considered standard right now.
+        $("#outof_3").click();
+        return;
+
         outof_count = parseInt($(this).attr('id').substring(6))
         outofUpdateLabel();
         update_outof();
@@ -229,9 +233,12 @@
     }
 
     function initializePublicKeys() {
-        $('#pub1').val('045b18a4e0153f0b4a8864976d0c3e55ff6845857f8ee818ca5aa22fbdcfaf51f408005b719d7226310d191f993960055681de48a12ff430b7ca2f6298fbae19d5');
-        $('#pub2').val('04edb36cd12605e32115916817d064733513992abcb69c12c2a3fe8a349d1bfe52f164e801f3d16b6dc5caaf8a901490a0a5c30ccde5a2e19b7f8a345d968ebf53');
-        $('#pub3').val('04757f731c485c1e387a110a2441965c93c699d03aecaa9447154acbc0c28c23044dca44dbc63304957ed36ca0a16b800a31cd2ca8732ca8a7c5709c646c538bcc');
+        // TODO - support/use compressed pubkeys and make them default
+        // TODO - BIP32 and chain-generation (pubkeys can be incremented). provide 3 seeds, increment based on index
+        // TODO - "meta" redeemscript (contains the keys) and can be used to seed BIP32 chains
+        $('#pub1').val('03d728ad6757d4784effea04d47baafa216cf474866c2d4dc99b1e8e3eb936e730');
+        $('#pub2').val('02d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fd');
+        $('#pub3').val('03aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d9');
         $('#pub1').focus();
         reqUpdateLabel();
         generate_redemption_script();
@@ -770,12 +777,12 @@
 
         // transactions
 
-        $("#txRedemptionScript").val('524104520ee4e1784521633bce92245367948081e1b81e59a19b2fefbe93d47c29e042000b16ea4d826a62e4eb30790c556f298870d0255f33aba91092123b11f961c8410498d2ffaba0eec39a2c403939fe5c0969271b279940720fc69e10e0664ba66f709110a5816dad3e378caec62f45c58f7226729749d0b4413cf47c5ffe3c89a79f4104d4b2d7638724d660671b9b8c3fc728f2abe486168c3bc7df868909d1d8e6f168162848c0777c3471c0ad7bb075c284445bf27c96131b0ca642b30cbf5f862cf653ae');
+        $("#txRedemptionScript").val('522103d728ad6757d4784effea04d47baafa216cf474866c2d4dc99b1e8e3eb936e7302102d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fd2103aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d953ae');
         txOnChangeRedemptionScript();
 
-        $("#txSec1").val('5KNVGaQirviYX8qKSwCePBvYaxDGxtudTwggCdFieCEHGLnDvje');
-        $("#txSec2").val('5Jij3wX4T4BxKvJeAWq8mmfgoSPNCR6fMhMCFuXpibE4ECCxsiU');
-        $("#txSec3").val('5K2GJtSnxu9xGpPTQU7X1F1HZCeHuFvBA5PncS79kLz1SsQUqQp');
+        $("#txSec1").val('KybuecAGpGhfLP4y6bd6bidFn23dGK2EJJi8zvbwjoffYd14EsU6');
+        $("#txSec2").val('L11z9LhtCJmPPtK4cwMC4s9s9R3uXkuPkmGfjBmUGGHn7eFejiPC');
+        $("#txSec3").val('L1idoWSvtirHZgYU5eVFGHSHG9xXB72AyLSupfQrs6JUvUAPSKzS');
 
         $('#txDest').val(tx_dest);
 
