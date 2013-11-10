@@ -1,5 +1,6 @@
 (function($){
 
+    var pubkeys_from = 'manual';
     var req_count = 2;
     var outof_count = 3;
     var gen_compressed = false;
@@ -137,6 +138,25 @@
         }
     }
 
+    function pubkeysFromUpdateLabel() {
+      $('#pubkeysFromMsg').text($('#pubkeys_from_'+pubkeys_from).parent().attr('title'));
+    }
+
+    function updatePubkeysFrom() {
+        $('#pub1').attr('readonly', pubkeys_from != 'manual');
+        $('#pub2').attr('readonly', pubkeys_from != 'manual');
+        $('#pub3').attr('readonly', pubkeys_from != 'manual');
+        $('#redemption_script').attr('readonly', pubkeys_from != 'redemption_script');
+        if( pubkeys_from == 'manual' ) $("#pub1").focus();
+        else if( pubkeys_from == 'redemption_script' ) $("#redemption_script").focus();
+    }
+
+    function update_pubkeys_from() {
+        pubkeys_from = $(this).attr('id').substring(13);
+        pubkeysFromUpdateLabel();
+        updatePubkeysFrom();
+    }
+
     function reqUpdateLabel() {
       $('#reqMsg').text($('#req_'+req_count).parent().attr('title'));
     }
@@ -210,8 +230,12 @@
         var redemption_script_str = Crypto.util.bytesToHex(redemption_script.buffer);
         $("#redemption_script").val(redemption_script_str);
 
+        update_p2sh_address();
+    }
+
+    function update_p2sh_address() {
         // Hash the script to produce the bitcoin address:
-        var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(redemption_script.buffer);
+        var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(Crypto.util.hexToBytes($("#redemption_script").val()));
         var p2sh_addr = new Bitcoin.Address(redemptionScriptHash160);
         p2sh_addr.version = 5;
         $("#addr").val('' + p2sh_addr);
@@ -227,9 +251,45 @@
         $('#genAddrURL').attr('title', addr);
     }
 
+    function parse_redemption_script() {
+        var redemption_script_bytes = Crypto.util.hexToBytes($("#redemption_script").val());
+        var redemption_script = new Bitcoin.Script(redemption_script_bytes);
+
+        console.log(redemption_script.chunks);
+        var m = redemption_script.chunks[0] - Bitcoin.Opcode.map["OP_1"] + 1;
+        if( m < 1 || m > 3 ) return;
+
+        var slen = redemption_script.chunks.length;
+        if( slen < 3 ) return;
+        if( redemption_script.chunks[slen - 1] != Bitcoin.Opcode.map["OP_CHECKMULTISIG"] ) return;
+
+        var n = redemption_script.chunks[slen - 2] - Bitcoin.Opcode.map["OP_1"] + 1;
+        if( n < 1 || n > 3 ) return;
+
+        // Temporary
+        if( n != 3 ) {
+            alert("Only m-of-3 multisignature transactions are supported.");
+            return;
+        }
+
+        if( slen == (n + 3) ) {
+            if( n >= 1 ) $("#pub1").val(Crypto.util.bytesToHex(redemption_script.chunks[1]));
+            if( n >= 2 ) $("#pub2").val(Crypto.util.bytesToHex(redemption_script.chunks[2]));
+            if( n >= 3 ) $("#pub3").val(Crypto.util.bytesToHex(redemption_script.chunks[3]));
+            $("#req_" + m).click();
+            $("#outof_" + n).click();
+            update_p2sh_address();
+        }
+    }
+
     function onChangePublicKey() {
         clearTimeout(timeout);
         timeout = setTimeout(generate_redemption_script, TIMEOUT);
+    }
+
+    function onChangeRedemptionScript() {
+        clearTimeout(timeout);
+        timeout = setTimeout(parse_redemption_script, TIMEOUT);
     }
 
     function initializePublicKeys() {
@@ -240,6 +300,7 @@
         $('#pub2').val('02d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fd');
         $('#pub3').val('03aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d9');
         $('#pub1').focus();
+        pubkeysFromUpdateLabel();
         reqUpdateLabel();
         generate_redemption_script();
     }
@@ -767,7 +828,9 @@
         onInput('#pub1', onChangePublicKey);
         onInput('#pub2', onChangePublicKey);
         onInput('#pub3', onChangePublicKey);
+        onInput('#redemption_script', onChangeRedemptionScript);
 
+        $('#pubkeys_from label input').on('change', update_pubkeys_from );
         $('#req_count label input').on('change', update_req_count );
         $('#outof_count label input').on('change', update_outof_count );
 

@@ -63,6 +63,15 @@
             <fieldset>
               <legend>Create Multisignature P2SH</legend>
               <div class="form-group">
+                <label class="col-lg-2 control-label" for="pubkey_from_manual">Get Public Keys From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="pubkeys_from">
+                    <label class="btn btn-default active" title="Public keys entered manually"><input id="pubkeys_from_manual" name="pubkeys_from" type="radio" />Manual</label>
+                    <label class="btn btn-default" title="Public Keys extracted from redemption script"><input id="pubkeys_from_redemption_script" name="pubkeys_from" type="radio" />Redemption Script</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="pubkeysFromMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group">
                 <label class="col-lg-2 control-label" for="req_1">Signatures Required (M)</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="req_count">
@@ -86,7 +95,7 @@
                 <label class="col-lg-2 control-label" for="pub1">Public Key #1 (SEC)</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <textarea class="form-control" id="pub1" type="text" rows="1"></textarea>
+                    <input class="form-control" id="pub1" type="text" />
                   </div>
                 </div>
               </div>
@@ -94,7 +103,7 @@
                 <label class="col-lg-2 control-label" for="pub2">Public Key #2 (SEC)</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <textarea class="form-control" id="pub2" type="text" rows="1"></textarea>
+                    <input class="form-control" id="pub2" type="text" />
                   </div>
                 </div>
               </div>
@@ -102,7 +111,7 @@
                 <label class="col-lg-2 control-label" for="pub3">Public Key #3 (SEC)</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <textarea class="form-control" id="pub3" type="text" rows="1"></textarea>
+                    <input class="form-control" id="pub3" type="text" />
                   </div>
                 </div>
               </div>
