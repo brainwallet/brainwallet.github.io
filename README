@@ -10,5 +10,4 @@ Notable features:
 - Online converter, including Base58 decoder and encoder
 - OpenSSL point conversion and compressed keys support
 - RFC 1751 JavaScript implementation
-- Bitcoin transactions editor
 
