@@ -1,5 +1,7 @@
 (function($){
 
+    var key_derivation = 'public';
+    var extpubkeys_from = 'manual';
     var pubkeys_from = 'manual';
     var req_count = 2;
     var outof_count = 3;
@@ -138,8 +140,325 @@
         }
     }
 
+    // --- bip32 ---
+
+    function keyDerivationUpdateLabel() {
+      $('#keyDerivationMsg').text($('#key_derivation'+key_derivation).parent().attr('title'));
+    }
+
+    function updateKeyDerivation() {
+        $('#extpubkeys_from_group').removeClass('hidden').addClass((key_derivation == 'public') ? '' : 'hidden');
+        $('#extpub1_group').removeClass('hidden').addClass((key_derivation == 'public') ? '' : 'hidden');
+        $('#extpub2_group').removeClass('hidden').addClass((key_derivation == 'public') ? '' : 'hidden');
+        $('#extpub3_group').removeClass('hidden').addClass((key_derivation == 'public') ? '' : 'hidden');
+        $('#extpublic_key_package').attr('readonly', (key_derivation == 'private' || extpubkeys_from == 'manual'));
+        $('#bip32private_key1_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        $('#bip32private_key2_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        $('#bip32private_key3_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        if( key_derivation == 'public' ) {
+            if( extpubkeys_from == 'manual' ) $("#extpub1").focus();
+            else if( extpubkeys_from == 'extpublic_key_package' ) $("#extpublic_key_package").focus();
+        } else if( key_derivation == 'private' ) $("#bip32private_key1").focus();
+
+        // The generated private keys cannot be displayed if we're doing public-key derivation
+        $('#genbip32private_key1_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        $('#genbip32private_key2_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        $('#genbip32private_key3_group').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+        $('#bip32SpendP2SH').removeClass('hidden').addClass((key_derivation == 'private') ? '' : 'hidden');
+    }
+
+    function update_key_derivation() {
+        key_derivation = $(this).attr('id').substring(15);
+        keyDerivationUpdateLabel();
+        updateKeyDerivation();
+
+        $("#extpublic_key_package").val("");
+        $("#genextpub1").val("");
+        $("#genextpub2").val("");
+        $("#genextpub3").val("");
+        $("#genbip32private_key1").val("");
+        $("#genbip32private_key2").val("");
+        $("#genbip32private_key3").val("");
+
+        clearTimeout(timeout);
+        timeout = setTimeout(generate_extended_public_key_package, TIMEOUT);
+    }
+
+
+    function extpubkeysFromUpdateLabel() {
+      $('#extpubkeysFromMsg').text($('#extpubkeys_from_'+extpubkeys_from).parent().attr('title'));
+    }
+
+    function updateExtpubkeysFrom() {
+        $('#extpub1').attr('readonly', extpubkeys_from != 'manual');
+        $('#extpub2').attr('readonly', extpubkeys_from != 'manual');
+        $('#extpub3').attr('readonly', extpubkeys_from != 'manual');
+        $('#extpublic_key_package').attr('readonly', extpubkeys_from != 'extpublic_key_package');
+        if( extpubkeys_from == 'manual' ) $("#extpub1").focus();
+        else if( extpubkeys_from == 'extpublic_key_package' ) $("#extpublic_key_package").focus();
+    }
+
+    function update_extpubkeys_from() {
+        extpubkeys_from = $(this).attr('id').substring(16);
+        extpubkeysFromUpdateLabel();
+        updateExtpubkeysFrom();
+    }
+
+    function get_extended_key_set(k1, k2, k3) {
+        var key1;
+        try {
+            var key1_str = $(k1).val();
+            key1 = new BIP32(key1_str);
+        } catch(err) {
+            key1 = null;
+        }
+
+        var key2;
+        try {
+            var key2_str = $(k2).val();
+            key2 = new BIP32(key2_str);
+        } catch(err) {
+            key2 = null;
+        }
+
+        var key3;
+        try {
+            var key3_str = $(k3).val();
+            key3 = new BIP32(key3_str);
+        } catch(err) {
+            key3 = null;
+        }
+
+        return { key1: key1, key2: key2, key3: key3 };
+    }
+
+    function generate_extended_public_key_package() {
+        var keyset = get_extended_key_set(
+                (key_derivation == 'public') ? "#extpub1" : "#bip32private_key1",
+                (key_derivation == 'public') ? "#extpub2" : "#bip32private_key2",
+                (key_derivation == 'public') ? "#extpub3" : "#bip32private_key3"
+        );
+
+        var count = 0;
+        var bytes = [];
+
+        if( keyset.key1 !== null ) {
+            count |= 0x01;
+            bytes = bytes.concat(Bitcoin.Base58.decode(keyset.key1.extended_public_key_string("base58")));
+        }
+
+        if( keyset.key2 !== null ) {
+            count |= 0x02;
+            bytes = bytes.concat(Bitcoin.Base58.decode(keyset.key2.extended_public_key_string("base58")));
+        }
+
+        if( keyset.key3 !== null ) {
+            count |= 0x04;
+            bytes = bytes.concat(Bitcoin.Base58.decode(keyset.key3.extended_public_key_string("base58")));
+        }
+
+        bytes = [count & 0xff].concat(bytes);
+
+        var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true});
+        bytes = bytes.concat(checksum.slice(0, 4));
+
+        $("#extpublic_key_package").val(Crypto.util.bytesToHex(bytes));
+
+        bip32_generate();
+    }
+
+    function parse_extended_public_key_package() {
+        var extpackage = Crypto.util.hexToBytes($("#extpublic_key_package").val());
+
+        var checksum = extpackage.slice(extpackage.length-4);
+        if( Crypto.util.bytesToHex(Crypto.SHA256(Crypto.SHA256(extpackage.slice(0, extpackage.length-4), {asBytes: true}), {asBytes: true}).slice(0, 4)) 
+            != Crypto.util.bytesToHex(checksum) ) {
+            throw new Error("Invalid extended public key package");
+        }
+
+        var count = extpackage[0];
+        if( count < 0 || count > 7 ) {
+            throw new Error("Invalid extended public key package");
+        }
+
+        var p = 1;
+        var keys = new Array();
+        for( var i = 0; i < 3; i++ ) {
+            if( ( count & (1 << i) ) != 0 ) {
+                var k = new BIP32(Bitcoin.Base58.encode(extpackage.slice(p, p+82)));
+                if( k.has_private_key ) throw new Error("Invalid extended public key package");
+                keys.push(k);
+                p += 82;
+            } else {
+                keys.push(null);
+            }
+        }
+        console.log(keys);
+
+        for( var i = 0; i < 3; i++ ) {
+            if( keys[i] != null ) {
+                $("#extpub" + (i+1)).val(keys[i].extended_public_key_string("base58"));
+            } else {
+                $("#extpub" + (i+1)).val("");
+            }
+        }
+
+        bip32_generate();
+    }
+
+    function onChangeExtendedPublicKey() {
+        $("#extpublic_key_package").val("");
+        clearTimeout(timeout);
+        timeout = setTimeout(generate_extended_public_key_package, TIMEOUT);
+    }
+    
+    function onChangeExtendedPublicKeyPackage() {
+        $("#extpub1").val("");
+        $("#extpub2").val("");
+        $("#extpub3").val("");
+        clearTimeout(timeout);
+        timeout = setTimeout(parse_extended_public_key_package, TIMEOUT);
+    }
+
+    function onChangeExtendedPrivateKey() {
+        clearTimeout(timeout);
+        timeout = setTimeout(generate_extended_public_key_package, TIMEOUT);
+    }
+
+    function onChangeChainIndex() {
+        $("#genextpub1").val("");
+        $("#genextpub2").val("");
+        $("#genextpub3").val("");
+        $("#genbip32private_key1").val("");
+        $("#genbip32private_key2").val("");
+        $("#genbip32private_key3").val("");
+        clearTimeout(timeout);
+        timeout = setTimeout(bip32_generate, TIMEOUT);
+    }
+
+    function bip32_generate() {
+        var key1, key2, key3;
+
+        var keyset = get_extended_key_set(
+                (key_derivation == 'public') ? "#extpub1" : "#bip32private_key1",
+                (key_derivation == 'public') ? "#extpub2" : "#bip32private_key2",
+                (key_derivation == 'public') ? "#extpub3" : "#bip32private_key3"
+        );
+
+        if( key_to_english == 'public' ) {
+            if( keyset.key1 !== null && keyset.key1.has_private_key ) throw new Error("must be a public key");
+            if( keyset.key2 !== null && keyset.key2.has_private_key ) throw new Error("must be a public key");
+            if( keyset.key3 !== null && keyset.key3.has_private_key ) throw new Error("must be a public key");
+        }
+
+        if( key_to_english == 'private' ) {
+            if( keyset.key1 !== null && !keyset.key1.has_private_key ) throw new Error("must be a private key");
+            if( keyset.key2 !== null && !keyset.key2.has_private_key ) throw new Error("must be a private key");
+            if( keyset.key3 !== null && !keyset.key3.has_private_key ) throw new Error("must be a private key");
+        }
+
+        $("#genextpub1").val("");
+        $("#genextpub2").val("");
+        $("#genextpub3").val("");
+        $("#genbip32private_key1").val("");
+        $("#genbip32private_key2").val("");
+        $("#genbip32private_key3").val("");
+
+        var chain_index = parseInt($("#chain_index").val(), 10);
+        if( isNaN(chain_index) || chain_index < 0 || chain_index > 0x7fffffff ) return;
+
+        var path_prefix = 'm/0/0/';
+
+        if( keyset.key1 !== null ) {
+            var d = keyset.key1.derive(path_prefix + chain_index);
+            if( key_derivation == 'private') {
+                $("#genbip32private_key1").val(d.extended_private_key_string());
+            }
+            $("#genextpub1").val(d.extended_public_key_string());
+        }
+
+        if( keyset.key2 !== null ) {
+            var d = keyset.key2.derive(path_prefix + chain_index);
+            if( key_derivation == 'private') {
+                $("#genbip32private_key2").val(d.extended_private_key_string());
+            }
+            $("#genextpub2").val(d.extended_public_key_string());
+        }
+
+        if( keyset.key3 !== null ) {
+            var d = keyset.key3.derive(path_prefix + chain_index);
+            if( key_derivation == 'private') {
+                $("#genbip32private_key3").val(d.extended_private_key_string());
+            }
+            $("#genextpub3").val(d.extended_public_key_string());
+        }
+    }
+
+    function bip32CreateP2SH(setup_only) {
+        if( setup_only === undefined ) setup_only = false;
+
+        var keyset = get_extended_key_set("#genextpub1", "#genextpub2", "#genextpub3");
+
+        if( keyset.key1 !== null ) 
+            $("#pub1").val(Crypto.util.bytesToHex(keyset.key1.eckey.pub.getEncoded(true)));
+        else 
+            $("#pub1").val("");
+
+        if( keyset.key2 !== null ) 
+            $("#pub2").val(Crypto.util.bytesToHex(keyset.key2.eckey.pub.getEncoded(true)));
+        else 
+            $("#pub2").val("");
+
+        if( keyset.key3 !== null ) 
+            $("#pub3").val(Crypto.util.bytesToHex(keyset.key3.eckey.pub.getEncoded(true)));
+        else 
+            $("#pub3").val("");
+
+        if( setup_only ) return;
+
+        // Change the page.
+        $('a[href="#generator"]').click();
+        generate_redemption_script();
+    }
+
+    function bip32SpendP2SH() {
+        function compressed_private_key_base58(t, k) {
+            var bytes = [0x80].concat(k.eckey.priv.toByteArrayUnsigned()).concat([1]);
+            var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true}).slice(0, 4);
+            t.val(Bitcoin.Base58.encode(bytes.concat(checksum)));
+        }
+
+        bip32CreateP2SH(true);
+
+        var keyset = get_extended_key_set("#genbip32private_key1", "#genbip32private_key2", "#genbip32private_key3");
+
+        if( keyset.key1 !== null )
+            compressed_private_key_base58($("#txSec1"), keyset.key1);
+        else
+            $("#txSec1").val("");
+
+        if( keyset.key2 !== null )
+            compressed_private_key_base58($("#txSec2"), keyset.key2);
+        else
+            $("#txSec2").val("");
+
+        if( keyset.key3 !== null )
+            compressed_private_key_base58($("#txSec3"), keyset.key3);
+        else
+            $("#txSec3").val("");
+
+        // Change the page.
+        $('a[href="#tx"]').click();
+        generate_redemption_script();
+
+        $("#txRedemptionScript").val('');
+        txOnChangeRedemptionScript();
+    }
+
+    // --- create ---
+
     function pubkeysFromUpdateLabel() {
-      $('#pubkeysFromMsg').text($('#pubkeys_from_'+pubkeys_from).parent().attr('title'));
+        $('#pubkeysFromMsg').text($('#pubkeys_from_'+pubkeys_from).parent().attr('title'));
     }
 
     function updatePubkeysFrom() {
@@ -255,7 +574,6 @@
         var redemption_script_bytes = Crypto.util.hexToBytes($("#redemption_script").val());
         var redemption_script = new Bitcoin.Script(redemption_script_bytes);
 
-        console.log(redemption_script.chunks);
         var m = redemption_script.chunks[0] - Bitcoin.Opcode.map["OP_1"] + 1;
         if( m < 1 || m > 3 ) return;
 
@@ -293,9 +611,6 @@
     }
 
     function initializePublicKeys() {
-        // TODO - support/use compressed pubkeys and make them default
-        // TODO - BIP32 and chain-generation (pubkeys can be incremented). provide 3 seeds, increment based on index
-        // TODO - "meta" redeemscript (contains the keys) and can be used to seed BIP32 chains
         $('#pub1').val('03d728ad6757d4784effea04d47baafa216cf474866c2d4dc99b1e8e3eb936e730');
         $('#pub2').val('02d83bba35a8022c247b645eed6f81ac41b7c1580de550e7e82c75ad63ee9ac2fd');
         $('#pub3').val('03aeb681df5ac19e449a872b9e9347f1db5a0394d2ec5caf2a9c143f86e232b0d9');
@@ -822,6 +1137,37 @@
         $('a[data-toggle="tab"]').on('click', function (e) {
             window.location.hash = $(this).attr('href');
         });
+
+        // bip32
+
+        $('#key_derivation label input').on('change', update_key_derivation );
+        $('#extpubkeys_from label input').on('change', update_extpubkeys_from );
+
+        updateExtpubkeysFrom();
+        extpubkeysFromUpdateLabel();
+        updateKeyDerivation();
+        keyDerivationUpdateLabel();
+
+        $("#extpub1").val("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
+        $("#extpub2").val("xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB");
+        $("#extpub3").val("xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
+        $("#bip32private_key1").val("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi");
+        $("#bip32private_key2").val("xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U");
+        $("#bip32private_key3").val("xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKCEXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j");
+
+        onInput('#extpub1', onChangeExtendedPublicKey);
+        onInput('#extpub2', onChangeExtendedPublicKey);
+        onInput('#extpub3', onChangeExtendedPublicKey);
+        onInput('#extpublic_key_package', onChangeExtendedPublicKeyPackage);
+        onChangeExtendedPublicKey();
+        
+        onInput("#bip32private_key1", onChangeExtendedPrivateKey);
+        onInput("#bip32private_key2", onChangeExtendedPrivateKey);
+        onInput("#bip32private_key3", onChangeExtendedPrivateKey);
+        onInput("#chain_index", onChangeChainIndex);
+
+        $("#bip32CreateP2SH").click(function() { return bip32CreateP2SH(false); });
+        $("#bip32SpendP2SH").click(bip32SpendP2SH);
 
         // generator
 

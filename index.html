@@ -13,10 +13,13 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/bitcoinjs-min.js"></script>
+    <script src="js/sha512.js"></script>
+    <script src="js/modsqrt.js"></script>
     <script src="js/qrcode.js"></script>
     <script src="js/rfc1751.js"></script>
     <script src="js/mnemonic.js"></script>
     <script src="js/armory.js"></script>
+    <script src="js/bip32.js"></script>
     <script src="js/electrum.js"></script>
     <script src="js/tx.js"></script>
     <script src="js/bitcoinsig.js"></script>
@@ -30,6 +33,7 @@
         </div>
         <nav class="collapse navbar-collapse bs-navbar-collapse">
           <ul class="nav navbar-nav">
+            <li><a data-toggle="tab" href="#bip32" id="tab-bip32">BIP32 (Alpha!)</a></li>
             <li class="active">
               <a data-toggle="tab" href="#generator">Create</a></li>
             <li><a data-toggle="tab" href="#tx" id="tab-tx">Spend</a></li>
@@ -57,6 +61,153 @@
     </header>
     <div class="container">
       <div class="tab-content">
+        <!-- BIP32 -->
+        <div class="tab-pane fade in" id="bip32">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Multi-Key BIP32 Deterministic Key Generator</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="key_derivation_public">Key Derivation</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="key_derivation">
+                    <label class="btn btn-default active" title="Public key derivation will be used"><input id="key_derivation_public" name="key_derivation" type="radio" />Public key</label>
+                    <label class="btn btn-default" title="Private key derivation will be used"><input id="key_derivation_private" name="key_derivation" type="radio" />Private key</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="keyDerivationMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group" id="extpubkeys_from_group">
+                <label class="col-lg-2 control-label" for="extpubkeys_from_manual">Get Extended Public Keys From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="extpubkeys_from">
+                    <label class="btn btn-default active" title="Extended Public Keys entered manually"><input id="extpubkeys_from_manual" name="extpubkeys_from" type="radio" />Manual</label>
+                    <label class="btn btn-default" title="Extended Public Keys extracted from Extended Public Key Package"><input id="extpubkeys_from_extpublic_key_package" name="extpubkeys_from" type="radio" />Extended Public Key Package</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="extpubkeysFromMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group" id="extpub1_group">
+                <label class="col-lg-2 control-label" for="extpub1">Extended Public Key #1</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="extpub1" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="extpub2_group">
+                <label class="col-lg-2 control-label" for="extpub2">Extended Public Key #2</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="extpub2" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="extpub3_group">
+                <label class="col-lg-2 control-label" for="extpub3">Extended Public Key #3</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="extpub3" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="bip32private_key1_group">
+                <label class="col-lg-2 control-label" for="bip32private_key1">Extended Private Key #1</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="bip32private_key1" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="bip32private_key2_group">
+                <label class="col-lg-2 control-label" for="bip32private_key2">Extended Private Key #2</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="bip32private_key2" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="bip32private_key3_group">
+                <label class="col-lg-2 control-label" for="bip32private_key3">Extended Private Key #3</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="bip32private_key3" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="extpubkeypackage_group">
+                <label class="col-lg-2 control-label" for="extpublic_key_package">Extended Public Key Package</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="extpublic_key_package" readonly="readonly" rows="6"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chain_index">Chain Index</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="chain_index" maxlength="5" type="text" value="0" />
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                    <hr />
+                </div>
+              </div>
+              <div class="form-group" id="genextpub1_group">
+                <label class="col-lg-2 control-label" for="genextpub1">Generated Extended Public Key #1</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genextpub1" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="genextpub2_group">
+                <label class="col-lg-2 control-label" for="genextpub2">Generated Extended Public Key #2</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genextpub2" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="genextpub3_group">
+                <label class="col-lg-2 control-label" for="genextpub3">Generated Extended Public Key #3</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genextpub3" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="genbip32private_key1_group">
+                <label class="col-lg-2 control-label" for="genbip32private_key1">Generated Extended Private Key #1</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genbip32private_key1" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="genbip32private_key2_group">
+                <label class="col-lg-2 control-label" for="genbip32private_key2">Generated Extended Private Key #2</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genbip32private_key2" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="genbip32private_key3_group">
+                <label class="col-lg-2 control-label" for="genbip32private_key3">Generated Extended Private Key #3</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="genbip32private_key3" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <div class="input-group">
+                    <button class="btn btn-default" id="bip32CreateP2SH" title="Use the Generated Public Keys to create a Multisignature P2SH address" type="button">Create Multisignature P2SH</button>
+                    &nbsp;<button class="btn btn-default" id="bip32SpendP2SH" title="Use the Generated Private Keys to spend a Multisignature P2SH output" type="button">Spend Multisignature P2SH</button>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
         <!-- Create -->
         <div class="tab-pane fade in active" id="generator">
           <form action="/" class="form-horizontal" method="get">
