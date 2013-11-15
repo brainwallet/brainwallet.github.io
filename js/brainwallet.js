@@ -1292,6 +1292,7 @@
         $('#vrVerify').click(vrVerify);
         onInput('#vrMsg', vrClearRes);
         onInput('#vrSig', vrClearRes);
+        onInput('#vrAddr', vrClearRes);
 
         if (vrMsg && vrSig)
           vrVerify();
