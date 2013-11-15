@@ -1124,12 +1124,14 @@
     {
       var msg = $('#vrMsg').val();
       var sig = $('#vrSig').val();
-      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig);
+      var addr = $('#vrAddr').val();
+      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig)+'&vrAddr='+encodeURIComponent(addr);
     }
 
     function vrVerify() {
         var msg = $('#vrMsg').val();
         var sig = $('#vrSig').val();
+        var addr = $('#vrAddr').val();
         var res = verify_message(sig, msg, PUBLIC_KEY_VERSION);
 
         if ( !msg )
@@ -1144,14 +1146,27 @@
           return;
         }
 
-        if (res) {
+        if ( !addr )
+        {
+          if ( res )
+          {
+            addr = res;
+            $('#vrAddr').val(addr);
+          }
+        } else {
+          if ( res!=addr )
+            $('.vrAddr').addClass('has-error');
+        }
+
+        if (res && res==addr ) {
             $('.vrMsg').removeClass('has-error');
             $('.vrSig').removeClass('has-error');
-            var href = ADDRESS_URL_PREFIX+res;
-            var a = '<a href=' + href + ' target=_blank>' + res + '</a>';
-            $('#vrRes').html('verified to: ' + a);
+            $('.vrAddr').removeClass('has-error');
+            $('#vrRes').attr('class','strong text-success');
+            $('#vrRes').html('Message Verified');
         } else {
-            $('#vrRes').text('not verified');
+            $('#vrRes').attr('class','strong text-danger');
+            $('#vrRes').text('Message Not Verified');
         }
 
         window.location.hash='#verify'+vrPermalink();
@@ -1254,6 +1269,7 @@
 
         var vrMsg = '';
         var vrSig = '';
+        var vrAddr = '';
         if ( window.location.hash && window.location.hash.indexOf('?')!=-1 )
         {
           var args = window.location.hash.split('?')[1].split('&');
@@ -1264,11 +1280,14 @@
               vrMsg=decodeURIComponent(arg[1]);
             else if ( arg[0]=='vrSig')
               vrSig=decodeURIComponent(arg[1]);
+            else if ( arg[0]=='vrAddr')
+              vrAddr=decodeURIComponent(arg[1]);
           }
         }
 
         $('#vrMsg').val(vrMsg?vrMsg:$('#sgMsg').val());
         $('#vrSig').val(vrSig);
+        $('#vrAddr').val(vrAddr);
 
         $('#vrVerify').click(vrVerify);
         onInput('#vrMsg', vrClearRes);
