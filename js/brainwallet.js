@@ -530,194 +530,199 @@
     }
 
     // --- chain ---
-    var chain_mode = 'csv';
-    var addresses = [];
-    var chain_range = parseInt($('#range').val());
-    var chain_type = 'chain_armory';
+    var chMode = 'csv';
+    var chAddrList = [];
+    var chRange = 1;
+    var chType = 'armory';
 
-    function onChangeMethod() {
+    function chOnChangeType() {
         var id = $(this).attr('id');
 
-        if (chain_type != id) {
-            $('#seed').val('');
-            $('#expo').val('');
-            $('#memo').val('');
+        if (chType != id) {
+            $('#chCode').val('');
+            $('#chRoot').val('');
+            $('#chBackup').val('');
             $('#chMsg').text('');
-            $('#chain').text('');
+            $('#chList').text('');
             chOnStop();
         }
 
-        $('#elChange').attr('disabled', id != 'chain_electrum');
+        $('#chChange').attr('disabled', id != 'electrum');
 
-        chain_type = id;
+        chType = id;
     }
 
-    function onChangeFormat() {
-        chain_mode = $(this).attr('id');
-        update_chain();
+    function chOnChangeFormat() {
+        chMode = $(this).attr('id');
+        chUpdate();
     }
 
-    function addr_to_csv(i, r) {
+    function chAddrToCSV(i, r) {
         return i + ', "' + r[0] +'", "' + r[1] +'"\n';
     }
 
-    function update_chain() {
-        if (addresses.length == 0)
+    function chUpdate() {
+        if (chAddrList.length == 0)
             return;
         var str = '';
-        if (chain_mode == 'csv') {
-            for (var i = 0; i < addresses.length; i++)
-                str += addr_to_csv(i+1, addresses[i]);
+        if (chMode == 'csv') {
+            for (var i = 0; i < chAddrList.length; i++)
+                str += chAddrToCSV(i+1, chAddrList[i]);
 
-        } else if (chain_mode == 'json') {
+        } else if (chMode == 'json') {
 
             var w = {};
             w['keys'] = [];
-            for (var i = 0; i < addresses.length; i++)
-                w['keys'].push({'addr':addresses[i][0],'sec':addresses[i][1]});
+            for (var i = 0; i < chAddrList.length; i++)
+                w['keys'].push({'addr':chAddrList[i][0],'sec':chAddrList[i][1]});
             str = JSON.stringify(w, null, 4);
         }
-        $('#chain').text(str);
+        $('#chList').text(str);
 
-        chain_range = parseInt($('#range').val());
-        var change = chain_type == 'chain_electrum' ? parseInt($('#elChange').val()) : 0;
+        chRange = parseInt($('#chRange').val());
 
-        if (addresses.length >= chain_range+change)
+        var c = (chType == 'electrum') ? parseInt($('#chChange').val()) : 0;
+
+        if (chAddrList.length >= chRange+c)
             chOnStop();
 
     }
 
-    function onChangeSeed() {
-        $('#expo').val('');
+    function chOnChangeCode() {
+        $('#chRoot').val('');
         $('#chMsg').text('');
         chOnStop();
-        $('#memo').val( mn_encode(seed) );
+        $('#chBackup').val( mn_encode(chRoot) );
         clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, TIMEOUT);
+        timeout = setTimeout(chGenerate, TIMEOUT);
     }
 
-    function onChangeMemo() {
-        var str =  $('#memo').val();
+    function chOnChangeBackup() {
+        var str =  $('#chBackup').val();
 
         if (str.length == 0) {
             chOnStop();
+            $('#chCode').val('');
+            $('#chRoot').val('');
+            $('#chBackup').val('');
+            $('#chMsg').text('');
+            $('#chList').text('');
             return;
         }
 
-        if (chain_type == 'chain_electrum') {
+        if (chType == 'electrum') {
             if (issubset(mn_words, str))  {
                 var seed = mn_decode(str);
-                $('#seed').val(seed);
+                $('#chCode').val(seed);
             }
         }
 
-        if (chain_type == 'chain_armory') {
+        if (chType == 'armory') {
             var keys = armory_decode_keys(str);
             if (keys != null) {
                 var cc = keys[1];
                 var pk = keys[0];
-                $('#seed').val(Crypto.util.bytesToHex(cc));
-                $('#expo').val(Crypto.util.bytesToHex(pk));
+                $('#chCode').val(Crypto.util.bytesToHex(cc));
+                $('#chRoot').val(Crypto.util.bytesToHex(pk));
             }
         }
 
         clearTimeout(timeout);
-        timeout = setTimeout(chain_generate, TIMEOUT);
+        timeout = setTimeout(chGenerate, TIMEOUT);
     }
 
-    function chOnPlay() {
+    function chOnRandom() {
         var cc = Crypto.util.randomBytes(32);
         var pk = Crypto.util.randomBytes(32);
 
-        if (chain_type == 'chain_armory') {
-            $('#seed').val(Crypto.util.bytesToHex(cc));
-            $('#expo').val(Crypto.util.bytesToHex(pk));
-            var codes = armory_encode_keys(pk, cc);
-            $('#memo').val(codes);
+        if (chType == 'armory') {
+            $('#chCode').val(Crypto.util.bytesToHex(cc));
+            $('#chRoot').val(Crypto.util.bytesToHex(pk));
+            $('#chBackup').val(armory_encode_keys(pk, cc));
         }
 
-        if (chain_type == 'chain_electrum') {
+        if (chType == 'electrum') {
             var seed = Crypto.util.bytesToHex(pk.slice(0,16));
             //nb! electrum doesn't handle trailing zeros very well
             if (seed.charAt(0) == '0') seed = seed.substr(1);
-            $('#seed').val(seed);
-            var codes = mn_encode(seed);
-            $('#memo').val(codes);
+            $('#chCode').val(seed);
+            $('#chBackup').val(mn_encode(seed));
         }
-        chain_generate();
+        chGenerate();
     }
 
     function chOnStop() {
         Armory.stop();
         Electrum.stop();
-        if (chain_type == 'chain_electrum') {
+        if (chType == 'electrum') {
             $('#chMsg').text('');
         }
     }
 
-    function onChangeRange()
+    function chOnChangeRange()
     {
-        if ( addresses.length==0 )
+        if ( chAddrList.length==0 )
           return;
         clearTimeout(timeout);
-        timeout = setTimeout(update_chain_range, TIMEOUT);
+        timeout = setTimeout(chUpdate_range, TIMEOUT);
     }
 
-    function addr_callback(r) {
-        addresses.push(r);
-        $('#chain').append(addr_to_csv(addresses.length,r));
+    function chCallback(r) {
+        chAddrList.push(r);
+        $('#chList').append(chAddrToCSV(chAddrList.length,r));
     }
 
-    function electrum_seed_update(r, seed) {
+    function chElectrumUpdate(r, seed) {
         $('#chMsg').text('key stretching: ' + r + '%');
-        $('#expo').val(Crypto.util.bytesToHex(seed));
+        $('#chRoot').val(Crypto.util.bytesToHex(seed));
     }
 
-    function electrum_seed_success(privKey) {
+    function chElectrumSuccess(privKey) {
         $('#chMsg').text('');
-        $('#expo').val(Crypto.util.bytesToHex(privKey));
-        var addChange = parseInt($('#elChange').val());
-        Electrum.gen(chain_range, addr_callback, update_chain, addChange);
+        $('#chRoot').val(Crypto.util.bytesToHex(privKey));
+        var addChange = parseInt($('#chChange').val());
+        Electrum.gen(chRange, chCallback, chUpdate, addChange);
     }
 
-    function update_chain_range() {
-        chain_range = parseInt($('#range').val());
+    function chUpdate_range() {
+        chRange = parseInt($('#chRange').val());
+        chAddrList = [];
 
-        addresses = [];
-        $('#chain').text('');
+        $('#chList').text('');
 
-        if (chain_type == 'chain_electrum') {
-            var addChange = parseInt($('#elChange').val());
+        if (chType == 'electrum') {
+            var addChange = parseInt($('#chChange').val());
             Electrum.stop();
-            Electrum.gen(chain_range, addr_callback, update_chain, addChange);
+            Electrum.gen(chRange, chCallback, chUpdate, addChange);
         }
 
-        if (chain_type == 'chain_armory') {
-            var codes = $('#memo').val();
-            Armory.gen(codes, chain_range, addr_callback, update_chain);
+        if (chType == 'armory') {
+            var codes = $('#chBackup').val();
+            Armory.gen(codes, chRange, chCallback, chUpdate);
         }
     }
 
-    function chain_generate() {
+    function chGenerate() {
         clearTimeout(timeout);
 
-        var seed = $('#seed').val();
-        var codes = $('#memo').val();
+        var seed = $('#chCode').val();
+        var codes = $('#chBackup').val();
 
-        addresses = [];
+        chAddrList = [];
+
         $('#chMsg').text('');
-        $('#chain').text('');
+        $('#chList').text('');
 
         Electrum.stop();
 
-        if (chain_type == 'chain_electrum') {
+        if (chType == 'electrum') {
            if (seed.length == 0)
                return;
-            Electrum.init(seed, electrum_seed_update, electrum_seed_success);
+            Electrum.init(seed, chElectrumUpdate, chElectrumSuccess);
         }
 
-        if (chain_type == 'chain_armory') {
-            var uid = Armory.gen(codes, chain_range, addr_callback, update_chain);
+        if (chType == 'armory') {
+            var uid = Armory.gen(codes, chRange, chCallback, chUpdate);
             if (uid)
                 $('#chMsg').text('uid: ' + uid);
             else
@@ -1210,15 +1215,16 @@
 
         // chains
 
-        $('#chPlay').click(chOnPlay);
+        $('#chRandom').click(chOnRandom);
 
-        $('#chain_from label input').on('change', onChangeMethod );
-        $('#chain_format label input').on('change', onChangeFormat );
+        $('#chType label input').on('change', chOnChangeType);
+        $('#chFormat label input').on('change', chOnChangeFormat);
 
-        onInput($('#range'), onChangeRange);
-        onInput($('#seed'), onChangeSeed);
-        onInput($('#memo'), onChangeMemo);
-        onInput($('#elChange'), onChangeRange);
+        onInput($('#chRange'), chOnChangeRange);
+        onInput($('#chCode'), chOnChangeCode);
+        onInput($('#chBackup'), chOnChangeBackup);
+        onInput($('#chChange'), chOnChangeRange);
+        chRange = parseInt($('#chRange').val());
 
         // transactions
 

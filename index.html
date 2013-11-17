@@ -142,60 +142,60 @@
             <fieldset>
               <legend>Chains</legend>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="chain_simple">Generation Method</label>
+                <label class="col-lg-2 control-label" for="chType">Generation Method</label>
                 <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="chain_from">
-                    <label class="btn btn-default active"><input id="chain_armory" type="radio" />Armory</label> <label class="btn btn-default"><input id="chain_electrum" type="radio" />Electrum</label>
+                  <div class="btn-group" data-toggle="buttons" id="chType">
+                    <label class="btn btn-default active"><input id="armory" name="chType" type="radio" />Armory</label> <label class="btn btn-default"><input id="electrum" name="chType" type="radio" />Electrum</label>
                   </div>&nbsp;&nbsp;<span class="help-inline" id="chMsg">&nbsp;</span>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="seed">Chain Code</label>
+                <label class="col-lg-2 control-label" for="chCode">Chain Code</label>
                 <div class="col-lg-10 controls">
                   <div class="input-group">
-                    <input class="form-control" id="seed" maxlength="32" readonly="readonly" type="text" />
+                    <input class="form-control" id="chCode" maxlength="32" readonly="readonly" type="text" />
                     <div class="input-group-btn">
-                      <button class="btn btn-default" id="chPlay" title="Random" type="button">Random</button>
+                      <button class="btn btn-default" id="chRandom" title="Random" type="button">Random</button>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="expo">Root Key</label>
+                <label class="col-lg-2 control-label" for="chRoot">Root Key</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="expo" maxlength="64" readonly="readonly" type="text" />
+                  <input class="form-control" id="chRoot" maxlength="64" readonly="readonly" type="text" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="memo">Paper Backup</label>
+                <label class="col-lg-2 control-label" for="chBackup">Paper Backup</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="memo" rows="4"></textarea>
+                  <textarea class="form-control" id="chBackup" rows="4"></textarea>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="range">Primary Addresses</label>
+                <label class="col-lg-2 control-label" for="chRange">Primary Addresses</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="range" maxlength="3" type="text" value="5" />
+                  <input class="form-control" id="chRange" maxlength="3" type="text" value="5" />
                 </div>
               </div>
               <div class="form-group" title="Electrum specific, added to the end of the list">
-                <label class="col-lg-2 control-label" for="range">Change Addresses</label>
+                <label class="col-lg-2 control-label" for="chChange">Change Addresses</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" disabled="disabled" id="elChange" maxlength="3" type="text" value="1" />
+                  <input class="form-control" disabled="disabled" id="chChange" maxlength="3" type="text" value="1" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="csv">Wallet Format</label>
+                <label class="col-lg-2 control-label" for="chFormat">Wallet Format</label>
                 <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="chain_format">
+                  <div class="btn-group" data-toggle="buttons" id="chFormat">
                     <label class="btn btn-default active"><input id="csv" type="radio" />CSV</label> <label class="btn btn-default"><input id="json" type="radio" />JSON</label>
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="chain">Chain</label>
+                <label class="col-lg-2 control-label" for="chList">Chain</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="chain" readonly="readonly" rows="13"></textarea>
+                  <textarea class="form-control" id="chList" readonly="readonly" rows="13"></textarea>
                 </div>
               </div>
             </fieldset>
