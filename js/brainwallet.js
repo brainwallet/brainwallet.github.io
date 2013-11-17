@@ -833,7 +833,7 @@
           var bytes = sendTx.serialize();
           var hex = Crypto.util.bytesToHex(bytes);
           $('#txHex').val(hex);
-          $("#txQR").html(txMakeQR());
+          txMakeQR("#txQR");
           setErrorState($('#txJSON'), false, '');
         } catch (err) {
           setErrorState($('#txJSON'), true, 'syntax error');
@@ -844,7 +844,7 @@
         var str = $('#txHex').val();
         str = str.replace(/[^0-9a-fA-f]/g,'');
         $('#txHex').val(str);
-        $("#txQR").html(txMakeQR());
+        txMakeQR("#txQR");
         var bytes = Crypto.util.hexToBytes(str);
         var sendTx = TX.deserialize(bytes);
         var text = TX.toBBE(sendTx);
@@ -913,7 +913,7 @@
         } catch (err) {
             $('#txJSON').val('');
             $('#txHex').val('');
-            $("#txQR").html(txMakeQR());
+            txMakeQR("#txQR");
             return;
         }
 
@@ -950,12 +950,12 @@
             setErrorState($('#txJSON'), false, '');
             $('#txJSON').val(txJSON);
             $('#txHex').val(txHex);
-            $("#txQR").html(txMakeQR());
+            txMakeQR("#txQR");
         } catch(err) {
             throw(err);
             $('#txJSON').val('');
             $('#txHex').val('');
-            $("#txQR").html(txMakeQR());
+            txMakeQR("#txQR");
         }
     }
 
@@ -974,12 +974,12 @@
             sendTx = TX.resign(sendTx);
             $('#txJSON').val(TX.toBBE(sendTx));
             $('#txHex').val(Crypto.util.bytesToHex(sendTx.serialize()));
-            $("#txQR").html(txMakeQR());
+            txMakeQR("#txQR");
             $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
         } catch(err) {
             $('#txJSON').val('');
             $('#txHex').val('');
-            $("#txQR").html(txMakeQR());
+            txMakeQR("#txQR");
         }
     }
 
@@ -1070,7 +1070,7 @@
         return res;
     }
 
-    function txMakeQR() {
+    function txMakeQR(el) {
         var txHex = $('#txHex').val();
 	var text = txHex.toUpperCase();
 	//var text = BigInteger.fromByteArrayUnsigned(Crypto.util.hexToBytes(txHex)).toString(36).toUpperCase();
@@ -1079,14 +1079,13 @@
 	var error_correction_level = 1; // L
 	var mode = 2; // alphanumeric
 	var version = qr.getVersionFromLength(error_correction_level, mode, text.length);
-	console.log(text, version);
         qr.encodeToCanvas(
 		mode, //alphanumeric
 		text, // that should be encoded
 		version, // QR version
 		error_correction_level, // L errorchecking (0 = M)
 		4, // pix width
-		$("#txQR")[0], //destination canvas
+		$(el)[0], //destination canvas
 		[1, 1, 1], // background color
 		[0, 0, 0] // foreground color
 	);
