@@ -13,7 +13,8 @@
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/bitcoinjs-min.js"></script>
-    <script src="js/qrcode.js"></script>
+    <script src="js/qrcode/reedsolomon.js"></script>
+    <script src="js/qrcode/qrcodedecode.js"></script>
     <script src="js/rfc1751.js"></script>
     <script src="js/mnemonic.js"></script>
     <script src="js/armory.js"></script>
@@ -113,7 +114,7 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="genAddrQR">Address QR Code</label>
                 <div class="col-lg-10 controls">
-                  <a href="#" id="genAddrURL" target="_blank" title="Click to view address history (external link)"><span id="genAddrQR"></span></a>
+                  <a href="#" id="genAddrURL" target="_blank" title="Click to view address history (external link)"><canvas id="genAddrQR"></canvas></a>
                 </div>
               </div>
               <div class="form-group">
@@ -277,6 +278,12 @@
                 <label class="col-lg-2 control-label" for="txHex">Raw Transaction</label>
                 <div class="col-lg-10 controls">
                   <textarea class="form-control" id="txHex" readonly="readonly" rows="5"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txQR">Raw transaction QR Code</label>
+                <div class="col-lg-10 controls">
+                  <canvas id="txQR"></canvas>
                 </div>
               </div>
               <div class="form-group">
