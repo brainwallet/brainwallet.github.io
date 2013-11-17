@@ -664,7 +664,7 @@
         if ( chAddrList.length==0 )
           return;
         clearTimeout(timeout);
-        timeout = setTimeout(chUpdate_range, TIMEOUT);
+        timeout = setTimeout(chUpdateRange, TIMEOUT);
     }
 
     function chCallback(r) {
@@ -684,7 +684,7 @@
         Electrum.gen(chRange, chCallback, chUpdate, addChange);
     }
 
-    function chUpdate_range() {
+    function chUpdateRange() {
         chRange = parseInt($('#chRange').val());
         chAddrList = [];
 
