@@ -1160,7 +1160,7 @@
 
     // -- verify --
     function vrOnChangeSig() {
-        $('#vrAlert').empty();
+        //$('#vrAlert').empty();
         window.location.hash='#verify';
     }
 
@@ -1231,12 +1231,12 @@
 
         $('#vrAlert').empty();
 
-        if ( p && res && res==p.address )
+        var clone = $('#vrError').clone();
+
+        if ( p && res )
         {
-          $('#vrAddr').text(res);
-          var clone = $('#vrSuccess').clone();
-        } else {
-          var clone = $('#vrError').clone();
+          clone = p.address==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
+          clone.find('#vrAddr').text(res);
         }
 
         clone.appendTo($('#vrAlert'));

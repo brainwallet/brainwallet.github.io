@@ -388,10 +388,13 @@
               <legend>Verify Message</legend>
               <div class="hidden">
                 <div class="col-lg-offset-2 col-lg-10 alert alert-success fade in" id="vrSuccess">
-                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr">17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL</span>
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr"></span>
                 </div>
                 <div class="col-lg-offset-2 col-lg-10 alert alert-danger fade in" id="vrError">
                   <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message failed to verify!
+                </div>
+                <div class="col-lg-offset-2 col-lg-10 alert alert-warning fade in" id="vrWarning">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr"></span> (address doesn't match!)
                 </div>
               </div>
               <div id="vrAlert"></div>
