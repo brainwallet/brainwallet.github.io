@@ -1179,6 +1179,7 @@
               addr = a[0];
               sig = a[1];
             }
+            msg = fullTrim(msg); // doesn't work without this
             return { "message":msg, "address":addr, "signature":sig };
           }
         }
