@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Brainwallet - JavaScript Client-Side Bitcoin Address Generator</title>
-    <meta content="Client-side Bitcoin address and deterministic wallets generator, Base58 converter, transaction builder, signing and verifying messages with Bitcoin address" name="description"/>
+    <meta content="Client-side Bitcoin address and deterministic wallets generator, Base58 converter, transaction builder, signing and verifying messages with Bitcoin address" name="description" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="bitcoin address generator" name="description" />
     <meta content="brainwallet" name="author" />
@@ -357,13 +357,13 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="sgMsg">Message</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="sgMsg" rows="10"></textarea>
+                  <textarea class="form-control" id="sgMsg" rows="5" spellcheck="false"></textarea>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="sgSig">Signature</label>
+                <label class="col-lg-2 control-label" for="sgSig">Signed Message</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="sgSig" readonly="readonly" type="text" />
+                  <textarea class="form-control" id="sgSig" readonly="readonly" rows="10" spellcheck="false"></textarea>
                 </div>
               </div>
               <div class="form-group">
@@ -378,22 +378,19 @@
           <form action="/" class="form-horizontal" id="vrForm" method="get" name="vrForm">
             <fieldset>
               <legend>Verify Message</legend>
-              <div class="form-group vrAddr">
-                <label class="col-lg-2 control-label" for="vrAddr">Address</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="vrAddr" type="text" />
+              <div class="hidden">
+                <div class="col-lg-offset-2 col-lg-10 alert alert-success fade in" id="vrSuccess">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr">17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL</span>
+                </div>
+                <div class="col-lg-offset-2 col-lg-10 alert alert-danger fade in" id="vrError">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message failed to verify!
                 </div>
               </div>
-              <div class="form-group vrMsg">
-                <label class="col-lg-2 control-label" for="vrMsg">Message</label>
+              <div id="vrAlert"></div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="vrSig">Signed Message</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="vrMsg" rows="10" spellcheck="false"></textarea>
-                </div>
-              </div>
-              <div class="form-group vrSig">
-                <label class="col-lg-2 control-label" for="vrSig">Signature</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="vrSig" type="text" />
+                  <textarea class="form-control" id="vrSig" rows="10" spellcheck="false"></textarea>
                 </div>
               </div>
               <div class="form-group">

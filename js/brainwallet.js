@@ -1084,7 +1084,7 @@
             setErrorState(from, true, "Bad private key");
         }
         to.val(addr);
-        return {"key":eckey, "compressed":compressed, "addrtype":version};
+        return {"key":eckey, "compressed":compressed, "addrtype":version, "address":addr};
     }
 
     function sgGenAddr() {
@@ -1097,11 +1097,35 @@
         timeout = setTimeout(sgGenAddr, TIMEOUT);
     }
 
+    function fullTrim(message)
+    {
+        message = message.replace(/^\s+|\s+$/g, '');
+        message = message.replace(/^\n+|\n+$/g, '');
+        return message;
+    }
+
+    var sgHdr = [
+      "-----BEGIN BITCOIN SIGNED MESSAGE-----",
+      "-----BEGIN SIGNATURE-----",
+      "-----END BITCOIN SIGNED MESSAGE-----"
+    ];
+
+    function makeSignedMessage(msg, addr, sig)
+    {
+      return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
+    }
+
     function sgSign() {
-        var message = $('#sgMsg').val();
-        var p = updateAddr($('#sgSec'), $('#sgAddr'));
-        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-        $('#sgSig').val(sig);
+      var message = $('#sgMsg').val();
+      var p = updateAddr($('#sgSec'), $('#sgAddr'));
+
+      if ( !message || !p.address )
+        return;
+
+      message = fullTrim(message);
+      var sig = sign_message(p.key, message, p.compressed, p.addrtype);
+      var s = makeSignedMessage(message, p.address, sig);
+      $('#sgSig').val(s);
     }
 
     function sgOnChangeMsg() {
@@ -1133,48 +1157,52 @@
       return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig)+'&vrAddr='+encodeURIComponent(addr);
     }
 
-    function vrVerify() {
-        var msg = $('#vrMsg').val();
-        var sig = $('#vrSig').val();
-        var addr = $('#vrAddr').val();
-        var res = verify_message(sig, msg, PUBLIC_KEY_VERSION);
+    function splitSignedMessage(s)
+    {
+      s = s.replace('\r','');
 
-        if ( !msg )
+      var p0 = s.indexOf(sgHdr[0]);
+      if ( p0>=0 )
+      {
+        var p1 = s.indexOf(sgHdr[1]);
+        if ( p1>p0 )
         {
-          $('.vrMsg').addClass('has-error');
-          return;
-        }
-
-        if ( !sig )
-        {
-          $('.vrSig').addClass('has-error');
-          return;
-        }
-
-        if ( !addr )
-        {
-          if ( res )
+          var p2 = s.indexOf(sgHdr[2]);
+          if ( p2>p1 )
           {
-            addr = res;
-            $('#vrAddr').val(addr);
+            var msg = s.substring(p0+sgHdr[0].length+1, p1-1);
+            var sig = s.substring(p1+sgHdr[1].length+1, p2-1);
+            var addr = '';
+            if ( sig.indexOf('\n')>=0 )
+            {
+              var a = sig.split('\n');
+              addr = a[0];
+              sig = a[1];
+            }
+            return { "message":msg, "address":addr, "signature":sig };
           }
+        }
+      }
+      return false;
+    }
+
+    function vrVerify() {
+        var s = $('#vrSig').val();
+        var p = splitSignedMessage(s);
+        var res = verify_message(p.signature, p.message, PUBLIC_KEY_VERSION);
+
+        $('#vrAlert').empty();
+
+        if ( p && res && res==p.address )
+        {
+          $('#vrAddr').text(res);
+          var clone = $('#vrSuccess').clone();
         } else {
-          if ( res!=addr )
-            $('.vrAddr').addClass('has-error');
+          var clone = $('#vrError').clone();
         }
 
-        if (res && res==addr ) {
-            $('.vrMsg').removeClass('has-error');
-            $('.vrSig').removeClass('has-error');
-            $('.vrAddr').removeClass('has-error');
-            $('#vrRes').attr('class','strong text-success');
-            $('#vrRes').html('Message Verified');
-        } else {
-            $('#vrRes').attr('class','strong text-danger');
-            $('#vrRes').text('Message Not Verified');
-        }
+        clone.appendTo($('#vrAlert'));
 
-        window.location.hash='#verify'+vrPermalink();
         return false;
     }
 
@@ -1263,7 +1291,7 @@
 
         $('#sgSec').val('5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf');
         $('#sgAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
-        $('#sgMsg').val("C'est par mon ordre et pour le bien de l'Etat que le porteur du présent a fait ce qu'il a fait.");
+        $('#sgMsg').val("This is an example of a signed message.");
 
         onInput('#sgSec', sgOnChangeSec);
         onInput('#sgMsg', sgOnChangeMsg);
@@ -1273,6 +1301,9 @@
 
         // verify
 
+        $('#vrVerify').click(vrVerify);
+
+        // -- permalink support (deprecated) --
         var vrMsg = '';
         var vrSig = '';
         var vrAddr = '';
@@ -1289,19 +1320,17 @@
             else if ( arg[0]=='vrAddr')
               vrAddr=decodeURIComponent(arg[1]);
           }
+
+          if (!vrAddr)
+            vrAddr = "<insert address here>"
+
+          if (vrMsg && vrSig && vrAddr)
+          {
+            $('#vrSig').val(makeSignedMessage( vrMsg, vrAddr, vrSig ));
+            vrVerify();
+          }
         }
-
-        $('#vrMsg').val(vrMsg?vrMsg:$('#sgMsg').val());
-        $('#vrSig').val(vrSig);
-        $('#vrAddr').val(vrAddr);
-
-        $('#vrVerify').click(vrVerify);
-        onInput('#vrMsg', vrClearRes);
-        onInput('#vrSig', vrClearRes);
-        onInput('#vrAddr', vrClearRes);
-
-        if (vrMsg && vrSig)
-          vrVerify();
+        // -- /permalink support --
 
         // currency select
 
