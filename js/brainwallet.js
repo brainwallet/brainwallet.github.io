@@ -1191,6 +1191,10 @@
           if ( m.indexOf(h1)>=0 )
             addr = m.substring(h1.length, m.length);
         }
+
+        // address should not contain spaces
+        if (addr.indexOf(' ')>=0)
+          addr = '';
       }
       return { "address":addr, "signature":sig };
     }
@@ -1233,7 +1237,7 @@
 
         var clone = $('#vrError').clone();
 
-        if ( p && res )
+        if ( p && res && (p.address==res || p.address==''))
         {
           clone = p.address==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
           clone.find('#vrAddr').text(res);
