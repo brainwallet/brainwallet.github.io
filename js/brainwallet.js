@@ -1367,7 +1367,7 @@
 
           if (vrMsg && vrSig && vrAddr)
           {
-            $('#vrSig').val(makeSignedMessage( vrMsg, vrAddr, vrSig ));
+            $('#vrSig').val(makeSignedMessage( sgType, vrMsg, vrAddr, vrSig ));
             vrVerify();
           }
         }
