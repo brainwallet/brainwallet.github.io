@@ -1058,6 +1058,15 @@
     }
 
     // -- sign --
+    var sgData = null;
+    var sgType = '';
+
+    function sgOnChangeType() {
+        var id = $(this).attr('name');
+        sgType = id;
+        if ( sgData )
+          $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
+    }
 
     function updateAddr(from, to) {
         var sec = from.val();
@@ -1093,6 +1102,7 @@
 
     function sgOnChangeSec() {
         $('#sgSig').val('');
+        sgData = null;
         clearTimeout(timeout);
         timeout = setTimeout(sgGenAddr, TIMEOUT);
     }
@@ -1116,9 +1126,12 @@
       "-----END BITCOIN SIGNATURE-----"
     ];
 
-    function makeSignedMessage(msg, addr, sig)
+    function makeSignedMessage(type, msg, addr, sig)
     {
-      return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
+      if (type=='clearsign')
+        return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
+      else
+        return qtHdr[0]+'\n'+msg +'\n'+qtHdr[1]+'\nVersion: Bitcoin-qt (1.0)\nAddress: '+addr+'\n\n'+sig+'\n'+qtHdr[2];
     }
 
     function sgSign() {
@@ -1130,12 +1143,13 @@
 
       message = fullTrim(message);
       var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-      var s = makeSignedMessage(message, p.address, sig);
-      $('#sgSig').val(s);
+      sgData = {"message":message, "address":p.address, "signature":sig };
+      $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
     }
 
     function sgOnChangeMsg() {
         $('#sgSig').val('');
+        sgData = null;
         clearTimeout(timeout);
         timeout = setTimeout(sgUpdateMsg, TIMEOUT);
     }
@@ -1145,13 +1159,8 @@
     }
 
     // -- verify --
-
-    function vrClearRes() {
-        $('#vrRes').text('');
-        $('.vrMsg').removeClass('has-error');
-        $('.vrSig').removeClass('has-error');
-        $('.vrMsg').removeClass('has-success');
-        $('.vrSig').removeClass('has-success');
+    function vrOnChangeSig() {
+        $('#vrAlert').empty();
         window.location.hash='#verify';
     }
 
@@ -1331,6 +1340,9 @@
         // verify
 
         $('#vrVerify').click(vrVerify);
+        onInput('#vrSig', vrOnChangeSig);
+
+        $('#sgType label input').on('change', sgOnChangeType);
 
         // -- permalink support (deprecated) --
         var vrMsg = '';
