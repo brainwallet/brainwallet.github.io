@@ -1110,6 +1110,12 @@
       "-----END BITCOIN SIGNED MESSAGE-----"
     ];
 
+    var qtHdr = [
+      "-----BEGIN BITCOIN SIGNED MESSAGE-----",
+      "-----BEGIN BITCOIN SIGNATURE-----",
+      "-----END BITCOIN SIGNATURE-----"
+    ];
+
     function makeSignedMessage(msg, addr, sig)
     {
       return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
@@ -1157,30 +1163,52 @@
       return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig)+'&vrAddr='+encodeURIComponent(addr);
     }
 
+    function splitSignature(s)
+    {
+      var addr = '';
+      var sig = s;
+      if ( s.indexOf('\n')>=0 )
+      {
+        var a = s.split('\n');
+        addr = a[0];
+
+        // always the last
+        sig = a[a.length-1];
+
+        // try named fields
+        var h1 = 'Address: ';
+        for (i in a) {
+          var m = a[i];
+          if ( m.indexOf(h1)>=0 )
+            addr = m.substring(h1.length, m.length);
+        }
+      }
+      return { "address":addr, "signature":sig };
+    }
+
     function splitSignedMessage(s)
     {
       s = s.replace('\r','');
 
-      var p0 = s.indexOf(sgHdr[0]);
-      if ( p0>=0 )
+      for (var i=0; i<2; i++ )
       {
-        var p1 = s.indexOf(sgHdr[1]);
-        if ( p1>p0 )
+        var hdr = i==0 ? sgHdr : qtHdr;
+
+        var p0 = s.indexOf(hdr[0]);
+        if ( p0>=0 )
         {
-          var p2 = s.indexOf(sgHdr[2]);
-          if ( p2>p1 )
+          var p1 = s.indexOf(hdr[1]);
+          if ( p1>p0 )
           {
-            var msg = s.substring(p0+sgHdr[0].length+1, p1-1);
-            var sig = s.substring(p1+sgHdr[1].length+1, p2-1);
-            var addr = '';
-            if ( sig.indexOf('\n')>=0 )
+            var p2 = s.indexOf(hdr[2]);
+            if ( p2>p1 )
             {
-              var a = sig.split('\n');
-              addr = a[0];
-              sig = a[1];
+              var msg = s.substring(p0+hdr[0].length+1, p1-1);
+              var sig = s.substring(p1+hdr[1].length+1, p2-1);
+              var m = splitSignature(sig);
+              msg = fullTrim(msg); // doesn't work without this
+              return { "message":msg, "address":m.address, "signature":m.signature };
             }
-            msg = fullTrim(msg); // doesn't work without this
-            return { "message":msg, "address":addr, "signature":sig };
           }
         }
       }
