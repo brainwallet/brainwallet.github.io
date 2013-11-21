@@ -1054,7 +1054,7 @@
 
     // -- sign --
     var sgData = null;
-    var sgType = '';
+    var sgType = 'clearsign';
 
     function sgOnChangeType() {
         var id = $(this).attr('name');
