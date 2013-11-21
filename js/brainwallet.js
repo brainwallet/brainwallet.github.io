@@ -156,13 +156,8 @@
         $('#sec').parent().parent().removeClass('error');
     }
 
-    function genUpdateLabel() {
-      $('#genMsg').text($('#from_'+gen_from).parent().attr('title'));
-    }
-
     function update_gen_from() {
         gen_from = $(this).attr('id').substring(5);
-        genUpdateLabel();
         update_gen();
         if (gen_from == 'pass') {
             if (gen_ps_reset) {
@@ -1281,7 +1276,6 @@
         $('#gen_comp label input').on('change', update_gen_compressed );
 
         genRandomPass();
-        genUpdateLabel();
 
         // chains
 

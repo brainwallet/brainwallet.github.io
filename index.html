@@ -68,14 +68,14 @@
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="gen_from">
                     <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label> <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label> <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="genMsg">&nbsp;</span>
+                  </div>
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="pass">Passphrase</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <input class="form-control" id="pass" type="text" />
+                    <input class="form-control" id="pass" type="text" title="Algorithm: SHA256(passphrase)"/>
                   </div>
                 </div>
               </div>
