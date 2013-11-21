@@ -1325,8 +1325,8 @@
 
         // sign
 
-        $('#sgSec').val('5JeWZ1z6sRcLTJXdQEDdB986E6XfLAkj9CgNE4EHzr5GmjrVFpf');
-        $('#sgAddr').val('17mDAmveV5wBwxajBsY7g1trbMW1DVWcgL');
+        $('#sgSec').val($('#sec').val());
+        $('#sgAddr').val($('#addr').val());
         $('#sgMsg').val("This is an example of a signed message.");
 
         onInput('#sgSec', sgOnChangeSec);
