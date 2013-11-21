@@ -1190,6 +1190,9 @@
         // address should not contain spaces
         if (addr.indexOf(' ')>=0)
           addr = '';
+
+        // some forums break signatures with spaces
+        sig = sig.replace(" ","");
       }
       return { "address":addr, "signature":sig };
     }
