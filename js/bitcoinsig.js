@@ -6,7 +6,8 @@ function msg_numToVarInt(i) {
     if (i < 0xfd) {
       return [i];
     } else if (i <= 0xffff) {
-      return [0xfd, i & 255, i >>> 8]; // BitcoinQT wants big endian here
+      // can't use numToVarInt from bitcoinjs, BitcoinQT wants big endian here (!)
+      return [0xfd, i & 255, i >>> 8];
     } else {
         throw ("message too large");
     }
