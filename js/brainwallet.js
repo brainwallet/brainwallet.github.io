@@ -795,8 +795,10 @@
     }
 
     function txParseUnspent(text) {
-        if (text == '')
+        if (text == '') {
             alert('No data');
+            return;
+        }
         txSetUnspent(text);
     }
 
