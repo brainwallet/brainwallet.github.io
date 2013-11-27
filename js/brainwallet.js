@@ -1061,8 +1061,7 @@
     function sgOnChangeType() {
         var id = $(this).attr('name');
         sgType = id;
-        if ( sgData )
-          $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
+        sgSign();
     }
 
     function updateAddr(from, to) {
@@ -1127,6 +1126,8 @@
     {
       if (type=='clearsign')
         return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
+      else if (type=='armory')
+        return sig;
       else
         return qtHdr[0]+'\n'+msg +'\n'+qtHdr[1]+'\nVersion: Bitcoin-qt (1.0)\nAddress: '+addr+'\n\n'+sig+'\n'+qtHdr[2];
     }
@@ -1139,8 +1140,15 @@
         return;
 
       message = fullTrim(message);
-      var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-      sgData = {"message":message, "address":p.address, "signature":sig };
+
+      if (sgType=='armory') {
+        var sig = armory_sign_message (p.key, p.address, message, p.compressed, p.addrtype);
+      } else {
+        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
+      }
+
+      sgData = {"message":message, "address":p.address, "signature":sig};
+
       $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
     }
 
@@ -1232,6 +1240,12 @@
         var s = $('#vrSig').val();
         var p = splitSignedMessage(s);
         var res = verify_message(p.signature, p.message, PUBLIC_KEY_VERSION);
+
+        if (!res) {
+          var values = armory_split_message(s);
+          res = armory_verify_message(values);
+          p = {"address":values.Address};
+        }
 
         $('#vrAlert').empty();
 
@@ -1346,6 +1360,13 @@
         onInput('#vrSig', vrOnChangeSig);
 
         $('#sgType label input').on('change', sgOnChangeType);
+
+        $('#vrSig').val('-----BEGIN BITCOIN SIGNED MESSAGE-----\n'
+        +'This is an example of a signed message.\n'
+        +'-----BEGIN SIGNATURE-----\n'
+        +'<insert address here>\n'
+        +'Gyk26Le4ER0EUvZiFGUCXhJKWVEoTtQNU449puYZPaiUmYyrcozt2LuAMgLvnEgpoF6cw8ob9Mj/CjP9ATydO1k=\n'
+        +'-----END BITCOIN SIGNED MESSAGE-----');
 
         // -- permalink support (deprecated) --
         var vrMsg = '';

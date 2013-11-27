@@ -76,7 +76,7 @@
                 <label class="col-lg-2 control-label" for="pass">Passphrase</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <input class="form-control" id="pass" type="text" title="Algorithm: Secret Exponent = SHA256(Passphrase)"/>
+                    <input class="form-control" id="pass" title="Algorithm: Secret Exponent = SHA256(Passphrase)" type="text" />
                   </div>
                 </div>
               </div>
@@ -170,7 +170,7 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="chBackup">Paper Backup</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="chBackup" spellcheck="false" rows="4"></textarea>
+                  <textarea class="form-control" id="chBackup" rows="4" spellcheck="false"></textarea>
                 </div>
               </div>
               <div class="form-group">
@@ -365,7 +365,7 @@
                 <label class="col-lg-2 control-label" for="sgType">Signature Type</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="sgType">
-                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="clearsign" type="radio" />Clearsign</label> <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="rfc" type="radio" />RFC2440</label>
+                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="clearsign" type="radio" />Clearsign</label> <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="multibit" type="radio" />Multibit</label> <label class="btn btn-default" title="Introduced in Bitcoin Armory"><input name="armory" type="radio" />Armory</label>
                   </div>
                 </div>
               </div>
@@ -402,12 +402,7 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="vrSig">Signed Message</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="vrSig" rows="17" spellcheck="false">-----BEGIN BITCOIN SIGNED MESSAGE-----
-This is an example of a signed message.
------BEGIN SIGNATURE-----
-<insert address here (optional)>
-Gyk26Le4ER0EUvZiFGUCXhJKWVEoTtQNU449puYZPaiUmYyrcozt2LuAMgLvnEgpoF6cw8ob9Mj/CjP9ATydO1k=
------END BITCOIN SIGNED MESSAGE-----</textarea>
+                  <textarea class="form-control" id="vrSig" rows="17" spellcheck="false"></textarea>
                 </div>
               </div>
               <div class="form-group">
