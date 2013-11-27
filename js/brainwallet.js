@@ -1060,8 +1060,12 @@
 
     function sgOnChangeType() {
         var id = $(this).attr('name');
-        sgType = id;
-        sgSign();
+        if (sgType!=id)
+        {
+          sgType = id;
+          if (sgData!=null)
+            sgSign();
+        }
     }
 
     function updateAddr(from, to) {
