@@ -147,7 +147,9 @@ var Armory = new function () {
 
 function armory_trim(str)
 {
-  return str.replace(/^(\s|")+|(\s|")+$/g, '');
+  str = str.replace(/^\s+|\s+$/g, '');
+  str = str.replace(/^"+|"+$/g, '');
+  return str;
 }
 
 function armory_fmt(str, quote)
@@ -163,6 +165,9 @@ function armory_fmt(str, quote)
 
 function armory_sign_message(private_key, address, message, compressed, addrtype)
 {
+  message = message.replace('\n',' ');
+  message = message.replace('"',"'");
+
   var digest = 'Bitcoin Signed Message:\n' +message;
   var hash = Crypto.SHA256(Crypto.SHA256(digest, {asBytes: true}), {asBytes: true});
   var sig = private_key.sign(hash);
