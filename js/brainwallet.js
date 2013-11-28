@@ -371,15 +371,15 @@
     }
 
     function isHex(str) {
-        return !/[^0123456789abcdef:, ]+/i.test(str);
+        return !/[^0123456789abcdef:, \n]+/i.test(str);
     }
 
     function isBase58(str) {
-        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/.test(str);
+        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz \n]+/.test(str);
     }
 
     function isBase64(str) {
-        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/.test(str) && (str.length % 4) == 0;
+        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/= \n]+/.test(str);
     }
 
     function issubset(a, ssv) {
@@ -459,22 +459,24 @@
         var type = '';
 
         if (bytes.length > 0) {
+            var bstr = str.replace(/[ :,\n]+/g,'');
+
             if (from == 'base58') {
-                try { 
-                    var res = parseBase58Check(str); 
+                try {
+                    var res = parseBase58Check(str);
                     type = 'Check ver.' + res[0];
                     bytes = res[1];
                 } catch (err) {
                     bytes = Bitcoin.Base58.decode(str);
                 }
             } else if (from == 'hex') {
-                bytes = Crypto.util.hexToBytes(str.replace(/[ :,]+/g,''));
+                bytes = Crypto.util.hexToBytes(bstr);
             } else if (from == 'rfc1751') {
                 try { bytes = english_to_key(str); } catch (err) { type = ' ' + err; bytes = []; };
             } else if (from == 'mnemonic') {
                 bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
             } else if (from == 'base64') {
-                try { bytes = Crypto.util.base64ToBytes(str); } catch (err) {}
+                try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
             }
 
             var ver = '';
