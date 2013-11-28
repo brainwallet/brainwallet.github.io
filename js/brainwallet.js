@@ -371,15 +371,15 @@
     }
 
     function isHex(str) {
-        return !/[^0123456789abcdef:, \n]+/i.test(str);
+        return !/[^0123456789abcdef]+/i.test(str);
     }
 
     function isBase58(str) {
-        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz \n]+/.test(str);
+        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/.test(str);
     }
 
     function isBase64(str) {
-        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/= \n]+/.test(str);
+        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/.test(str) && (str.length % 4) == 0;
     }
 
     function issubset(a, ssv) {
@@ -394,15 +394,16 @@
 
     function autodetect(str) {
         var enc = [];
+        var bstr = str.replace(/[ :,\n]+/g,'').trim();
         if (isHex(str)) 
             enc.push('hex');
-        if (isBase58(str))
+        if (isBase58(bstr))
             enc.push('base58');
-        if (issubset(mn_words, str)) 
+        if (issubset(mn_words, str))
             enc.push('mnemonic');
         if (issubset(rfc1751_wordlist, str)) 
             enc.push('rfc1751');
-        if (isBase64(str))
+        if (isBase64(bstr))
             enc.push('base64');
         if (str.length > 0)
             enc.push('text');
@@ -459,7 +460,7 @@
         var type = '';
 
         if (bytes.length > 0) {
-            var bstr = str.replace(/[ :,\n]+/g,'');
+            var bstr = str.replace(/[ :,\n]+/g,'').trim();
 
             if (from == 'base58') {
                 try {
