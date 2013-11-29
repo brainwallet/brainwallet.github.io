@@ -480,9 +480,12 @@
 
         if( setup_only ) return;
 
+        pubkey_order = 0;
+        update_pubkey_order();
+        generate_redemption_script();
+
         // Change the page.
         $('a[href="#generator"]').click();
-        generate_redemption_script();
     }
 
     function bip32SpendP2SH() {
@@ -973,6 +976,11 @@
     var txType = 'txBCI';
     var txFrom = 'txFromSec';
 
+    function txOnChangeSec() {
+        clearTimeout(timeout);
+        timeout = setTimeout(txRebuild, TIMEOUT);
+    }
+
     function txOnChangeRedemptionScript() {
         var bytes = Crypto.util.hexToBytes($('#txRedemptionScript').val());
         var redemption_script = new Bitcoin.Script(bytes);
@@ -1139,6 +1147,16 @@
         return compare_arrays( pubkey, eckey.getPubPoint().getEncoded(isCompressed) ) == 0;
     }
 
+    function array_has_object(list, obj) {
+        var x;
+        for (x in list) {
+            if (list.hasOwnProperty(x) && list[x] === obj) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function txRebuild() {
         var bytes = Crypto.util.hexToBytes($('#txRedemptionScript').val());
         var redemption_script = new Bitcoin.Script(bytes);
@@ -1177,6 +1195,13 @@
         }
 
         console.log(eckeys);
+
+        if( m >= 1 && !array_has_object(eckeys, eckey1) ) setErrorState($('#txSec1'), true, 'Key is not valid for redemption script');
+        else                                              setErrorState($('#txSec1'), false, '');
+        if( m >= 2 && !array_has_object(eckeys, eckey2) ) setErrorState($('#txSec2'), true, 'Key is not valid for redemption script');
+        else                                              setErrorState($('#txSec2'), false, '');
+        if( m >= 3 && !array_has_object(eckeys, eckey3) ) setErrorState($('#txSec3'), true, 'Key is not valid for redemption script');
+        else                                              setErrorState($('#txSec3'), false, '');
 
         if( eckeys.length < m ) {
             console.log("Keys provided are not valid for transaction");
@@ -1427,6 +1452,9 @@
         $('#txGetUnspent').click(txGetUnspent);
         $('#txType label input').on('change', txChangeType);
 
+        onInput($('#txSec1'), txOnChangeSec);
+        onInput($('#txSec2'), txOnChangeSec);
+        onInput($('#txSec3'), txOnChangeSec);
         onInput($('#txRedemptionScript'), txOnChangeRedemptionScript);
         onInput($('#txUnspent'), txOnChangeUnspent);
         onInput($('#txHex'), txOnChangeHex);
