@@ -1,8 +1,13 @@
+// TODO - support TESTNET
+// TODO - give a range and show a table full of the addresses
+// TODO - find the chain index from a given p2sh address
+// TODO - partially sign transactions
 (function($){
 
     var key_derivation = 'public';
     var extpubkeys_from = 'manual';
     var pubkeys_from = 'manual';
+    var pubkey_order = 0;
     var req_count = 2;
     var outof_count = 3;
     var gen_compressed = false;
@@ -12,9 +17,12 @@
     var TIMEOUT = 600;
     var timeout = null;
 
+    var coin = "btc_main";
+
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
     var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
+    var PERMUTATIONS = [[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]];
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -230,6 +238,62 @@
         }
 
         return { key1: key1, key2: key2, key3: key3 };
+    }
+
+    function translate_extended_public_keys() {
+        var t = ['public', 'private'];
+
+        for( var i = 0; i < t.length; i++ ) {
+            var keyset = get_extended_key_set(
+                    (t[i] == 'public') ? "#extpub1" : "#bip32private_key1",
+                    (t[i] == 'public') ? "#extpub2" : "#bip32private_key2",
+                    (t[i] == 'public') ? "#extpub3" : "#bip32private_key3"
+            );
+
+            if( keyset.key1 !== null && 
+               (   ( (keyset.key1.version == MAINNET_PUBLIC || keyset.key1.version == MAINNET_PRIVATE) && coin === 'btc_test' ) 
+                || ( (keyset.key1.version == TESTNET_PUBLIC || keyset.key1.version == TESTNET_PRIVATE) && coin === 'btc_main' ) )
+               ) {
+                if( keyset.key1.version == MAINNET_PUBLIC ) keyset.key1.version = TESTNET_PUBLIC;
+                else if( keyset.key1.version == MAINNET_PRIVATE ) keyset.key1.version = TESTNET_PRIVATE;
+                else if( keyset.key1.version == TESTNET_PUBLIC ) keyset.key1.version = MAINNET_PUBLIC;
+                else if( keyset.key1.version == TESTNET_PRIVATE ) keyset.key1.version = MAINNET_PRIVATE;
+                keyset.key1.build_extended_public_key();
+                keyset.key1.build_extended_private_key();
+                $((t[i] == 'public') ? "#extpub1" : "#bip32private_key1").val(
+                        (t[i] == 'public') ? keyset.key1.extended_public_key_string("base58") : keyset.key1.extended_private_key_string("base58"));
+            }
+
+            if( keyset.key2 !== null && 
+               (   ( (keyset.key2.version == MAINNET_PUBLIC || keyset.key2.version == MAINNET_PRIVATE) && coin === 'btc_test' ) 
+                || ( (keyset.key2.version == TESTNET_PUBLIC || keyset.key2.version == TESTNET_PRIVATE) && coin === 'btc_main' ) )
+               ) {
+                if( keyset.key2.version == MAINNET_PUBLIC ) keyset.key2.version = TESTNET_PUBLIC;
+                else if( keyset.key2.version == MAINNET_PRIVATE ) keyset.key2.version = TESTNET_PRIVATE;
+                else if( keyset.key2.version == TESTNET_PUBLIC ) keyset.key2.version = MAINNET_PUBLIC;
+                else if( keyset.key2.version == TESTNET_PRIVATE ) keyset.key2.version = MAINNET_PRIVATE;
+                keyset.key2.build_extended_public_key();
+                keyset.key2.build_extended_private_key();
+                $((t[i] == 'public') ? "#extpub2" : "#bip32private_key2").val(
+                        (t[i] == 'public') ? keyset.key2.extended_public_key_string("base58") : keyset.key2.extended_private_key_string("base58"));
+            }
+
+            if( keyset.key3 !== null && 
+               (   ( (keyset.key3.version == MAINNET_PUBLIC || keyset.key3.version == MAINNET_PRIVATE) && coin === 'btc_test' ) 
+                || ( (keyset.key3.version == TESTNET_PUBLIC || keyset.key3.version == TESTNET_PRIVATE) && coin === 'btc_main' ) )
+               ) {
+                if( keyset.key3.version == MAINNET_PUBLIC ) keyset.key3.version = TESTNET_PUBLIC;
+                else if( keyset.key3.version == MAINNET_PRIVATE ) keyset.key3.version = TESTNET_PRIVATE;
+                else if( keyset.key3.version == TESTNET_PUBLIC ) keyset.key3.version = MAINNET_PUBLIC;
+                else if( keyset.key3.version == TESTNET_PRIVATE ) keyset.key3.version = MAINNET_PRIVATE;
+                keyset.key3.build_extended_public_key();
+                keyset.key3.build_extended_private_key();
+                $((t[i] == 'public') ? "#extpub3" : "#bip32private_key3").val(
+                        (t[i] == 'public') ? keyset.key3.extended_public_key_string("base58") : keyset.key3.extended_private_key_string("base58"));
+            }
+        }
+
+        generate_extended_public_key_package();
     }
 
     function generate_extended_public_key_package() {
@@ -499,14 +563,106 @@
 
     function update_outof_count() {
         // TODO - this must remain '3' for now, as only M-of-3 multisigs are considered standard right now.
-        $("#outof_3").click();
-        return;
-
-        outof_count = parseInt($(this).attr('id').substring(6))
+        outof_count = 3 //parseInt($(this).attr('id').substring(6))
         outofUpdateLabel();
         update_outof();
         clearTimeout(timeout);
         timeout = setTimeout(generate_redemption_script, TIMEOUT);
+    }
+
+    function update_pubkey_order() {
+        if( pubkey_order == 0 ) $("#pubkey_order_current").html("Order #0 (sorted)");
+        else                    $("#pubkey_order_current").html("Order #" + pubkey_order);
+    }
+
+    function pubkey_order_prev() {
+        if( pubkey_order == 0 ) pubkey_order = 5;
+        else                    pubkey_order -= 1;
+        update_pubkey_order();
+        generate_redemption_script();
+    }
+
+    function pubkey_order_next() {
+        pubkey_order = (pubkey_order + 1) % 6;
+        if( pubkey_order == 0 ) $("#pubkey_order_current").html("Order #0 (sorted)");
+        else                    $("#pubkey_order_current").html("Order #" + pubkey_order);
+        update_pubkey_order();
+        generate_redemption_script();
+    }
+
+    function compare_arrays(a, b) {
+        var i = 0, j = 0;
+
+        while( i < a.length && j < b.length ) {
+            if( a[i] < b[j] ) return -1;
+            if( b[j] < a[i] ) return 1;
+            i++;
+            j++;
+        }
+
+        if( i == j ) return 0;
+        if( i < j ) return -1;
+        return 1;
+    }
+
+    function sort_keys(pub1, pub2, pub3) {
+        var nums = [pub1, pub2, pub3];
+
+        if( compare_arrays(nums[2], nums[1]) < 0 ) {
+            var t = nums[1];
+            nums[1] = nums[2];
+            nums[2] = t;
+        }
+
+        if( compare_arrays(nums[1], nums[0]) < 0 ) {
+            var t = nums[0];
+            nums[0] = nums[1];
+            nums[1] = t;
+        }
+
+        if( compare_arrays(nums[2], nums[1]) < 0 ) {
+            var t = nums[1];
+            nums[1] = nums[2];
+            nums[2] = t;
+        }
+
+        return nums;
+    }
+
+    function permute_keys(sorted_keys, n) {
+        var ret = [];
+
+        for( var i = 0; i < sorted_keys.length; i++ ) {
+            ret.push(sorted_keys[PERMUTATIONS[n][i]]);
+        }
+
+        return ret;
+    }
+
+    function determine_permutation(key_list) {
+        var sorted_keys = sort_keys(key_list[0], key_list[1], key_list[2]);
+        var order = [];
+
+        for( var i = 0; i < key_list.length; i++ ) {
+            for( var j = 0; j < sorted_keys.length; j++ ) {
+                if( compare_arrays(key_list[i], sorted_keys[j]) == 0 ) {
+                    order.push(j);
+                }
+            }
+        }
+
+        for( var i = 0; i < PERMUTATIONS.length; i++ ) {
+            var good = true;
+            for( var j = 0; j < PERMUTATIONS[i].length; j++ ) {
+                if( PERMUTATIONS[i][j] != order[j] ) {
+                    good = false;
+                    break;
+                }
+            }
+            if( good ) return i;
+        }
+
+        throw new Error("Invalid");
     }
 
     function generate_redemption_script() {
@@ -518,6 +674,12 @@
 
         var pub3_str = pad($('#pub3').val(), 65, '0');
         var pub3 = Crypto.util.hexToBytes(pub3_str);
+
+        // Sort the keys, then use the pubkey_order to create the permutation
+        var sorted_keys = permute_keys(sort_keys(pub1, pub2, pub3), pubkey_order);
+        pub1 = sorted_keys[0];
+        pub2 = sorted_keys[1];
+        pub3 = sorted_keys[2];
 
         var pubkey1 = new Bitcoin.ECKey();
         pubkey1.pub = pub1;
@@ -556,7 +718,7 @@
         // Hash the script to produce the bitcoin address:
         var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(Crypto.util.hexToBytes($("#redemption_script").val()));
         var p2sh_addr = new Bitcoin.Address(redemptionScriptHash160);
-        p2sh_addr.version = 5;
+        p2sh_addr.version = (coin == 'btc_main') ? 5 : 196;
         $("#addr").val('' + p2sh_addr);
 
         var qrCode = qrcode(3, 'M');
@@ -591,11 +753,14 @@
         }
 
         if( slen == (n + 3) ) {
-            if( n >= 1 ) $("#pub1").val(Crypto.util.bytesToHex(redemption_script.chunks[1]));
-            if( n >= 2 ) $("#pub2").val(Crypto.util.bytesToHex(redemption_script.chunks[2]));
-            if( n >= 3 ) $("#pub3").val(Crypto.util.bytesToHex(redemption_script.chunks[3]));
+            var new_keys = [redemption_script.chunks[1], redemption_script.chunks[2], redemption_script.chunks[3]];
+            pubkey_order = determine_permutation(new_keys);
+            if( n >= 1 ) $("#pub1").val(Crypto.util.bytesToHex(new_keys[0]));
+            if( n >= 2 ) $("#pub2").val(Crypto.util.bytesToHex(new_keys[1]));
+            if( n >= 3 ) $("#pub3").val(Crypto.util.bytesToHex(new_keys[2]));
             $("#req_" + m).click();
             $("#outof_" + n).click();
+            update_pubkey_order();
             update_p2sh_address();
         }
     }
@@ -815,7 +980,7 @@
         // Hash the script to produce the bitcoin address:
         var redemptionScriptHash160 = Bitcoin.Util.sha256ripe160(redemption_script.buffer);
         var p2sh_addr = new Bitcoin.Address(redemptionScriptHash160);
-        p2sh_addr.version = 5;
+        p2sh_addr.version = (coin == 'btc_main') ? 5 : 196;
         $("#txAddr").val('' + p2sh_addr);
 
         // Show/Hide private key spaces depending on M
@@ -1118,15 +1283,46 @@
         return res;
     }
 
-    function crChange()
+    function translate_txDest() {
+        $.each($(document).find('.txCC'), function() {
+            var dest = $(this).find('#txDest');
+
+            var decoded = Bitcoin.Base58.decode(dest.val());
+            var checksum = Crypto.SHA256(Crypto.SHA256(decoded.slice(0, decoded.length-4), {asBytes: true}), {asBytes: true});
+
+            if( Crypto.util.bytesToHex(checksum.slice(0, 4)) != Crypto.util.bytesToHex(decoded.slice(decoded.length-4)) ) {
+                console.log("bad checksum");
+                return;
+            }
+
+            if( decoded[0] == 0 && coin == 'btc_test' ) {
+                decoded = [111].concat(decoded.slice(1, decoded.length-4));
+            } else if( decoded[0] == 111 && coin == 'btc_main' ) {
+                decoded = [0].concat(decoded.slice(1, decoded.length-4));
+            } else {
+                return;
+            }
+
+            checksum = Crypto.SHA256(Crypto.SHA256(decoded, {asBytes: true}), {asBytes: true});
+            dest.val(Bitcoin.Base58.encode(decoded.concat(checksum.slice(0, 4))));
+        });
+
+        txRebuild();
+    }
+
+    function crChange(e)
     {
-      PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
-      PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
-      ADDRESS_URL_PREFIX = $(this).attr('href');
-      $('#crName').text($(this).text());
-      $('#crSelect').dropdown('toggle');
-      translate();
-      return false;
+        e.preventDefault();
+        coin = $(this).attr("id");
+        ADDRESS_URL_PREFIX = $(this).attr('href');
+        $('#crName').text($(this).text());
+        $('#crSelect').dropdown('toggle');
+        txOnChangeRedemptionScript();
+        update_p2sh_address();
+        translate_txDest();
+        translate_extended_public_keys();
+        translate();
+        return false;
     }
 
     $(document).ready( function() {
@@ -1179,6 +1375,9 @@
         $('#pubkeys_from label input').on('change', update_pubkeys_from );
         $('#req_count label input').on('change', update_req_count );
         $('#outof_count label input').on('change', update_outof_count );
+
+        $("#pubkey_order_prev").on('click', pubkey_order_prev );
+        $("#pubkey_order_next").on('click', pubkey_order_next );
 
         initializePublicKeys();
         reqUpdateLabel();
