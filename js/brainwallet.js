@@ -993,6 +993,8 @@
         $("#txSec1_group").removeClass('hidden');
         $("#txSec2_group").removeClass('hidden').addClass((m < 2) ? 'hidden' : '');
         $("#txSec3_group").removeClass('hidden').addClass((m < 3) ? 'hidden' : '');
+
+        txRebuild();
     }
 
     function txSetUnspent(text) {
@@ -1098,7 +1100,7 @@
 
         // Disabled for now because Blockchain.info can't verify
         // signatures on these transactions properly yet.
-        alert("Since Blockchain.info cannot correctly verify the signatures in a multi-signature transaction correctly yet, pushing is disabled. In order to broadcast this transaction, you need to use another service.  Bitcoind/Bitcoin-Qt are known to work.");
+        alert("Since Blockchain.info cannot correctly verify the signatures in a multi-signature transaction correctly yet, pushing is disabled. In order to broadcast this transaction, you need to use another service.  Bitcoind/Bitcoin-Qt's RPC service call sendrawtransaction is known to work.");
         return;
 
         //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
@@ -1132,10 +1134,17 @@
         return eckey;
     }
 
+    function pubkey_matches_privkey(pubkey, eckey) {
+        var isCompressed = (pubkey[0] == 0x02) || (pubkey[0] == 0x03);
+        return compare_arrays( pubkey, eckey.getPubPoint().getEncoded(isCompressed) ) == 0;
+    }
+
     function txRebuild() {
         var bytes = Crypto.util.hexToBytes($('#txRedemptionScript').val());
         var redemption_script = new Bitcoin.Script(bytes);
         var m = redemption_script.buffer[0] - Bitcoin.Opcode.map["OP_1"] + 1;
+        var n = redemption_script.buffer[redemption_script.buffer.length-2] - Bitcoin.Opcode.map["OP_1"] + 1;
+        console.log("" + m + " -of- " + n);
 
         var eckey1 = (m >= 1) ? txKey(1) : null;
         var eckey2 = (m >= 2) ? txKey(2) : null;
@@ -1150,12 +1159,31 @@
         }
 
         var eckeys = new Array();
-        if( m >= 1 )
-            eckeys.push(eckey1);
-        if( m >= 2 )
-            eckeys.push(eckey2);
-        if( m >= 3 )
-            eckeys.push(eckey3);
+
+        // Need to determine the order of the keys in the redemption script.
+        // And build 'eckeys' in an order that matches
+        var pubkey1 = (n >= 1) ? redemption_script.chunks[1] : null;
+        var pubkey2 = (n >= 2) ? redemption_script.chunks[2] : null;
+        var pubkey3 = (n >= 3) ? redemption_script.chunks[3] : null;
+        var pubkeys = [pubkey1, pubkey2, pubkey3];
+        console.log(pubkeys);
+
+        for( var j = 0; j < pubkeys.length; j++ ) {
+            if( pubkeys[j] === null ) continue;
+
+            if( m >= 1 && pubkey_matches_privkey(pubkeys[j], eckey1) ) eckeys.push(eckey1);
+            else if( m >= 2 && pubkey_matches_privkey(pubkeys[j], eckey2) ) eckeys.push(eckey2);
+            else if( m >= 3 && pubkey_matches_privkey(pubkeys[j], eckey3) ) eckeys.push(eckey3);
+        }
+
+        console.log(eckeys);
+
+        if( eckeys.length < m ) {
+            console.log("Keys provided are not valid for transaction");
+            $('#txJSON').val('');
+            $('#txHex').val('');
+            return;
+        }
 
         var addr = $('#txAddr').val();
         var unspent = $('#txUnspent').val();
