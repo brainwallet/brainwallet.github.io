@@ -19,6 +19,8 @@
     <script src="js/armory.js"></script>
     <script src="js/electrum.js"></script>
     <script src="js/tx.js"></script>
+    <script src="js/bip32.js"></script>
+    <script src="js/sha512.js"></script>
     <script src="js/bitcoinsig.js"></script>
     <script src="js/brainwallet.js"></script>
   </head>
@@ -106,6 +108,12 @@
                 </div>
               </div>
               <div class="form-group">
+                <label class="col-lg-2 control-label" for="sec">Private Key (BIP32)</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="bip32sec" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
                 <label class="col-lg-2 control-label" for="addr">Address</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="addr" readonly="readonly" type="text" />
@@ -127,6 +135,12 @@
                 <label class="col-lg-2 control-label" for="pub">Public Key (SEC)</label>
                 <div class="col-lg-10 controls">
                   <textarea class="form-control" id="pub" readonly="readonly" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="pub">Public Key (BIP32)</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="bip32pub" readonly="readonly" rows="1"></textarea>
                 </div>
               </div>
               <div class="form-group">
