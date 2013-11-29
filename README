@@ -11,3 +11,4 @@ Notable features:
 - Bitcoin transactions editor
 - Signing and verifying messages with bitcoin address
 - Litecoin support
+- BIP32 master key generation support
