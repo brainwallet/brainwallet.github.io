@@ -1162,7 +1162,6 @@
         var redemption_script = new Bitcoin.Script(bytes);
         var m = redemption_script.buffer[0] - Bitcoin.Opcode.map["OP_1"] + 1;
         var n = redemption_script.buffer[redemption_script.buffer.length-2] - Bitcoin.Opcode.map["OP_1"] + 1;
-        console.log("" + m + " -of- " + n);
 
         var eckey1 = (m >= 1) ? txKey(1) : null;
         var eckey2 = (m >= 2) ? txKey(2) : null;
@@ -1184,7 +1183,6 @@
         var pubkey2 = (n >= 2) ? redemption_script.chunks[2] : null;
         var pubkey3 = (n >= 3) ? redemption_script.chunks[3] : null;
         var pubkeys = [pubkey1, pubkey2, pubkey3];
-        console.log(pubkeys);
 
         for( var j = 0; j < pubkeys.length; j++ ) {
             if( pubkeys[j] === null ) continue;
@@ -1194,7 +1192,6 @@
             else if( m >= 3 && pubkey_matches_privkey(pubkeys[j], eckey3) ) eckeys.push(eckey3);
         }
 
-        console.log(eckeys);
 
         if( m >= 1 && !array_has_object(eckeys, eckey1) ) setErrorState($('#txSec1'), true, 'Key is not valid for redemption script');
         else                                              setErrorState($('#txSec1'), false, '');
@@ -1204,7 +1201,6 @@
         else                                              setErrorState($('#txSec3'), false, '');
 
         if( eckeys.length < m ) {
-            console.log("Keys provided are not valid for transaction");
             $('#txJSON').val('');
             $('#txHex').val('');
             return;
