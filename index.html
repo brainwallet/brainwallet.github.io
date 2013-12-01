@@ -84,7 +84,7 @@
                 <label class="col-lg-2 control-label" for="hash">Secret Exponent</label>
                 <div class="col-lg-10 controls">
                   <div class="input-group">
-                    <input class="form-control" id="hash" maxlength="64" readonly="readonly" type="text" />
+                    <input class="form-control" id="hash" maxlength="64" readonly="readonly" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text" />
                     <div class="input-group-btn">
                       <button class="btn btn-default" id="genRandom" title="Generate random exponent" type="button">Random</button>
                     </div>
@@ -102,13 +102,13 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="sec">Private Key</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="sec" readonly="readonly" type="text" />
+                  <input class="form-control" id="sec" readonly="readonly" title="Base58Check of Secret Exponent (Wallet Import Format)" type="text" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="addr">Address</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="addr" readonly="readonly" type="text" />
+                  <input class="form-control" id="addr" readonly="readonly" title="Base58Check of HASH160 (Bitcoin Address)" type="text" />
                 </div>
               </div>
               <div class="form-group">
@@ -120,19 +120,19 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="der">Private Key (DER)</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="der" readonly="readonly" rows="5"></textarea>
+                  <textarea class="form-control" id="der" readonly="readonly" rows="5" title="ASN.1 DER-encoded ECDSA private key (OpenSSL)"></textarea>
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="pub">Public Key (SEC)</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="pub" readonly="readonly" rows="2"></textarea>
+                  <textarea class="form-control" id="pub" readonly="readonly" rows="2" title="SEC1-encoded ECDSA public key (OpenSSL)"></textarea>
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="h160">HASH160</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="h160" readonly="readonly" type="text" />
+                  <input class="form-control" id="h160" readonly="readonly" title="Hex-encoded address, SHA256(RIPEMD160(Public Key))" type="text" />
                 </div>
               </div>
             </fieldset>
@@ -365,7 +365,7 @@
                 <label class="col-lg-2 control-label" for="sgType">Signature Type</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="sgType">
-                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="clearsign" type="radio" />Clearsign</label> <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="multibit" type="radio" />Multibit</label> <label class="btn btn-default" title="Introduced in Bitcoin Armory"><input name="armory" type="radio" />Armory</label>
+                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="inputs_io" type="radio" />Inputs.IO</label> <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="multibit" type="radio" />Multibit</label> <label class="btn btn-default" title="Introduced in Bitcoin Armory"><input name="armory" type="radio" />Armory</label> <label class="btn btn-default" title="Introduced in Bitcoin Armory (ASCII-armored clearsign)"><input name="ascii" type="radio" />ASCII</label> <label class="btn btn-default" title="Introduced in Bitcoin Armory (ASCII-armored base64)"><input name="base64" type="radio" />Base64</label>
                   </div>
                 </div>
               </div>
