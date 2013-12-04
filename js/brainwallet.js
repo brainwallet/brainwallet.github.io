@@ -397,8 +397,13 @@
         var bstr = str.replace(/[ :,\n]+/g,'').trim();
         if (isHex(str)) 
             enc.push('hex');
-        if (isBase58(bstr))
+        if (isBase58(bstr)) {
             enc.push('base58');
+            try {
+                var res = parseBase58Check(str);
+                enc.push('base58check');
+            } catch (err) {};
+        }
         if (issubset(mn_words, str))
             enc.push('mnemonic');
         if (issubset(rfc1751_wordlist, str)) 
@@ -462,14 +467,14 @@
         if (bytes.length > 0) {
             var bstr = str.replace(/[ :,\n]+/g,'').trim();
 
-            if (from == 'base58') {
+            if (from == 'base58check') {
                 try {
                     var res = parseBase58Check(str);
-                    type = 'Check ver.' + res[0];
+                    type = ' ver.' + res[0];
                     bytes = res[1];
-                } catch (err) {
-                    bytes = Bitcoin.Base58.decode(str);
-                }
+                } catch (err) {};
+            } else if (from == 'base58') {
+                bytes = Bitcoin.Base58.decode(str);
             } else if (from == 'hex') {
                 bytes = Crypto.util.hexToBytes(bstr);
             } else if (from == 'rfc1751') {
@@ -481,15 +486,13 @@
             }
 
             var ver = '';
-            if (to == 'base58') {
-                if (bytes.length == 20 || bytes.length == 32) {
-                    var addr = new Bitcoin.Address(bytes);
-                    addr.version = bytes.length == 32 ? PRIVATE_KEY_VERSION : PUBLIC_KEY_VERSION;
-                    text = addr.toString();
-                    ver = 'Check ver.' + addr.version;
-                } else {
-                    text = Bitcoin.Base58.encode(bytes);
-                }
+            if (to == 'base58check') {
+               var addr = new Bitcoin.Address(bytes);
+               addr.version = bytes.length == 20 ? PUBLIC_KEY_VERSION : PRIVATE_KEY_VERSION;
+               text = addr.toString();
+               ver = ' ver.' + addr.version;
+            } else if (to == 'base58') {
+                text = Bitcoin.Base58.encode(bytes);
             } else if (to == 'hex') {
                 text = Crypto.util.bytesToHex(bytes);
             } else if (to == 'text') {
