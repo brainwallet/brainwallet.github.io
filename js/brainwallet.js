@@ -318,10 +318,10 @@
         if (payload.length > 32) {
             payload.pop();
             gen_compressed = true;
-            $('#compressed').button('toggle');
+            $('#compressed').click();
         } else {
             gen_compressed = false;
-            $('#uncompressed').button('toggle');
+            $('#uncompressed').click();
         }
 
         $('#hash').val(Crypto.util.bytesToHex(payload));
