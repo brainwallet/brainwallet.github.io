@@ -1063,7 +1063,7 @@
 
     // -- sign --
     var sgData = null;
-    var sgType = 'clearsign';
+    var sgType = 'inputs_io';
 
     function sgOnChangeType() {
         var id = $(this).attr('name');
@@ -1135,7 +1135,7 @@
 
     function makeSignedMessage(type, msg, addr, sig)
     {
-      if (type=='clearsign')
+      if (type=='inputs_io')
         return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
       else if (type=='armory')
         return sig;
