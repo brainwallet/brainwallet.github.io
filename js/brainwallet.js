@@ -398,11 +398,12 @@
         if (isHex(str)) 
             enc.push('hex');
         if (isBase58(bstr)) {
-            enc.push('base58');
+            // push base58check first (higher priority)
             try {
                 var res = parseBase58Check(str);
                 enc.push('base58check');
             } catch (err) {};
+            enc.push('base58');
         }
         if (issubset(mn_words, str))
             enc.push('mnemonic');
