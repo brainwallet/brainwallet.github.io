@@ -731,8 +731,8 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
-        $('#genAddrURL').attr('title', addr);
+        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+p2sh_addr);
+        $('#genAddrURL').attr('title', p2sh_addr);
     }
 
     function parse_redemption_script() {
