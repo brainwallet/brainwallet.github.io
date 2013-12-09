@@ -400,7 +400,7 @@
         if (isBase58(bstr)) {
             // push base58check first (higher priority)
             try {
-                var res = parseBase58Check(str);
+                var res = parseBase58Check(bstr);
                 enc.push('base58check');
             } catch (err) {};
             enc.push('base58');
@@ -472,12 +472,12 @@
 
             if (from == 'base58check') {
                 try {
-                    var res = parseBase58Check(str);
+                    var res = parseBase58Check(bstr);
                     type = ' ver.' + res[0];
                     bytes = res[1];
                 } catch (err) {};
             } else if (from == 'base58') {
-                bytes = Bitcoin.Base58.decode(str);
+                bytes = Bitcoin.Base58.decode(bstr);
             } else if (from == 'hex') {
                 bytes = Crypto.util.hexToBytes(bstr);
             } else if (from == 'rfc1751') {
