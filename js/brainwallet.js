@@ -411,8 +411,10 @@
             enc.push('rfc1751');
         if (isBase64(bstr))
             enc.push('base64');
-        if (str.length > 0)
+        if (str.length > 0) {
             enc.push('text');
+            enc.push('rot13');
+        }
         return enc;
     }
 
@@ -484,6 +486,8 @@
                 bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
             } else if (from == 'base64') {
                 try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
+            } else if (from == 'rot13') {
+                bytes = strToBytes(rot13(str));
             }
 
             var ver = '';
@@ -505,7 +509,7 @@
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
             } else if (to == 'rot13') {
-                text = rot13(str);
+                text = rot13(bytesToString(bytes));
             }
         }
 
