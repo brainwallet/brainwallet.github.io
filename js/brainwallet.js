@@ -403,7 +403,6 @@
                 var res = parseBase58Check(bstr);
                 enc.push('base58check');
             } catch (err) {};
-            enc.push('base58');
         }
         if (issubset(mn_words, str))
             enc.push('mnemonic');
@@ -414,6 +413,10 @@
         if (str.length > 0) {
             enc.push('text');
             enc.push('rot13');
+        }
+        if (isBase58(bstr)) {
+          // arbitrary text should have higher priority than base58
+          enc.push('base58');
         }
         return enc;
     }
