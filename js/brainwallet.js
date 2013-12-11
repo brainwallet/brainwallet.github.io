@@ -66,9 +66,8 @@
     }
 
     function getEncoded(pt, compressed) {
-       // TODO: figure out how zero exponent produces given public key (first address in directory.io, 1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a)
-       var x = pt.x!=null ? pt.getX().toBigInteger() : new BigInteger('4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa', 16);
-       var y = pt.y!=null ? pt.getY().toBigInteger() : new BigInteger('385b6b1b8ead809ca67454d9683fcf2ba03456d6fe2c4abe2b07f0fbdbb2f1c1', 16);
+       var x = pt.getX().toBigInteger();
+       var y = pt.getY().toBigInteger();
        var enc = integerToBytes(x, 32);
        if (compressed) {
          if (y.isEven()) {
@@ -185,12 +184,24 @@
         $('#from_'+gen_from).button('toggle');
     }
 
+    function validateKey(e)
+    {
+      // Tricky part, directory.io first listed address, 1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a
+      // supposed to utilize zero exponent, but apparently it's using '111111111111....'
+      // TODO: figure out why directory.io used this (openssl glitch?)
+      // TODO: move to Bitcoin.ECKey prototype?
+      // (also helps to get rid of exceptions on zero exponent)
+      for (var i=0; i<e.length; i++)
+        if (e[i]!=0)
+          return e;
+      return Crypto.util.hexToBytes('1111111111111111111111111111111111111111111111111111111111111111');
+    }
+
     function generate() {
         var hash_str = pad($('#hash').val(), 64, '0');
-
         var hash = Crypto.util.hexToBytes(hash_str);
 
-        eckey = new Bitcoin.ECKey(hash);
+        eckey = new Bitcoin.ECKey(validateKey(hash));
 
         gen_eckey = eckey;
 
@@ -752,7 +763,7 @@
                 payload.pop();
                 compressed = true;
             }
-            var eckey = new Bitcoin.ECKey(payload);
+            var eckey = new Bitcoin.ECKey(validateKey(payload));
             var curve = getSECCurveByName("secp256k1");
             var pt = curve.getG().multiply(eckey.priv);
             eckey.pub = getEncoded(pt, compressed);
@@ -921,7 +932,7 @@
             compressed = true;
         }
 
-        var eckey = new Bitcoin.ECKey(payload);
+        var eckey = new Bitcoin.ECKey(validateKey(payload));
 
         eckey.setCompressed(compressed);
 
@@ -1090,7 +1101,7 @@
                 payload.pop();
                 compressed = true;
             }
-            eckey = new Bitcoin.ECKey(payload);
+            eckey = new Bitcoin.ECKey(validateKey(payload));
             var curve = getSECCurveByName("secp256k1");
             var pt = curve.getG().multiply(eckey.priv);
             eckey.pub = getEncoded(pt, compressed);
