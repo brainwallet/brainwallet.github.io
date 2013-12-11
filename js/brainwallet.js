@@ -66,8 +66,9 @@
     }
 
     function getEncoded(pt, compressed) {
-       var x = pt.getX().toBigInteger();
-       var y = pt.getY().toBigInteger();
+       // TODO: figure out how zero exponent produces given public key (first address in directory.io, 1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a)
+       var x = pt.x!=null ? pt.getX().toBigInteger() : new BigInteger('4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa', 16);
+       var y = pt.y!=null ? pt.getY().toBigInteger() : new BigInteger('385b6b1b8ead809ca67454d9683fcf2ba03456d6fe2c4abe2b07f0fbdbb2f1c1', 16);
        var enc = integerToBytes(x, 32);
        if (compressed) {
          if (y.isEven()) {
@@ -193,17 +194,11 @@
 
         gen_eckey = eckey;
 
-        try {
-            var curve = getSECCurveByName("secp256k1");
-            gen_pt = curve.getG().multiply(eckey.priv);
-            gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
-            gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-            setErrorState($('#hash'), false);
-        } catch (err) {
-            //console.info(err);
-            setErrorState($('#hash'), true, 'Invalid secret exponent (must be non-zero value)');
-            return;
-        }
+        var curve = getSECCurveByName("secp256k1");
+        gen_pt = curve.getG().multiply(eckey.priv);
+        gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
+        gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
+        setErrorState($('#hash'), false);
 
         gen_update();
     }
