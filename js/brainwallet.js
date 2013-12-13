@@ -3,6 +3,7 @@
     var gen_from = 'pass';
     var gen_compressed = false;
     var gen_eckey = null;
+    var gen_bip32 = null;
     var gen_pt = null;
     var gen_ps_reset = false;
     var TIMEOUT = 600;
@@ -11,6 +12,7 @@
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
     var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
+    var BIP32_TYPE = MAINNET_PRIVATE;
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -205,6 +207,32 @@
             return;
         }
 
+        var hasher = new jsSHA(hash_str, 'HEX');   
+        var I = hasher.getHMAC("Bitcoin seed", "TEXT", "SHA-512", "HEX");
+        var il = Crypto.util.hexToBytes(I.slice(0, 64));
+        var ir = Crypto.util.hexToBytes(I.slice(64, 128));
+
+        try {
+            gen_bip32 = new BIP32();
+            gen_bip32.eckey = new Bitcoin.ECKey(il);
+            gen_bip32.eckey.pub = gen_bip32.eckey.getPubPoint();
+            gen_bip32.eckey.setCompressed(true);
+            gen_bip32.eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_bip32.eckey.pub.getEncoded(true));
+            gen_bip32.has_private_key = true;
+
+            gen_bip32.chain_code = ir;
+            gen_bip32.child_index = 0;
+            gen_bip32.parent_fingerprint = Bitcoin.Util.hexToBytes("00000000");
+            gen_bip32.version = BIP32_TYPE;
+            gen_bip32.depth = 0;
+
+            gen_bip32.build_extended_public_key();
+            gen_bip32.build_extended_private_key();
+        } catch (err) {
+            setErrorState($('#hash'), true, '' + err);
+            return;
+        }
+
         gen_update();
     }
 
@@ -243,8 +271,16 @@
         sec.version = PRIVATE_KEY_VERSION;
         $('#sec').val(sec);
 
+        $("#bip32sec").val('');
+        if( PUBLIC_KEY_VERSION == 0 || PUBLIC_KEY_VERSION == 111 )
+            $("#bip32sec").val(gen_bip32.extended_private_key_string('base58'));
+
         var pub = Crypto.util.bytesToHex(getEncoded(gen_pt, compressed));
         $('#pub').val(pub);
+
+        $("#bip32pub").val('');
+        if( PUBLIC_KEY_VERSION == 0 || PUBLIC_KEY_VERSION == 111 )
+            $("#bip32pub").val(gen_bip32.extended_public_key_string('base58'));
 
         var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
         $('#der').val(der);
@@ -1284,9 +1320,15 @@
     {
       PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
+      BIP32_TYPE = (PUBLIC_KEY_VERSION==0)?MAINNET_PRIVATE:TESTNET_PRIVATE;
       ADDRESS_URL_PREFIX = $(this).attr('href');
       $('#crName').text($(this).text());
       $('#crSelect').dropdown('toggle');
+      if(gen_bip32 !== null) {
+          gen_bip32.version = BIP32_TYPE;
+          gen_bip32.build_extended_private_key();
+          gen_bip32.build_extended_public_key();
+      }
       gen_update();
       translate();
       return false;
