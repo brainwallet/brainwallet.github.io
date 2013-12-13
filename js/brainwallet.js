@@ -249,13 +249,23 @@
         var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
         $('#der').val(der);
 
-        var qrCode = qrcode(3, 'M');
         var text = $('#addr').val();
         text = text.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
-        qrCode.addData(text);
-        qrCode.make();
-
-        $('#genAddrQR').html(qrCode.createImgTag(4));
+        var qr = new QRCodeDecode();
+        var error_correction_level = 0; // M
+        var mode = 4; // eight bit
+        var version = qr.getVersionFromLength(error_correction_level, mode, text.length);
+        qr.encodeToCanvas(
+            mode, //alphanumeric
+            text, // that should be encoded
+            version, // QR version
+            error_correction_level, // L errorchecking (0 = M)
+            4, // pix width
+            $("#genAddrQR")[0], //destination canvas
+            [1, 1, 1], // background color
+            [0, 0, 0] // foreground color
+        );
+        
         $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
         $('#genAddrURL').attr('title', addr);
     }
@@ -839,6 +849,7 @@
           var bytes = sendTx.serialize();
           var hex = Crypto.util.bytesToHex(bytes);
           $('#txHex').val(hex);
+          txMakeQR("#txQR");
           setErrorState($('#txJSON'), false, '');
         } catch (err) {
           setErrorState($('#txJSON'), true, 'syntax error');
@@ -849,6 +860,7 @@
         var str = $('#txHex').val();
         str = str.replace(/[^0-9a-fA-f]/g,'');
         $('#txHex').val(str);
+        txMakeQR("#txQR");
         var bytes = Crypto.util.hexToBytes(str);
         var sendTx = TX.deserialize(bytes);
         var text = TX.toBBE(sendTx);
@@ -917,6 +929,7 @@
         } catch (err) {
             $('#txJSON').val('');
             $('#txHex').val('');
+            txMakeQR("#txQR");
             return;
         }
 
@@ -953,9 +966,12 @@
             setErrorState($('#txJSON'), false, '');
             $('#txJSON').val(txJSON);
             $('#txHex').val(txHex);
+            txMakeQR("#txQR");
         } catch(err) {
+            throw(err);
             $('#txJSON').val('');
             $('#txHex').val('');
+            txMakeQR("#txQR");
         }
     }
 
@@ -974,10 +990,12 @@
             sendTx = TX.resign(sendTx);
             $('#txJSON').val(TX.toBBE(sendTx));
             $('#txHex').val(Crypto.util.bytesToHex(sendTx.serialize()));
+            txMakeQR("#txQR");
             $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
         } catch(err) {
             $('#txJSON').val('');
             $('#txHex').val('');
+            txMakeQR("#txQR");
         }
     }
 
@@ -1066,6 +1084,27 @@
             res.push( {"dest":dest, "fval":fval } );
         });
         return res;
+    }
+
+    function txMakeQR(el) {
+        var txHex = $('#txHex').val();
+	var text = txHex.toUpperCase();
+	//var text = BigInteger.fromByteArrayUnsigned(Crypto.util.hexToBytes(txHex)).toString(36).toUpperCase();
+        // text = text.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+	var qr = new QRCodeDecode();
+	var error_correction_level = 1; // L
+	var mode = 2; // alphanumeric
+	var version = qr.getVersionFromLength(error_correction_level, mode, text.length);
+        qr.encodeToCanvas(
+		mode, //alphanumeric
+		text, // that should be encoded
+		version, // QR version
+		error_correction_level, // L errorchecking (0 = M)
+		4, // pix width
+		$(el)[0], //destination canvas
+		[1, 1, 1], // background color
+		[0, 0, 0] // foreground color
+	);
     }
 
     // -- sign --
