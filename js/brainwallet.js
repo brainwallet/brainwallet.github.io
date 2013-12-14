@@ -1312,6 +1312,8 @@
         $('#gen_from label input').on('change', update_gen_from );
         $('#gen_comp label input').on('change', update_gen_compressed );
 
+        $('#pass').attr('placeholder', $('#pass').attr('title'));
+
         genRandomPass();
 
         // chains
