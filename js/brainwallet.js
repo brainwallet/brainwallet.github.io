@@ -208,10 +208,10 @@
         gen_update();
     }
 
-    function update_gen_compressed() {
+    function genOnChangeCompressed() {
         setErrorState($('#hash'), false);
         setErrorState($('#sec'), false);
-        gen_compressed = $(this).attr('id') == 'compressed';
+        gen_compressed = $(this).attr('name') == 'compressed';
         gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
         gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
         gen_update();
@@ -287,7 +287,7 @@
         timeout = setTimeout(generate, TIMEOUT);
     }
 
-    function onChangePrivKey() {
+    function genOnChangePrivKey() {
 
         clearTimeout(timeout);
 
@@ -318,11 +318,14 @@
         if (payload.length > 32) {
             payload.pop();
             gen_compressed = true;
-            $('#compressed').click();
         } else {
             gen_compressed = false;
-            $('#uncompressed').click();
         }
+
+        // toggle radio button without firing an event
+        $('#gen_comp label input').off();
+        $('#gen_comp label input[name='+(gen_compressed?'compressed':'uncompressed')+']').click();
+        $('#gen_comp label input').on('change', genOnChangeCompressed);
 
         $('#hash').val(Crypto.util.bytesToHex(payload));
 
@@ -1305,12 +1308,12 @@
 
         onInput('#pass', onChangePass);
         onInput('#hash', onChangeHash);
-        onInput('#sec', onChangePrivKey);
+        onInput('#sec', genOnChangePrivKey);
 
         $('#genRandom').click(genRandom);
 
         $('#gen_from label input').on('change', update_gen_from );
-        $('#gen_comp label input').on('change', update_gen_compressed );
+        $('#gen_comp label input').on('change', genOnChangeCompressed);
 
         genRandomPass();
 
