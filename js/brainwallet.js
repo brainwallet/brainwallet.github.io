@@ -1026,7 +1026,6 @@
       $('#txHex').attr('readonly', txFrom!='txFromRaw');
       $('#txFee').attr('readonly', !bFromKey);
       $('#txAddr').attr('readonly', !bFromKey);
-      $('#txBalance').attr('readonly', !bFromKey);
 
       $.each($(document).find('.txCC'), function() {
         $(this).find('#txDest').attr('readonly', !bFromKey);
