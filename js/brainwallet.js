@@ -10,7 +10,7 @@
 
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
-    var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
+    var ADDRESS_URL_PREFIX = 'http://blockchain.info'
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -256,8 +256,12 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
+        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/address/'+addr);
         $('#genAddrURL').attr('title', addr);
+
+        // NMC fix
+        if (ADDRESS_URL_PREFIX.indexOf('explorer.dot-bit.org')>=0 )
+          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/a/'+addr);
     }
 
 
