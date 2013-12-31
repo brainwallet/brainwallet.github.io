@@ -389,6 +389,10 @@
         return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/.test(str) && (str.length % 4) == 0;
     }
 
+    function isBin(str) {
+      return !/[^01 \r\n]+/i.test(str);
+    }
+
     function issubset(a, ssv) {
         var b = ssv.trim().split(' ');
         for (var i = 0; i < b.length; i++) {
@@ -425,6 +429,8 @@
           // arbitrary text should have higher priority than base58
           enc.push('base58');
         }
+        if ( isBin(bstr) )
+          enc.push('bin');
         return enc;
     }
 
@@ -449,6 +455,30 @@
         return str.replace(/[a-zA-Z]/g, function(c) {
           return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
         });
+    }
+
+    function toBin(bytes)
+    {
+      var arr = [];
+      for (var i=0; i<bytes.length;i++)
+      {
+        var s = (bytes[i]).toString(2);
+        arr.push(('0000000' + s).slice(-8));
+      }
+      return arr.join(' ');
+    }
+
+    function fromBin(str)
+    {
+      var arr = str.split(' ');
+      var res = [];
+      for (var i=0; i<arr.length; i++)
+      {
+        var chunks = arr[i].match(/.{1,8}/g);
+         for (var j=0;j<chunks.length;j++)
+          res.push(parseInt(chunks[j], 2));
+      }
+      return res;
     }
 
     function enct(id) {
@@ -498,6 +528,8 @@
                 try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
             } else if (from == 'rot13') {
                 bytes = strToBytes(rot13(str));
+            } else if (from == 'bin') {
+                bytes = fromBin(str);
             }
 
             var ver = '';
@@ -520,6 +552,8 @@
                 text = Crypto.util.bytesToBase64(bytes);
             } else if (to == 'rot13') {
                 text = rot13(bytesToString(bytes));
+            } else if (to == 'bin') {
+                text = toBin(bytes);
             }
         }
 
