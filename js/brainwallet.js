@@ -406,6 +406,10 @@
     function autodetect(str) {
         var enc = [];
         var bstr = str.replace(/[ :,\n]+/g,'').trim();
+
+        if ( isBin(bstr) )
+          enc.push('bin');
+
         if (isHex(str)) 
             enc.push('hex');
         if (isBase58(bstr)) {
@@ -429,8 +433,6 @@
           // arbitrary text should have higher priority than base58
           enc.push('base58');
         }
-        if ( isBin(bstr) )
-          enc.push('bin');
         return enc;
     }
 
