@@ -262,6 +262,10 @@
         // NMC fix
         if (ADDRESS_URL_PREFIX.indexOf('explorer.dot-bit.org')>=0 )
           $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/a/'+addr);
+
+        // MMC fix (needs closing slash for some reason)
+        if (ADDRESS_URL_PREFIX.indexOf('chainbrowser.com/memorycoin')>=0 )
+          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/address/'+addr+'/');
     }
 
 
