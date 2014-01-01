@@ -1329,7 +1329,7 @@
 
     function crChange()
     {
-      PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
+      PUBLIC_KEY_VERSION = parseInt($(this).attr('data-target'));
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
       ADDRESS_URL_PREFIX = $(this).attr('href');
 
