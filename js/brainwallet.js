@@ -1332,7 +1332,14 @@
       PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
       PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
       ADDRESS_URL_PREFIX = $(this).attr('href');
-      $('#crName').text($(this).text());
+
+      var name = $(this).text();
+      var child = $(this).children();
+      if (child.length)
+        name = child.text();
+
+      $('#crName').text(name);
+
       $('#crSelect').dropdown('toggle');
       gen_update();
       translate();
