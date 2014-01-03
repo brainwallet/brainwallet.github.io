@@ -1097,7 +1097,7 @@
             $('#txValue').val(fval < 0 ? 0 : fval);
         }
 
-        if (fee == 0 && fval == balance - 0.0005) {
+        if (fee == 0 && fval == balance - 0.0001) {
             $('#txValue').val(balance);
         }
 
