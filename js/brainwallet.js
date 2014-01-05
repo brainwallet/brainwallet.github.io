@@ -692,9 +692,10 @@
         var pk = Crypto.util.randomBytes(32);
 
         if (chType == 'armory') {
+            cc = armory_derive_chaincode(pk);
             $('#chCode').val(Crypto.util.bytesToHex(cc));
             $('#chRoot').val(Crypto.util.bytesToHex(pk));
-            $('#chBackup').val(armory_encode_keys(pk, cc));
+            $('#chBackup').val(armory_encode_keys(pk, cc).split('\n').slice(0,2).join('\n'));
         }
 
         if (chType == 'electrum') {
