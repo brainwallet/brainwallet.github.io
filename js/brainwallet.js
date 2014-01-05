@@ -669,7 +669,7 @@
         if (chType == 'electrum') {
             if (issubset(mn_words, str))  {
                 var seed = mn_decode(str);
-                $('#chCode').val(seed);
+                $('#chRoot').val(seed);
             }
         }
 
@@ -678,8 +678,8 @@
             if (keys != null) {
                 var cc = keys[1];
                 var pk = keys[0];
-                $('#chCode').val(Crypto.util.bytesToHex(cc));
                 $('#chRoot').val(Crypto.util.bytesToHex(pk));
+                $('#chCode').val(Crypto.util.bytesToHex(cc));
             }
         }
 
@@ -693,8 +693,8 @@
 
         if (chType == 'armory') {
             cc = armory_derive_chaincode(pk);
-            $('#chCode').val(Crypto.util.bytesToHex(cc));
             $('#chRoot').val(Crypto.util.bytesToHex(pk));
+            $('#chCode').val(Crypto.util.bytesToHex(cc));
             $('#chBackup').val(armory_encode_keys(pk, cc).split('\n').slice(0,2).join('\n'));
         }
 
@@ -702,7 +702,7 @@
             var seed = Crypto.util.bytesToHex(pk.slice(0,16));
             //nb! electrum doesn't handle trailing zeros very well
             if (seed.charAt(0) == '0') seed = seed.substr(1);
-            $('#chCode').val(seed);
+            $('#chRoot').val(seed);
             $('#chBackup').val(mn_encode(seed));
         }
         chGenerate();
@@ -731,12 +731,12 @@
 
     function chElectrumUpdate(r, seed) {
         $('#chMsg').text('key stretching: ' + r + '%');
-        $('#chRoot').val(Crypto.util.bytesToHex(seed));
+        $('#chCode').val(Crypto.util.bytesToHex(seed));
     }
 
     function chElectrumSuccess(privKey) {
         $('#chMsg').text('');
-        $('#chRoot').val(Crypto.util.bytesToHex(privKey));
+        $('#chCode').val(Crypto.util.bytesToHex(privKey));
         var addChange = parseInt($('#chChange').val());
         Electrum.gen(chRange, chCallback, chUpdate, addChange);
     }
@@ -762,7 +762,7 @@
     function chGenerate() {
         clearTimeout(timeout);
 
-        var seed = $('#chCode').val();
+        var seed = $('#chRoot').val();
         var codes = $('#chBackup').val();
 
         chAddrList = [];
