@@ -67,6 +67,25 @@ function armory_encode_keys(privKey, chainCode) {
     return str;
 }
 
+function armory_derive_chaincode(root)
+{
+  var msg = 'Derive Chaincode from Root Key';
+  var hash = Crypto.SHA256(Crypto.SHA256(root, {asBytes: true}), {asBytes: true});
+
+  var okey = [];
+  var ikey = [];
+  for (var i in hash)
+  {
+    okey.push(0x5c^hash[i]);
+    ikey.push(0x36^hash[i]);
+  }
+
+  var m = Crypto.charenc.UTF8.stringToBytes(msg);
+  var a = Crypto.SHA256(ikey.concat(m), {asBytes: true});
+  var b = Crypto.SHA256(okey.concat(a), {asBytes: true});
+  return b;
+}
+
 function armory_decode_keys(data) {
     var keys = data.split('\n');
     var lines = [];
@@ -78,7 +97,7 @@ function armory_decode_keys(data) {
     }
     try {
         var privKey = lines[0].concat(lines[1]);
-        var chainCode = lines[2].concat(lines[3]);
+        var chainCode = (lines.length==4) ? lines[2].concat(lines[3]) : armory_derive_chaincode(privKey);
         return [privKey, chainCode];
     } catch (errr) {
         return null;
@@ -282,5 +301,11 @@ if (typeof require != 'undefined' && require.main === module) {
 
   Armory.gen(codes, 5, function(r) { console.log(r[0]); } );
 
+  var codes = [
+    'fdrn oeej stgu orhe tujr ndhj fedh ijnh duuo',
+    'tdrd irhg jsgi djrg iasu ifof oass nust hhgg'
+  ].join('\n');
+
+  Armory.gen(codes, 5, function(r) { console.log(r[0]); } );
 }
 
