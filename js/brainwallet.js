@@ -653,7 +653,7 @@
         timeout = setTimeout(chGenerate, TIMEOUT);
     }
 
-    function chOnChangeBackup() {
+    function chUpdateBackup() {
         var str =  $('#chBackup').val();
 
         if (str.length == 0) {
@@ -670,21 +670,41 @@
             if (issubset(mn_words, str))  {
                 var seed = mn_decode(str);
                 $('#chRoot').val(seed);
+                var words = str.split(' ');
+                if (words.length!=12)
+                {
+                  $('#chList').text('');
+                  return;
+                }
             }
         }
 
         if (chType == 'armory') {
             var keys = armory_decode_keys(str);
             if (keys != null) {
-                var cc = keys[1];
                 var pk = keys[0];
+                var cc = keys[1];
                 $('#chRoot').val(Crypto.util.bytesToHex(pk));
                 $('#chCode').val(Crypto.util.bytesToHex(cc));
+
+                var lines = str.split('\n');
+                var text = lines.join(' ');
+                var words = text.split(' ');
+                if (words.length!=9*2 && words.length!=9*4)
+                {
+                  $('#chList').text('');
+                  return;
+                }
             }
         }
 
         clearTimeout(timeout);
         timeout = setTimeout(chGenerate, TIMEOUT);
+    }
+
+    function chOnChangeBackup() {
+        clearTimeout(timeout);
+        timeout = setTimeout(chUpdateBackup, TIMEOUT);
     }
 
     function chOnRandom() {
