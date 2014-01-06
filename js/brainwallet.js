@@ -367,20 +367,6 @@
         translate();
     }
 
-    function strToBytes(str) {
-        var bytes = [];
-        for (var i = 0; i < str.length; ++i)
-           bytes.push(str.charCodeAt(i));
-        return bytes;
-    }
-
-    function bytesToString(bytes) {
-        var str = '';
-        for (var i = 0; i < bytes.length; ++i)
-            str += String.fromCharCode(bytes[i]);
-        return str;
-    }
-
     function isHex(str) {
         return !/[^0123456789abcdef]+/i.test(str);
     }
@@ -509,7 +495,7 @@
 
         update_toolbar(enc);
 
-        bytes = strToBytes(str);
+        bytes = Crypto.charenc.UTF8.stringToBytes(str);
 
         var type = '';
 
@@ -533,7 +519,7 @@
             } else if (from == 'base64') {
                 try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
             } else if (from == 'rot13') {
-                bytes = strToBytes(rot13(str));
+                bytes = Crypto.charenc.UTF8.stringToBytes(rot13(str));
             } else if (from == 'bin') {
                 bytes = fromBin(str);
             }
@@ -549,7 +535,7 @@
             } else if (to == 'hex') {
                 text = Crypto.util.bytesToHex(bytes);
             } else if (to == 'text') {
-                text = bytesToString(bytes);
+                text = Crypto.charenc.UTF8.bytesToString(bytes);
             } else if (to == 'rfc1751') {
                 text = key_to_english(bytes);
             } else if (to == 'mnemonic') {
@@ -557,7 +543,7 @@
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
             } else if (to == 'rot13') {
-                text = rot13(bytesToString(bytes));
+                text = rot13(Crypto.charenc.UTF8.bytesToString(bytes));
             } else if (to == 'bin') {
                 text = toBin(bytes);
             }
