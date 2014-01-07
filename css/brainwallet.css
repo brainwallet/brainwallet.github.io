@@ -4,3 +4,10 @@ body {
 }
 
 .form-control[disabled], .form-control[readonly] { cursor: auto; }
+
+.dropdown-menu-two-column {
+  -moz-column-count: 2;
+  -webkit-column-count: 2;
+  column-count:2;
+  width: 360px;
+}
