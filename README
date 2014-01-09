@@ -1,13 +1,4 @@
-JavaScript Client-Side Multisignature P2SH Address and Transaction Generator
+JavaScript Client-Side BIP0032 generator
 
-http://github.com/ms-brainwallet/ms-brainwallet.github.io
-
-Notable features:
-
-- BIP32 Deterministic Wallet support
-- Create Multisignature P2SH Addresses (supports 1/2/3 of 3)
-- Spend from P2SH multisignature outputs
-- Online converter, including Base58 decoder and encoder
-- OpenSSL point conversion and compressed keys support
-- RFC 1751 JavaScript implementation
+http://github.com/sarchar/brainwallet.github.com/tree/bip32
 
