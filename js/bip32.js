@@ -8,14 +8,14 @@ var BIP32 = function(bytes) {
     // decode base58
     if( typeof bytes === "string" ) {
         var decoded = Bitcoin.Base58.decode(bytes);
-        if( decoded.length != 82 ) throw new Exception("Not enough data");
+        if( decoded.length != 82 ) throw new Error("Not enough data");
         var checksum = decoded.slice(78, 82);
         bytes = decoded.slice(0, 78);
 
         var hash = Crypto.SHA256( Crypto.SHA256( bytes, { asBytes: true } ), { asBytes: true } );
 
         if( hash[0] != checksum[0] || hash[1] != checksum[1] || hash[2] != checksum[2] || hash[3] != checksum[3] ) {
-            throw new Exception("Invalid checksum");
+            throw new Error("Invalid checksum");
         }
     }
 
@@ -25,7 +25,7 @@ var BIP32 = function(bytes) {
 
 BIP32.prototype.init_from_bytes = function(bytes) {
     // Both pub and private extended keys are 78 bytes
-    if( bytes.length != 78 ) throw new Exception("not enough data");
+    if( bytes.length != 78 ) throw new Error("not enough data");
 
     this.version            = u32(bytes.slice(0, 4));
     this.depth              = u8 (bytes.slice(4, 5));
@@ -51,7 +51,7 @@ BIP32.prototype.init_from_bytes = function(bytes) {
         this.eckey.setCompressed(true);
         this.has_private_key = false;
     } else {
-        throw new Exception("Invalid key");
+        throw new Error("Invalid key");
     }
 
     this.build_extended_public_key();
@@ -156,12 +156,15 @@ BIP32.prototype.extended_private_key_string = function(format) {
 BIP32.prototype.derive = function(path) {
     var e = path.split('/');
 
+    // Special cases:
+    if( path == 'm' || path == 'M' || path == 'm\'' || path == 'M\'' ) return this;
+
     var bip32 = this;
     for( var i in e ) {
         var c = e[i];
 
         if( i == 0 ) {
-            if( c != 'm' ) throw new Exception("invalid path");
+            if( c != 'm' ) throw new Error("invalid path");
             continue;
         }
 
