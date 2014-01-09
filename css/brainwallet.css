@@ -20,3 +20,7 @@ hidden {
 .col-lg-10 {
     width: 82%;
 }
+
+.col-lg-10-inner {
+    width: 80.5%;
+}

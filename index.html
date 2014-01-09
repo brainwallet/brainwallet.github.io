@@ -29,15 +29,11 @@
     <header class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
-          <button class="navbar-toggle" data-target=".bs-navbar-collapse" data-toggle="collapse" type="button"><span class="sr-only">Toggle navigation</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span></button> <a class="navbar-brand" href="/">Multisignature P2SH</a>
+          <button class="navbar-toggle" data-target=".bs-navbar-collapse" data-toggle="collapse" type="button"><span class="sr-only">Toggle navigation</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span></button> <a class="navbar-brand" href="/">BIP32 Generator (Alpha!)</a>
         </div>
         <nav class="collapse navbar-collapse bs-navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a data-toggle="tab" href="#bip32" id="tab-bip32">BIP32 (Alpha!)</a></li>
-            <li class="active">
-              <a data-toggle="tab" href="#generator">Create</a></li>
-            <li><a data-toggle="tab" href="#tx" id="tab-tx">Spend</a></li>
-            <li><a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li>
+            <li class="active"><a data-toggle="tab" href="#bip32" id="tab-bip32">Home</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown" id="crCurrency">
@@ -62,226 +58,151 @@
     <div class="container">
       <div class="tab-content">
         <!-- BIP32 -->
-        <div class="tab-pane fade in" id="bip32">
+        <div class="tab-pane fade in active" id="bip32">
           <form action="/" class="form-horizontal" method="get">
             <fieldset>
-              <legend>Multi-Key BIP32 Deterministic Key Generator</legend>
+              <legend>BIP32 Deterministic Key Generator</legend>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="key_derivation_public">Key Derivation</label>
+                <label class="col-lg-2 control-label" for="from_pass">Derive From</label>
                 <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="key_derivation">
-                    <label class="btn btn-default active" title="Public key derivation will be used"><input id="key_derivation_public" name="key_derivation" type="radio" />Public key</label>
-                    <label class="btn btn-default" title="Private key derivation will be used"><input id="key_derivation_private" name="key_derivation" type="radio" />Private key</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="keyDerivationMsg">&nbsp;</span>
-                </div>
-              </div>
-              <div class="form-group" id="extpubkeys_from_group">
-                <label class="col-lg-2 control-label" for="extpubkeys_from_manual">Get Extended Public Keys From</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="extpubkeys_from">
-                    <label class="btn btn-default active" title="Extended Public Keys entered manually"><input id="extpubkeys_from_manual" name="extpubkeys_from" type="radio" />Manual</label>
-                    <label class="btn btn-default" title="Extended Public Keys extracted from Extended Public Key Package"><input id="extpubkeys_from_extpublic_key_package" name="extpubkeys_from" type="radio" />Extended Public Key Package</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="extpubkeysFromMsg">&nbsp;</span>
-                </div>
-              </div>
-              <div class="form-group" id="extpub1_group">
-                <label class="col-lg-2 control-label" for="extpub1">Extended Public Key #1</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="extpub1" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="extpub2_group">
-                <label class="col-lg-2 control-label" for="extpub2">Extended Public Key #2</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="extpub2" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="extpub3_group">
-                <label class="col-lg-2 control-label" for="extpub3">Extended Public Key #3</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="extpub3" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="bip32private_key1_group">
-                <label class="col-lg-2 control-label" for="bip32private_key1">Extended Private Key #1</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="bip32private_key1" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="bip32private_key2_group">
-                <label class="col-lg-2 control-label" for="bip32private_key2">Extended Private Key #2</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="bip32private_key2" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="bip32private_key3_group">
-                <label class="col-lg-2 control-label" for="bip32private_key3">Extended Private Key #3</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="bip32private_key3" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="extpubkeypackage_group">
-                <label class="col-lg-2 control-label" for="extpublic_key_package">Extended Public Key Package</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="extpublic_key_package" readonly="readonly" rows="6"></textarea>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="chain_index">Chain Index</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="chain_index" maxlength="5" type="text" value="0" />
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-lg-offset-2 col-lg-10 controls">
-                    <hr />
-                </div>
-              </div>
-              <div class="form-group" id="genextpub1_group">
-                <label class="col-lg-2 control-label" for="genextpub1">Generated Extended Public Key #1</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genextpub1" readonly="readonly" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="genextpub2_group">
-                <label class="col-lg-2 control-label" for="genextpub2">Generated Extended Public Key #2</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genextpub2" readonly="readonly" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="genextpub3_group">
-                <label class="col-lg-2 control-label" for="genextpub3">Generated Extended Public Key #3</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genextpub3" readonly="readonly" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="genbip32private_key1_group">
-                <label class="col-lg-2 control-label" for="genbip32private_key1">Generated Extended Private Key #1</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genbip32private_key1" readonly="readonly" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="genbip32private_key2_group">
-                <label class="col-lg-2 control-label" for="genbip32private_key2">Generated Extended Private Key #2</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genbip32private_key2" readonly="readonly" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="genbip32private_key3_group">
-                <label class="col-lg-2 control-label" for="genbip32private_key3">Generated Extended Private Key #3</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="genbip32private_key3" readonly="readonly" type="text" />
+                  <div class="btn-group" data-toggle="buttons" id="gen_from">
+                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label>
+                    <label class="btn btn-default" title="Base58-encoded"><input id="from_key" name="gen_from" type="radio" />BIP32 Key</label>
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <div class="col-lg-offset-2 col-lg-10 controls">
-                  <div class="input-group">
-                    <button class="btn btn-default" id="bip32CreateP2SH" title="Use the Generated Public Keys to create a Multisignature P2SH address" type="button">Create Multisignature P2SH</button>
-                    &nbsp;<button class="btn btn-default" id="bip32SpendP2SH" title="Use the Generated Private Keys to spend a Multisignature P2SH output" type="button">Spend Multisignature P2SH</button>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </form>
-        </div>
-        <!-- Create -->
-        <div class="tab-pane fade in active" id="generator">
-          <form action="/" class="form-horizontal" method="get">
-            <fieldset>
-              <legend>Create Multisignature P2SH</legend>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="pubkey_from_manual">Get Public Keys From</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="pubkeys_from">
-                    <label class="btn btn-default active" title="Public keys entered manually"><input id="pubkeys_from_manual" name="pubkeys_from" type="radio" />Manual</label>
-                    <label class="btn btn-default" title="Public Keys extracted from redemption script"><input id="pubkeys_from_redemption_script" name="pubkeys_from" type="radio" />Redemption Script</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="pubkeysFromMsg">&nbsp;</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="req_1">Signatures Required (M)</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="req_count">
-                    <label class="btn btn-default" title="Only one signature required to spend"><input id="req_1" name="req_count" type="radio" />1</label>
-                    <label class="btn btn-default active" title="Two signatures required to spend"><input id="req_2" name="req_count" type="radio" />2</label>
-                    <label class="btn btn-default" title="Three signatures required to spend"><input id="req_3" name="req_count" type="radio" />3</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="reqMsg">&nbsp;</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label disabled" for="outof_1">Provided Public Keys (N)</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="outof_count">
-                    <label class="btn btn-default disabled" title="One public key provided"><input id="outof_1" name="outof_count" type="radio" />1</label>
-                    <label class="btn btn-default disabled" title="Two public keys provided"><input id="outof_2" name="outof_count" type="radio" />2</label>
-                    <label class="btn btn-default active" title="Three public keys provided"><input id="outof_3" name="outof_count" type="radio" />3</label>
-                  </div>&nbsp;&nbsp;<span class="help-inline" id="outofMsg">&nbsp;</span>
-                </div>
-              </div>
-              <div class="form-group" id="pub1_group">
-                <label class="col-lg-2 control-label" for="pub1">Public Key #1 (SEC)</label>
+                <label class="col-lg-2 control-label" for="bip32_source_passphrase">Passphrase</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <input class="form-control" id="pub1" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="pub2_group">
-                <label class="col-lg-2 control-label" for="pub2">Public Key #2 (SEC)</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="pub2" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="pub3_group">
-                <label class="col-lg-2 control-label" for="pub3">Public Key #3 (SEC)</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="pub3" type="text" />
+                    <input class="form-control" id="bip32_source_passphrase" type="text" />
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="pubkey_order">Key Ordering</label>
+                <label class="col-lg-2 control-label" for="bip32_source_key">BIP32 Extended Key</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <div class="btn-group">
-                      <button class="btn btn-default" id="pubkey_order_prev" type="button">-</button>
-                      <button class="btn btn-default" id="pubkey_order_next" type="button">+</button>
-                      <button class="btn btn-default" disabled="disabled" id="pubkey_order_current" type="button">Order #0 (sorted)</button>
+                    <input class="form-control" id="bip32_source_key" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="bip32_key_info">Key Info</label>
+                <div class="col-lg-10 controls">
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <label class="control-label" id="bip32_key_info_title">title</label>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Version</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_version" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Depth</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_depth" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Parent Fingerprint</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_parent_fingerprint" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Child Index</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_child_index" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Chain Code</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_chain_code" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                      <div class="col-lg-2 control-label">Key</div>
+                      <div class="col-lg-10 col-lg-10-inner controls">
+                          <input class="form-control" id="bip32_key_info_key" disabled />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="redeption_script">Redemption Script</label>
+              <div class="form-group" id="extpubkeys_from_group">
+                <label class="col-lg-2 control-label" for="bip32_derivation_path">Derivation Path</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="redemption_script" readonly="readonly" rows="5"></textarea>
+                  <select class="form-control" id="bip32_derivation_path">
+                      <option value="m">Info: m</option>
+                      <option value="m/k">Simple: m/k</option>
+                      <option value="m/i'/0/k" selected>External account: m/i'/0/k</option>
+                      <option value="m/i'/1/k">Internal account: m/i'/1/k</option>
+                      <option value="custom">Custom</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" id="custom_group">
+                <label class="col-lg-2 control-label" for="bip32_custom_path">Custom Path</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="bip32_custom_path" type="text" placeholder="m/k" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="account_group">
+                <label class="col-lg-2 control-label" for="account_index">Account (i)</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="account_index" maxlength="10" type="text" value="0" />
+                </div>
+              </div>
+              <div class="form-group" id="child_group">
+                <label class="col-lg-2 control-label" for="keypair_index">Keypair Index (k)</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="keypair_index" maxlength="10" type="text" value="0" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="key_derivation_public">Key Derivation</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="key_derivation">
+                    <label class="btn btn-default active" title="Public key derivation will be used">
+                        <input id="key_derivation_public" name="key_derivation" type="radio" checked />Public key</label>
+                    <label class="btn btn-default" title="Private key derivation will be used">
+                        <input id="key_derivation_private" name="key_derivation" type="radio" />Private key</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="keyDerivationMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="derived_private_key">Derived Private Key</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="derived_private_key" readonly="readonly" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="derived_public_key">Derived Public Key</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="derived_public_key" readonly="readonly" type="text" />
+                  </div>
                 </div>
               </div>
               <div class="form-group">
@@ -298,158 +219,11 @@
               </div>
             </fieldset>
           </form>
-        </div><!-- Spend -->
-        <div class="tab-pane fade" id="tx">
-          <form action="/" class="form-horizontal" method="get">
-            <fieldset>
-              <legend>Spend Multisignature P2SH</legend>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="txRedemptionScript">Redemption Script</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="txRedemptionScript" rows="5"></textarea>
-                </div>
-              </div>
-              <div class="form-group" id="txSec1_group">
-                <label class="col-lg-2 control-label" for="txSec1">Private Key #1</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="txSec1" type="text" />
-                </div>
-              </div>
-              <div class="form-group" id="txSec2_group">
-                <label class="col-lg-2 control-label" for="txSec2">Private Key #2</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="txSec2" type="text" />
-                </div>
-              </div>
-              <div class="form-group" id="txSec3_group">
-                <label class="col-lg-2 control-label" for="txSec3">Private Key #3</label>
-                <div class="col-lg-10 controls">
-                  <input class="form-control" id="txSec3" type="text" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="txAddr">Source Address</label>
-                <div class="col-lg-10 controls">
-                  <div class="row">
-                    <div class="col-xs-6">
-                      <input class="form-control" id="txAddr" readonly=1 type="text" />
-                    </div>
-                    <div class="col-xs-3">
-                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txBalance" placeholder="0.00" type="text" /></span>
-                    </div>
-                    <div class="col-xs-2">
-                      <button class="btn btn-default" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit Inputs</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="collapse" id="txUnspentForm">
-                <div class="form-group">
-                  <label class="col-lg-2 control-label" for="txBBE">Use History From</label>
-                  <div class="col-lg-10 controls">
-                    <div class="btn-group" data-toggle="buttons" id="txType">
-                      <label class="btn btn-default active"><input id="txBCI" name="txType" type="radio" />BlockChain Info</label> <label class="btn btn-default"><input id="txBBE" name="txType" type="radio" />Bitcoin Block Explorer</label>
-                    </div>&nbsp;<button class="btn btn-default help-inline" id="txGetUnspent" type="button">Download</button>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-lg-2 control-label" for="txUnspent">Transaction History</label>
-                  <div class="col-lg-10 controls">
-                    <textarea class="form-control" id="txUnspent" rows="16"></textarea>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group txCC">
-                <label class="col-lg-2 control-label" for="txDest">Destination Address</label>
-                <div class="col-lg-10 controls">
-                  <div class="row">
-                    <div class="col-xs-6">
-                      <input autocomplete="off" class="form-control txDest" id="txDest" type="text" />
-                    </div>
-                    <div class="col-xs-3">
-                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txValue" placeholder="0.00" type="text" /></span>
-                    </div>
-                    <div class="col-xs-3 help-inline">
-                      <button class="btn btn-default" id="txAddDest" type="button">+</button>&nbsp;<button class="btn btn-default" disabled="disabled" id="txRemoveDest" type="button">–</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="txJSON">JSON Transaction</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="txJSON" readonly="readonly" rows="12" spellcheck="false"></textarea>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="txHex">Raw Transaction</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="txHex" readonly="readonly" rows="5"></textarea>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="txFee">Fee</label>
-                <div class="col-lg-10 controls">
-                  <div class="input-group">
-                    <span class="input-group-addon">BTC</span> <input class="form-control" id="txFee" type="text" value="0.0005" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-lg-offset-2 col-lg-10 controls">
-                  <div class="input-group">
-                    <button class="btn btn-default" id="txSign" title="ECDSA signatures require a random number which means signing the same data twice results in different sigs." type="button">Re-sign</button> &nbsp;<button class="btn btn-default" id="txSend" type="button">Send Transaction</button>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </form>
-        </div><!-- Converter -->
-        <div class="tab-pane fade" id="converter">
-          <form action="/" class="form-horizontal" method="get">
-            <fieldset>
-              <legend>Converter</legend>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="enc_from">Source Encoding</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="enc_from">
-                    <label class="btn btn-default active"><input id="from_hex" name="enc_from" type="radio" />Hex</label> <label class="btn btn-default"><input id="from_text" name="enc_from" type="radio" />Text</label> <label class="btn btn-default"><input id="from_base58" name="enc_from" type="radio" />Base58</label> <label class="btn btn-default"><input id="from_base64" name="enc_from" type="radio" />Base64</label> <label class="btn btn-default"><input id="from_rfc1751" name="enc_from" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="from_mnemonic" name="enc_from" type="radio" />Poetry</label>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="enc_from">Source Text</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="src" rows="8" spellcheck="false"></textarea>
-                  <div>
-                    <span id="hint_from">&nbsp;</span>&nbsp;
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="enc_from">Convert To</label>
-                <div class="col-lg-10 controls">
-                  <div class="btn-group" data-toggle="buttons" id="enc_to">
-                    <label class="btn btn-default active"><input id="to_hex" name="enc_to" type="radio" />Hex</label> <label class="btn btn-default"><input id="to_text" name="enc_to" type="radio" />Text</label> <label class="btn btn-default"><input id="to_base58" name="enc_to" type="radio" />Base58</label> <label class="btn btn-default"><input id="to_base64" name="enc_to" type="radio" />Base64</label> <label class="btn btn-default"><input id="to_rfc1751" name="enc_to" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="to_mnemonic" name="enc_to" type="radio" />Poetry</label> <label class="btn btn-default"><input id="to_rot13" name="enc_to" type="radio" />Rot13</label>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-lg-2 control-label" for="enc_from">Result</label>
-                <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="dest" readonly="readonly" rows="8"></textarea>
-                  <div>
-                    <span id="hint_to">&nbsp;</span>&nbsp;
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </form>
         </div>
         <hr />
         <footer>
           <p>
-            This work of art is public domain, source code available at <a href="https://github.com/sarchar/brainwallet.github.com/tree/multisig">GitHub</a>.
+            This work of art is public domain, source code available at <a href="https://github.com/bip32/bip32.github.io">GitHub</a>.
           </p>
         </footer>
       </div>
