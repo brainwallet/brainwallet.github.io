@@ -151,9 +151,9 @@
                 <div class="col-lg-10 controls">
                   <select class="form-control" id="bip32_derivation_path">
                       <option value="m">Info: m</option>
-                      <option value="m/k">Simple: m/k</option>
-                      <option value="m/i'/0/k" selected>External account: m/i'/0/k</option>
-                      <option value="m/i'/1/k">Internal account: m/i'/1/k</option>
+                      <option value="m/i">Simple: m/i</option>
+                      <option value="m/k'/0/i" selected>External account: m/k'/0/i</option>
+                      <option value="m/k'/1/i">Internal account: m/k'/1/i</option>
                       <option value="custom">Custom</option>
                   </select>
                 </div>
@@ -162,18 +162,18 @@
                 <label class="col-lg-2 control-label" for="bip32_custom_path">Custom Path</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <input class="form-control" id="bip32_custom_path" type="text" placeholder="m/k" />
+                    <input class="form-control" id="bip32_custom_path" type="text" placeholder="m/i" />
                   </div>
                 </div>
               </div>
               <div class="form-group" id="account_group">
-                <label class="col-lg-2 control-label" for="account_index">Account (i)</label>
+                <label class="col-lg-2 control-label" for="account_index">Account (k)</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="account_index" maxlength="10" type="text" value="0" />
                 </div>
               </div>
               <div class="form-group" id="child_group">
-                <label class="col-lg-2 control-label" for="keypair_index">Keypair Index (k)</label>
+                <label class="col-lg-2 control-label" for="keypair_index">Keypair Index (i)</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="keypair_index" maxlength="10" type="text" value="0" />
                 </div>

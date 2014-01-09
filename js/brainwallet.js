@@ -211,16 +211,16 @@
             $("#custom_group").hide();
         }
 
-        if( bip32_derivation_path.indexOf('/i/') >= 0 || bip32_derivation_path.indexOf('/i\'/') >= 0 ) {
+        if( bip32_derivation_path.indexOf('/k/') >= 0 || bip32_derivation_path.indexOf('/k\'/') >= 0 ) {
             $("#account_group").show();
         } else {
             $("#account_group").hide();
         }
 
-        if( bip32_derivation_path.indexOf('/k/') >= 0 || 
-            bip32_derivation_path.indexOf('/k\'/') >= 0 || 
-            bip32_derivation_path.slice(bip32_derivation_path.length-2) == "/k" ||
-            bip32_derivation_path.slice(bip32_derivation_path.length-3) == "/k'" ) {
+        if( bip32_derivation_path.indexOf('/i/') >= 0 || 
+            bip32_derivation_path.indexOf('/i\'/') >= 0 || 
+            bip32_derivation_path.slice(bip32_derivation_path.length-2) == "/i" ||
+            bip32_derivation_path.slice(bip32_derivation_path.length-3) == "/i'" ) {
             $("#child_group").show();
         } else {
             $("#child_group").hide();
@@ -235,8 +235,8 @@
 
     function updateResult() {
         var p = '' + bip32_derivation_path;
-        var i = parseInt($("#account_index").val());
-        var k = parseInt($("#keypair_index").val());
+        var k = parseInt($("#account_index").val());
+        var i = parseInt($("#keypair_index").val());
 
         p = p.replace('i', i).replace('k', k);
 
