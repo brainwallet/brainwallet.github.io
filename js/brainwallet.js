@@ -1,121 +1,18 @@
 (function($){
 
-    var gen_from = 'pass';
-    var gen_compressed = false;
-    var gen_eckey = null;
-    var gen_pt = null;
-    var gen_ps_reset = false;
+    var bip32_source_key = null;
+    var bip32_derivation_path = null;
+    var gen_from = "pass";
+
     var TIMEOUT = 600;
     var timeout = null;
+
+    var coin = "btc_main";
 
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
     var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
-
-    function parseBase58Check(address) {
-        var bytes = Bitcoin.Base58.decode(address);
-        var end = bytes.length - 4;
-        var hash = bytes.slice(0, end);
-        var checksum = Crypto.SHA256(Crypto.SHA256(hash, {asBytes: true}), {asBytes: true});
-        if (checksum[0] != bytes[end] ||
-            checksum[1] != bytes[end+1] ||
-            checksum[2] != bytes[end+2] ||
-            checksum[3] != bytes[end+3])
-                throw new Error("Wrong checksum");
-        var version = hash.shift();
-        return [version, hash];
-    }
-
-    encode_length = function(len) {
-        if (len < 0x80)
-            return [len];
-        else if (len < 255)
-            return [0x80|1, len];
-        else
-            return [0x80|2, len >> 8, len & 0xff];
-    }
-    
-    encode_id = function(id, s) {
-        var len = encode_length(s.length);
-        return [id].concat(len).concat(s);
-    }
-
-    encode_integer = function(s) {
-        if (typeof s == 'number')
-            s = [s];
-        return encode_id(0x02, s);
-    }
-
-    encode_octet_string = function(s)  {
-        return encode_id(0x04, s);
-    }
-
-    encode_constructed = function(tag, s) {
-        return encode_id(0xa0 + tag, s);
-    }
-
-    encode_bitstring = function(s) {
-        return encode_id(0x03, s);
-    }
-
-    encode_sequence = function() {
-        sequence = [];
-        for (var i = 0; i < arguments.length; i++)
-            sequence = sequence.concat(arguments[i]);
-        return encode_id(0x30, sequence);
-    }
-
-    function getEncoded(pt, compressed) {
-       var x = pt.getX().toBigInteger();
-       var y = pt.getY().toBigInteger();
-       var enc = integerToBytes(x, 32);
-       if (compressed) {
-         if (y.isEven()) {
-           enc.unshift(0x02);
-         } else {
-           enc.unshift(0x03);
-         }
-       } else {
-         enc.unshift(0x04);
-         enc = enc.concat(integerToBytes(y, 32));
-       }
-       return enc;
-    }
-
-    function getDER(eckey, compressed) {
-        var curve = getSECCurveByName("secp256k1");
-        var _p = curve.getCurve().getQ().toByteArrayUnsigned();
-        var _r = curve.getN().toByteArrayUnsigned();
-        var encoded_oid = [0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x01, 0x01];
-
-        var secret = integerToBytes(eckey.priv, 32);
-        var encoded_gxgy = getEncoded(curve.getG(), compressed);
-        var encoded_pub = getEncoded(gen_pt, compressed);
-
-        return encode_sequence(
-            encode_integer(1),
-            encode_octet_string(secret),
-            encode_constructed(0,
-                encode_sequence(
-                    encode_integer(1),
-                    encode_sequence(
-                        encoded_oid, //encode_oid(*(1, 2, 840, 10045, 1, 1)), //TODO
-                        encode_integer([0].concat(_p))
-                    ),
-                    encode_sequence(
-                        encode_octet_string([0]),
-                        encode_octet_string([7])
-                    ),
-                    encode_octet_string(encoded_gxgy),
-                    encode_integer([0].concat(_r)),
-                    encode_integer(1)
-                )
-            ),
-            encode_constructed(1, 
-                encode_bitstring([0].concat(encoded_pub))
-            )
-        );
-    }
+    var BIP32_TYPE = MAINNET_PRIVATE;
 
     function pad(str, len, ch) {
         padding = '';
@@ -136,118 +33,247 @@
         }
     }
 
-    function genRandom() {
-        $('#pass').val('');
-        $('#hash').focus();
-        gen_from = 'hash';
-        $('#from_hash').click();
-        update_gen();
-        var bytes = Crypto.util.randomBytes(32);
-        $('#hash').val(Crypto.util.bytesToHex(bytes));
-        generate();
+    function pad2(s) {
+        if(s.length == 1) return '0' + s;
+        return s;
     }
 
-    function update_gen() {
-        setErrorState($('#hash'), false);
-        setErrorState($('#sec'), false);
-        $('#pass').attr('readonly', gen_from != 'pass');
-        $('#hash').attr('readonly', gen_from != 'hash');
-        $('#sec').attr('readonly', gen_from != 'sec');
-        $('#sec').parent().parent().removeClass('error');
+    function pad8(s) {
+        while(s.length < 8) s = '0' + s;
+        return s;
     }
 
-    function update_gen_from() {
+    function byteArrayToHexString(a) {
+        var s = '';
+        for( var i in a ) {
+            s = s + pad2(a[i].toString(16));
+        }
+        return s;
+    }
+
+    // --- bip32 ---
+
+    function onUpdateGenFrom() {
         gen_from = $(this).attr('id').substring(5);
-        update_gen();
-        if (gen_from == 'pass') {
-            if (gen_ps_reset) {
-                gen_ps_reset = false;
-                onChangePass();
-            }
-            $('#pass').focus();
-        } else if (gen_from == 'hash') {
-            $('#hash').focus();
-        } else if (gen_from == 'sec') {
-            $('#sec').focus();
+        updateGenFrom();
+    }
+
+    function updateGenFrom() {
+        if( gen_from == 'pass' ) {
+            $("#bip32_source_passphrase").attr('readonly', false);
+            $("#bip32_source_key").attr('readonly', true);
+        } else {
+            $("#bip32_source_passphrase").attr('readonly', true);
+            $("#bip32_source_key").attr('readonly', false);
         }
     }
 
-    function update_gen_from_focus() {
-        gen_from = $(this).attr('id');
-        update_gen();
-        if (gen_from == 'pass') {
-            if (gen_ps_reset) {
-                gen_ps_reset = false;
-                onChangePass();
-            }
-        }
-        $('#from_'+gen_from).button('toggle');
+    function onUpdateSourcePassphrase() {
+        clearTimeout(timeout);
+        timeout = setTimeout(updateSourcePassphrase, TIMEOUT);
     }
 
-    function generate() {
-        var hash_str = pad($('#hash').val(), 64, '0');
+    function updateSourcePassphrase() {
+        var passphrase = $("#bip32_source_passphrase").val();
 
-        var hash = Crypto.util.hexToBytes(hash_str);
+        var hash_str = Crypto.util.bytesToHex(Crypto.SHA256(passphrase, { asBytes: true }));
 
-        eckey = new Bitcoin.ECKey(hash);
+        var hasher = new jsSHA(hash_str, 'HEX');   
+        var I = hasher.getHMAC("Bitcoin seed", "TEXT", "SHA-512", "HEX");
+        var il = Crypto.util.hexToBytes(I.slice(0, 64));
+        var ir = Crypto.util.hexToBytes(I.slice(64, 128));
 
-        gen_eckey = eckey;
-
+        var gen_bip32 = new BIP32();
         try {
-            var curve = getSECCurveByName("secp256k1");
-            gen_pt = curve.getG().multiply(eckey.priv);
-            gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
-            gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-            setErrorState($('#hash'), false);
+            gen_bip32.eckey = new Bitcoin.ECKey(il);
+            gen_bip32.eckey.pub = gen_bip32.eckey.getPubPoint();
+            gen_bip32.eckey.setCompressed(true);
+            gen_bip32.eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_bip32.eckey.pub.getEncoded(true));
+            gen_bip32.has_private_key = true;
+
+            gen_bip32.chain_code = ir;
+            gen_bip32.child_index = 0;
+            gen_bip32.parent_fingerprint = Bitcoin.Util.hexToBytes("00000000");
+            gen_bip32.version = BIP32_TYPE;
+            gen_bip32.depth = 0;
+
+            gen_bip32.build_extended_public_key();
+            gen_bip32.build_extended_private_key();
         } catch (err) {
-            //console.info(err);
-            setErrorState($('#hash'), true, 'Invalid secret exponent (must be non-zero value)');
+            setErrorState($('#bip32_source_passphrase'), true, '' + err);
             return;
         }
 
-        gen_update();
+        setErrorState($('#bip32_source_passphrase'), false);
+
+        $("#bip32_source_key").val(gen_bip32.extended_private_key_string("base58"));
+        updateSourceKey();
     }
 
-    function update_gen_compressed() {
-        setErrorState($('#hash'), false);
-        setErrorState($('#sec'), false);
-        gen_compressed = $(this).attr('id') == 'compressed';
-        gen_eckey.pub = getEncoded(gen_pt, gen_compressed);
-        gen_eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(gen_eckey.pub);
-        gen_update();
+    function isMasterKey(k) {
+        return k.child_index == 0 && k.depth == 0 && 
+               ( k.parent_fingerprint[0] == 0 && k.parent_fingerprint[1] == 0 && k.parent_fingerprint[2] == 0 && k.parent_fingerprint[3] == 0 );
     }
 
-    function gen_update() {
+    function onUpdateSourceKey() {
+        clearTimeout(timeout);
+        timeout = setTimeout(updateSourceKey, TIMEOUT);
+    }
 
-        var eckey = gen_eckey;
-        var compressed = gen_compressed;
+    function updateSourceKey() {
+        try {
+            var source_key_str = $("#bip32_source_key").val();
+            bip32_source_key = new BIP32(source_key_str);
+        } catch(err) {
+            bip32_source_key = null;
+            setErrorState($('#bip32_source_key'), true, 'Invalid key: ' + err.toString());
+            return;
+        }
+        setErrorState($('#bip32_source_key'), false);
 
-        var hash_str = pad($('#hash').val(), 64, '0');
-        var hash = Crypto.util.hexToBytes(hash_str);
+        //console.log(bip32_source_key);
+        updateSourceKeyInfo();
+        updateDerivationPath();
+    }
 
-        var hash160 = eckey.getPubKeyHash();
+    function updateSourceKeyInfo() {
+        if( isMasterKey(bip32_source_key) ) {
+            if( bip32_source_key.has_private_key ) {
+                $("#bip32_key_info_title").html("<b>Master Private Key</b>");
+            } else {
+                $("#bip32_key_info_title").html("<b>Master Public Key</b>");
+            }
+        } else {
+            if( bip32_source_key.has_private_key ) {
+                $("#bip32_key_info_title").html("<b>Derived Private Key</b>");
+            } else {
+                $("#bip32_key_info_title").html("<b>Derived Public Key</b>");
+            }
+        }
 
-        var h160 = Crypto.util.bytesToHex(hash160);
-        $('#h160').val(h160);
+        var testnet = (bip32_source_key.version == TESTNET_PUBLIC || bip32_source_key.version == TESTNET_PRIVATE);
 
+        var v = '' + pad8(bip32_source_key.version.toString(16));
+        if( bip32_source_key.has_private_key ) v = v + " (" + (testnet ? "Testnet" : "Mainnet") + " private key)";
+        else                                   v = v + " (" + (testnet ? "Testnet" : "Mainnet") + " public key)";
+
+        $("#bip32_key_info_version").val(v);
+
+        $("#bip32_key_info_depth").val('' + bip32_source_key.depth);
+
+        $("#bip32_key_info_parent_fingerprint").val('' + pad2(bip32_source_key.parent_fingerprint[0].toString(16)) +
+                                                         pad2(bip32_source_key.parent_fingerprint[1].toString(16)) +
+                                                         pad2(bip32_source_key.parent_fingerprint[2].toString(16)) +
+                                                         pad2(bip32_source_key.parent_fingerprint[3].toString(16)));
+
+        $("#bip32_key_info_child_index").val(bip32_source_key.child_index);
+        $("#bip32_key_info_chain_code").val('' + byteArrayToHexString(bip32_source_key.chain_code));
+
+        if( bip32_source_key.has_private_key ) {
+            var bytes = [testnet ? (PRIVATE_KEY_VERSION+0x6f) : PRIVATE_KEY_VERSION].concat(bip32_source_key.eckey.priv.toByteArrayUnsigned()).concat([1]);
+            var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true}).slice(0, 4);
+            $("#bip32_key_info_key").val(Bitcoin.Base58.encode(bytes.concat(checksum)));
+
+        } else {
+            var bytes = Crypto.util.bytesToHex(bip32_source_key.eckey.pub.getEncoded(true));
+            $("#bip32_key_info_key").val(bytes);
+        }
+
+        return;
+    }
+
+    function onUpdateDerivationPath() {
+        updateDerivationPath();
+    }
+
+    function onUpdateCustomPath() {
+        clearTimeout(timeout);
+        timeout = setTimeout(updateDerivationPath, TIMEOUT);
+    }
+
+    function onAccountIndexChanged() {
+        clearTimeout(timeout);
+        timeout = setTimeout(updateDerivationPath, TIMEOUT);
+    }
+
+    function onKeypairIndexChanged() {
+        clearTimeout(timeout);
+        timeout = setTimeout(updateDerivationPath, TIMEOUT);
+    }
+
+    function updateDerivationPath() {
+        bip32_derivation_path = $("#bip32_derivation_path :selected").val();
+
+        if( bip32_derivation_path == "custom" ) {
+            $("#custom_group").show();
+            bip32_derivation_path = $("#bip32_custom_path").val();
+        } else {
+            $("#custom_group").hide();
+        }
+
+        if( bip32_derivation_path.indexOf('/i/') >= 0 || bip32_derivation_path.indexOf('/i\'/') >= 0 ) {
+            $("#account_group").show();
+        } else {
+            $("#account_group").hide();
+        }
+
+        if( bip32_derivation_path.indexOf('/k/') >= 0 || 
+            bip32_derivation_path.indexOf('/k\'/') >= 0 || 
+            bip32_derivation_path.slice(bip32_derivation_path.length-2) == "/k" ||
+            bip32_derivation_path.slice(bip32_derivation_path.length-3) == "/k'" ) {
+            $("#child_group").show();
+        } else {
+            $("#child_group").hide();
+        }
+
+        updateResult();
+    }
+
+    function onKeyDerivationChanged() {
+        updateResult();
+    }
+
+    function updateResult() {
+        var p = '' + bip32_derivation_path;
+        var i = parseInt($("#account_index").val());
+        var k = parseInt($("#keypair_index").val());
+
+        p = p.replace('i', i).replace('k', k);
+
+        var pubpriv = $('input[name="key_derivation"]:checked').attr('id');
+
+        if( pubpriv == "key_derivation_private" && p[p.length-1] != "\'" ) {
+            p = p + "\'";
+        }
+
+        try {
+            console.log("Deriving: " + p);
+            var result = bip32_source_key.derive(p);
+        } catch (err) {
+            setErrorState($('#bip32_derivation_path'), true, 'Error deriving key: ' + err.toString());
+            $("#derived_private_key").val('');
+            $("#derived_public_key").val('');
+            $("#addr").val('');
+            $("#genAddrQR").val('');
+            return;
+        }
+
+        setErrorState($('#bip32_derivation_path'), false);
+
+        if( result.has_private_key ) {
+            $("#derived_private_key").val(result.extended_private_key_string("base58"));
+        } else {
+            $("#derived_private_key").val("No private key available");
+        }
+
+        $("#derived_public_key").val(result.extended_public_key_string("base58"));
+
+        var testnet = (result.version == TESTNET_PUBLIC || result.version == TESTNET_PRIVATE);
+
+        var hash160 = result.eckey.pubKeyHash;
         var addr = new Bitcoin.Address(hash160);
-        addr.version = PUBLIC_KEY_VERSION;
-        $('#addr').val(addr);
-
-        var payload = hash;
-
-        if (compressed)
-            payload.push(0x01);
-
-        var sec = new Bitcoin.Address(payload);
-        sec.version = PRIVATE_KEY_VERSION;
-        $('#sec').val(sec);
-
-        var pub = Crypto.util.bytesToHex(getEncoded(gen_pt, compressed));
-        $('#pub').val(pub);
-
-        var der = Crypto.util.bytesToHex(getDER(eckey, compressed));
-        $('#der').val(der);
+        addr.version = PUBLIC_KEY_VERSION + (testnet ? 0x6f : 0);
+        $("#addr").val(addr.toString());
 
         var qrCode = qrcode(3, 'M');
         var text = $('#addr').val();
@@ -256,263 +282,8 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+addr);
-        $('#genAddrURL').attr('title', addr);
-    }
-
-
-    function calc_hash() {
-        var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
-        $('#hash').val(Crypto.util.bytesToHex(hash));
-    }
-
-    function onChangePass() {
-        calc_hash();
-        clearTimeout(timeout);
-        timeout = setTimeout(generate, TIMEOUT);
-    }
-
-    function onChangeHash() {
-        $('#pass').val('');
-        gen_ps_reset = true;
-        clearTimeout(timeout);
-
-        if (/[^0123456789abcdef]+/i.test($('#hash').val())) {
-            setErrorState($('#hash'), true, 'Erroneous characters (must be 0..9-a..f)');
-            return;
-        } else {
-            setErrorState($('#hash'), false);
-        }
-
-        timeout = setTimeout(generate, TIMEOUT);
-    }
-
-    function onChangePrivKey() {
-
-        clearTimeout(timeout);
-
-        $('#pass').val('');
-        gen_ps_reset = true;
-
-        var sec = $('#sec').val();
-
-        try { 
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-        } catch (err) {
-            setErrorState($('#sec'), true, 'Invalid private key checksum');
-            return;
-        };
-
-        if (version != PRIVATE_KEY_VERSION) {
-            setErrorState($('#sec'), true, 'Invalid private key version');
-            return;
-        } else if (payload.length < 32) {
-            setErrorState($('#sec'), true, 'Invalid payload (must be 32 or 33 bytes)');
-            return;
-        }
-
-        setErrorState($('#sec'), false);
-
-        if (payload.length > 32) {
-            payload.pop();
-            gen_compressed = true;
-            $('#compressed').button('toggle');
-        } else {
-            gen_compressed = false;
-            $('#uncompressed').button('toggle');
-        }
-
-        $('#hash').val(Crypto.util.bytesToHex(payload));
-
-        timeout = setTimeout(generate, TIMEOUT);
-    }
-
-    function genRandomPass() {
-        // chosen by fair dice roll
-        // guaranted to be random
-        $('#pass').val('correct horse battery staple');
-        $('#from_pass').button('toggle');
-        $('#pass').focus();
-        gen_from = 'pass';
-        update_gen();
-        calc_hash();
-        generate();
-    }
-
-    // --- converter ---
-
-    var from = 'hex';
-    var to = 'hex';
-
-    function update_enc_from() {
-        from = $(this).attr('id').substring(5);
-        translate();
-    }
-
-    function update_enc_to() {
-        to = $(this).attr('id').substring(3);
-        translate();
-    }
-
-    function strToBytes(str) {
-        var bytes = [];
-        for (var i = 0; i < str.length; ++i)
-           bytes.push(str.charCodeAt(i));
-        return bytes;
-    }
-
-    function bytesToString(bytes) {
-        var str = '';
-        for (var i = 0; i < bytes.length; ++i)
-            str += String.fromCharCode(bytes[i]);
-        return str;
-    }
-
-    function isHex(str) {
-        return !/[^0123456789abcdef]+/i.test(str);
-    }
-
-    function isBase58(str) {
-        return !/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/.test(str);
-    }
-
-    function isBase64(str) {
-        return !/[^ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=]+/.test(str) && (str.length % 4) == 0;
-    }
-
-    function issubset(a, ssv) {
-        var b = ssv.trim().split(' ');
-        for (var i = 0; i < b.length; i++) {
-            if (a.indexOf(b[i].toLowerCase()) == -1 
-                && a.indexOf(b[i].toUpperCase()) == -1)
-            return false;
-        }
-        return true;
-    }
-
-    function autodetect(str) {
-        var enc = [];
-        var bstr = str.replace(/[ :,\n]+/g,'').trim();
-        if (isHex(str)) 
-            enc.push('hex');
-        if (isBase58(bstr))
-            enc.push('base58');
-        if (issubset(mn_words, str))
-            enc.push('mnemonic');
-        if (issubset(rfc1751_wordlist, str)) 
-            enc.push('rfc1751');
-        if (isBase64(bstr))
-            enc.push('base64');
-        if (str.length > 0)
-            enc.push('text');
-        return enc;
-    }
-
-    function update_toolbar(enc) {
-        var reselect = false;
-        $.each($('#enc_from').children(), function() {
-            var id = $(this).children().attr('id').substring(5);
-            var disabled = (enc && enc.indexOf(id) == -1);
-            if (disabled && $(this).hasClass('active')) {
-                $(this).removeClass('active');
-                reselect = true;
-            }
-            $(this).attr('disabled', disabled);
-        });
-        if (enc && enc.length > 0 && reselect) {
-            $('#from_' + enc[0]).click();//addClass('active');
-            from = enc[0];
-        }
-    }
-
-    function rot13(str) {
-        return str.replace(/[a-zA-Z]/g, function(c) {
-          return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
-        });
-    }
-
-    function enct(id) {
-        return $('#from_'+id).parent().text();
-    }
-
-    function translate() {
-
-        var str = $('#src').val();
-
-        if (str.length == 0) {
-          update_toolbar(null);
-          $('#hint_from').text('');
-          $('#hint_to').text('');
-          $('#dest').val('');
-          return;
-        }
-
-        text = str;
-
-        var enc = autodetect(str);
-
-        update_toolbar(enc);
-
-        bytes = strToBytes(str);
-
-        var type = '';
-
-        if (bytes.length > 0) {
-            var bstr = str.replace(/[ :,\n]+/g,'').trim();
-
-            if (from == 'base58') {
-                try {
-                    var res = parseBase58Check(str);
-                    type = 'Check ver.' + res[0];
-                    bytes = res[1];
-                } catch (err) {
-                    bytes = Bitcoin.Base58.decode(str);
-                }
-            } else if (from == 'hex') {
-                bytes = Crypto.util.hexToBytes(bstr);
-            } else if (from == 'rfc1751') {
-                try { bytes = english_to_key(str); } catch (err) { type = ' ' + err; bytes = []; };
-            } else if (from == 'mnemonic') {
-                bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
-            } else if (from == 'base64') {
-                try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
-            }
-
-            var ver = '';
-            if (to == 'base58') {
-                if (bytes.length == 20 || bytes.length == 32) {
-                    var addr = new Bitcoin.Address(bytes);
-                    addr.version = bytes.length == 32 ? PRIVATE_KEY_VERSION : PUBLIC_KEY_VERSION;
-                    text = addr.toString();
-                    ver = 'Check ver.' + addr.version;
-                } else {
-                    text = Bitcoin.Base58.encode(bytes);
-                }
-            } else if (to == 'hex') {
-                text = Crypto.util.bytesToHex(bytes);
-            } else if (to == 'text') {
-                text = bytesToString(bytes);
-            } else if (to == 'rfc1751') {
-                text = key_to_english(bytes);
-            } else if (to == 'mnemonic') {
-                text = mn_encode(Crypto.util.bytesToHex(bytes));
-            } else if (to == 'base64') {
-                text = Crypto.util.bytesToBase64(bytes);
-            } else if (to == 'rot13') {
-                text = rot13(str);
-            }
-        }
-
-        $('#hint_from').text(enct(from) + type + ' (' + bytes.length + ' byte' + (bytes.length == 1 ? ')' : 's)'));
-        $('#hint_to').text(enct(to) + ver + ' (' + text.length + ' character' + (text.length == 1 ? ')' : 's)'));
-        $('#dest').val(text);
-    }
-
-    function onChangeFrom() {
-        clearTimeout(timeout);
-        timeout = setTimeout(translate, TIMEOUT);
+        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+text);
+        $('#genAddrURL').attr('title', text);
     }
 
     function onInput(id, func) {
@@ -527,758 +298,47 @@
         });
     }
 
-    // --- chain ---
-    var chMode = 'csv';
-    var chAddrList = [];
-    var chRange = 1;
-    var chType = 'armory';
+    function crChange(e)
+    {
+        e.preventDefault();
+        coin = $(this).attr("id");
+        ADDRESS_URL_PREFIX = $(this).attr('href');
+        $('#crName').text($(this).text());
+        $('#crSelect').dropdown('toggle');
 
-    function chOnChangeType() {
-        var id = $(this).attr('id');
+        if( coin == "btc_main" ) BIP32_TYPE = MAINNET_PRIVATE;
+        else if( coin == "btc_test" ) BIP32_TYPE = TESTNET_PRIVATE;
 
-        if (chType != id) {
-            $('#chCode').val('');
-            $('#chRoot').val('');
-            $('#chBackup').val('');
-            $('#chMsg').text('');
-            $('#chList').text('');
-            chOnStop();
-        }
-
-        $('#chChange').attr('disabled', id != 'electrum');
-
-        chType = id;
-    }
-
-    function chOnChangeFormat() {
-        chMode = $(this).attr('id');
-        chUpdate();
-    }
-
-    function chAddrToCSV(i, r) {
-        return i + ', "' + r[0] +'", "' + r[1] +'"\n';
-    }
-
-    function chUpdate() {
-        if (chAddrList.length == 0)
-            return;
-        var str = '';
-        if (chMode == 'csv') {
-            for (var i = 0; i < chAddrList.length; i++)
-                str += chAddrToCSV(i+1, chAddrList[i]);
-
-        } else if (chMode == 'json') {
-
-            var w = {};
-            w['keys'] = [];
-            for (var i = 0; i < chAddrList.length; i++)
-                w['keys'].push({'addr':chAddrList[i][0],'sec':chAddrList[i][1]});
-            str = JSON.stringify(w, null, 4);
-        }
-        $('#chList').text(str);
-
-        chRange = parseInt($('#chRange').val());
-
-        var c = (chType == 'electrum') ? parseInt($('#chChange').val()) : 0;
-
-        if (chAddrList.length >= chRange+c)
-            chOnStop();
-
-    }
-
-    function chOnChangeCode() {
-        $('#chRoot').val('');
-        $('#chMsg').text('');
-        chOnStop();
-        $('#chBackup').val( mn_encode(chRoot) );
-        clearTimeout(timeout);
-        timeout = setTimeout(chGenerate, TIMEOUT);
-    }
-
-    function chOnChangeBackup() {
-        var str =  $('#chBackup').val();
-
-        if (str.length == 0) {
-            chOnStop();
-            $('#chCode').val('');
-            $('#chRoot').val('');
-            $('#chBackup').val('');
-            $('#chMsg').text('');
-            $('#chList').text('');
-            return;
-        }
-
-        if (chType == 'electrum') {
-            if (issubset(mn_words, str))  {
-                var seed = mn_decode(str);
-                $('#chCode').val(seed);
+        if( gen_from == 'pass' ) updateSourcePassphrase();
+        else if( gen_from == 'key' ) {
+            if( ( bip32_source_key.version == MAINNET_PUBLIC || bip32_source_key.version == MAINNET_PRIVATE ) && coin == 'btc_test' ) {
+                if( bip32_source_key.version == MAINNET_PUBLIC ) {
+                    bip32_source_key.version = TESTNET_PUBLIC;
+                    bip32_source_key.build_extended_public_key();
+                    $("#bip32_source_key").val(bip32_source_key.extended_public_key_string("base58"));
+                } else if( bip32_source_key.version == MAINNET_PRIVATE ) {
+                    bip32_source_key.version = TESTNET_PRIVATE;
+                    bip32_source_key.build_extended_public_key();
+                    bip32_source_key.build_extended_private_key();
+                    $("#bip32_source_key").val(bip32_source_key.extended_private_key_string("base58"));
+                }
+            } else if( ( bip32_source_key.version == TESTNET_PUBLIC || bip32_source_key.version == TESTNET_PRIVATE ) && coin == 'btc_main' ) {
+                if( bip32_source_key.version == TESTNET_PUBLIC ) {
+                    bip32_source_key.version = MAINNET_PUBLIC;
+                    bip32_source_key.build_extended_public_key();
+                    $("#bip32_source_key").val(bip32_source_key.extended_public_key_string("base58"));
+                } else if( bip32_source_key.version == TESTNET_PRIVATE ) {
+                    bip32_source_key.version = MAINNET_PRIVATE;
+                    bip32_source_key.build_extended_public_key();
+                    bip32_source_key.build_extended_private_key();
+                    $("#bip32_source_key").val(bip32_source_key.extended_private_key_string("base58"));
+                }
             }
+
+            updateSourceKey();
         }
-
-        if (chType == 'armory') {
-            var keys = armory_decode_keys(str);
-            if (keys != null) {
-                var cc = keys[1];
-                var pk = keys[0];
-                $('#chCode').val(Crypto.util.bytesToHex(cc));
-                $('#chRoot').val(Crypto.util.bytesToHex(pk));
-            }
-        }
-
-        clearTimeout(timeout);
-        timeout = setTimeout(chGenerate, TIMEOUT);
-    }
-
-    function chOnRandom() {
-        var cc = Crypto.util.randomBytes(32);
-        var pk = Crypto.util.randomBytes(32);
-
-        if (chType == 'armory') {
-            $('#chCode').val(Crypto.util.bytesToHex(cc));
-            $('#chRoot').val(Crypto.util.bytesToHex(pk));
-            $('#chBackup').val(armory_encode_keys(pk, cc));
-        }
-
-        if (chType == 'electrum') {
-            var seed = Crypto.util.bytesToHex(pk.slice(0,16));
-            //nb! electrum doesn't handle trailing zeros very well
-            if (seed.charAt(0) == '0') seed = seed.substr(1);
-            $('#chCode').val(seed);
-            $('#chBackup').val(mn_encode(seed));
-        }
-        chGenerate();
-    }
-
-    function chOnStop() {
-        Armory.stop();
-        Electrum.stop();
-        if (chType == 'electrum') {
-            $('#chMsg').text('');
-        }
-    }
-
-    function chOnChangeRange()
-    {
-        if ( chAddrList.length==0 )
-          return;
-        clearTimeout(timeout);
-        timeout = setTimeout(chUpdateRange, TIMEOUT);
-    }
-
-    function chCallback(r) {
-        chAddrList.push(r);
-        $('#chList').append(chAddrToCSV(chAddrList.length,r));
-    }
-
-    function chElectrumUpdate(r, seed) {
-        $('#chMsg').text('key stretching: ' + r + '%');
-        $('#chRoot').val(Crypto.util.bytesToHex(seed));
-    }
-
-    function chElectrumSuccess(privKey) {
-        $('#chMsg').text('');
-        $('#chRoot').val(Crypto.util.bytesToHex(privKey));
-        var addChange = parseInt($('#chChange').val());
-        Electrum.gen(chRange, chCallback, chUpdate, addChange);
-    }
-
-    function chUpdateRange() {
-        chRange = parseInt($('#chRange').val());
-        chAddrList = [];
-
-        $('#chList').text('');
-
-        if (chType == 'electrum') {
-            var addChange = parseInt($('#chChange').val());
-            Electrum.stop();
-            Electrum.gen(chRange, chCallback, chUpdate, addChange);
-        }
-
-        if (chType == 'armory') {
-            var codes = $('#chBackup').val();
-            Armory.gen(codes, chRange, chCallback, chUpdate);
-        }
-    }
-
-    function chGenerate() {
-        clearTimeout(timeout);
-
-        var seed = $('#chCode').val();
-        var codes = $('#chBackup').val();
-
-        chAddrList = [];
-
-        $('#chMsg').text('');
-        $('#chList').text('');
-
-        Electrum.stop();
-
-        if (chType == 'electrum') {
-           if (seed.length == 0)
-               return;
-            Electrum.init(seed, chElectrumUpdate, chElectrumSuccess);
-        }
-
-        if (chType == 'armory') {
-            var uid = Armory.gen(codes, chRange, chCallback, chUpdate);
-            if (uid)
-                $('#chMsg').text('uid: ' + uid);
-            else
-                return;
-        }
-    }
-
-    // -- transactions --
-
-    var txType = 'txBCI';
-    var txFrom = 'txFromSec';
-
-    function txGenSrcAddr() {
-        var sec = $('#txSec').val();
-        var addr = '';
-
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-            var compressed = false;
-            if (payload.length > 32) {
-                payload.pop();
-                compressed = true;
-            }
-            var eckey = new Bitcoin.ECKey(payload);
-            var curve = getSECCurveByName("secp256k1");
-            var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = getEncoded(pt, compressed);
-            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
-        } catch (err) {
-        }
-
-        $('#txAddr').val(addr);
-        $('#txBalance').val('0.00');
-
-        if (addr != "" && txFrom=='txFromSec')
-            txGetUnspent();
-    }
-
-    function txOnChangeSec() {
-        clearTimeout(timeout);
-        timeout = setTimeout(txGenSrcAddr, TIMEOUT);
-    }
-
-    function txOnChangeAddr() {
-        clearTimeout(timeout);
-        timeout = setTimeout(txGetUnspent, TIMEOUT);
-    }
-
-    function txSetUnspent(text) {
-        var r = JSON.parse(text);
-        txUnspent = JSON.stringify(r, null, 4);
-        $('#txUnspent').val(txUnspent);
-        var address = $('#txAddr').val();
-        TX.parseInputs(txUnspent, address);
-        var value = TX.getBalance();
-        var fval = Bitcoin.Util.formatValue(value);
-        var fee = parseFloat($('#txFee').val());
-        $('#txBalance').val(fval);
-        var value = Math.floor((fval-fee)*1e8)/1e8;
-        $('#txValue').val(value);
-        txRebuild();
-    }
-
-    function txUpdateUnspent() {
-        txSetUnspent($('#txUnspent').val());
-    }
-
-    function txOnChangeUnspent() {
-        clearTimeout(timeout);
-        timeout = setTimeout(txUpdateUnspent, TIMEOUT);
-    }
-
-    function txParseUnspent(text) {
-        if (text == '') {
-            alert('No data');
-            return;
-        }
-        txSetUnspent(text);
-    }
-
-    function txGetUnspent() {
-        var addr = $('#txAddr').val();
-
-        var url = (txType == 'txBCI') ? 'http://blockchain.info/unspent?address=' + addr :
-            'http://blockexplorer.com/q/mytransactions/' + addr;
-
-        url = prompt('Press OK to download transaction history:', url);
-        if (url != null && url != "") {
-            $('#txUnspent').val('');
-            tx_fetch(url, txParseUnspent);
-        } else {
-          txSetUnspent($('#txUnspent').val());
-        }
-    }
-
-    function txOnChangeJSON() {
-        var str = $('#txJSON').val();
-        try {
-          var sendTx = TX.fromBBE(str);
-          $('txJSON').removeClass('has-error');
-          var bytes = sendTx.serialize();
-          var hex = Crypto.util.bytesToHex(bytes);
-          $('#txHex').val(hex);
-          setErrorState($('#txJSON'), false, '');
-        } catch (err) {
-          setErrorState($('#txJSON'), true, 'syntax error');
-        }
-    }
-
-    function txOnChangeHex() {
-        var str = $('#txHex').val();
-        str = str.replace(/[^0-9a-fA-f]/g,'');
-        $('#txHex').val(str);
-        var bytes = Crypto.util.hexToBytes(str);
-        var sendTx = TX.deserialize(bytes);
-        var text = TX.toBBE(sendTx);
-        $('#txJSON').val(text);
-    }
-
-    function txOnAddDest() {
-        var list = $(document).find('.txCC');
-        var clone = list.last().clone();
-        clone.find('.help-inline').empty();
-        clone.find('.control-label').text('Cc');
-        var dest = clone.find('#txDest');
-        var value = clone.find('#txValue');
-        clone.insertAfter(list.last());
-        onInput(dest, txOnChangeDest);
-        onInput(value, txOnChangeDest);
-        dest.val('');
-        value.val('');
-        $('#txRemoveDest').attr('disabled', false);
-        return false;
-    }
-
-    function txOnRemoveDest() {
-        var list = $(document).find('.txCC');
-        if (list.size() == 2)
-            $('#txRemoveDest').attr('disabled', true);
-        list.last().remove();
-        return false;
-    }
-
-    function txSent(text) {
-        alert(text ? text : 'No response!');
-    }
-
-    function txSend() {
-        var txAddr = $('#txAddr').val();
-        var address = TX.getAddress();
-
-        var r = '';
-        if (txAddr != address)
-            r += 'Warning! Source address does not match private key.\n\n';
-
-        var tx = $('#txHex').val();
-
-        //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
-        url = 'http://blockchain.info/pushtx';
-        postdata = 'tx=' + tx;
-        url = prompt(r + 'Press OK to send transaction to:', url);
-        if (url != null && url != "") {
-            tx_fetch(url, txSent, txSent, postdata);
-        }
-        return false;
-    }
-
-    function txRebuild() {
-        var sec = $('#txSec').val();
-        var addr = $('#txAddr').val();
-        var unspent = $('#txUnspent').val();
-        var balance = parseFloat($('#txBalance').val());
-        var fee = parseFloat('0'+$('#txFee').val());
-
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-        } catch (err) {
-            $('#txJSON').val('');
-            $('#txHex').val('');
-            return;
-        }
-
-        var compressed = false;
-        if (payload.length > 32) {
-            payload.pop();
-            compressed = true;
-        }
-
-        var eckey = new Bitcoin.ECKey(payload);
-
-        eckey.setCompressed(compressed);
-
-        TX.init(eckey);
-
-        var fval = 0;
-        var o = txGetOutputs();
-        for (i in o) {
-            TX.addOutput(o[i].dest, o[i].fval);
-            fval += o[i].fval;
-        }
-
-        // send change back or it will be sent as fee
-        if (balance > fval + fee) {
-            var change = balance - fval - fee;
-            TX.addOutput(addr, change);
-        }
-
-        try {
-            var sendTx = TX.construct();
-            var txJSON = TX.toBBE(sendTx);
-            var buf = sendTx.serialize();
-            var txHex = Crypto.util.bytesToHex(buf);
-            setErrorState($('#txJSON'), false, '');
-            $('#txJSON').val(txJSON);
-            $('#txHex').val(txHex);
-        } catch(err) {
-            $('#txJSON').val('');
-            $('#txHex').val('');
-        }
-    }
-
-    function txSign() {
-        if (txFrom=='txFromSec')
-        {
-          txRebuild();
-          return;
-        }
-
-        var str = $('#txJSON').val();
-        TX.removeOutputs();
-        var sendTx = TX.fromBBE(str);
-
-        try {
-            sendTx = TX.resign(sendTx);
-            $('#txJSON').val(TX.toBBE(sendTx));
-            $('#txHex').val(Crypto.util.bytesToHex(sendTx.serialize()));
-            $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
-        } catch(err) {
-            $('#txJSON').val('');
-            $('#txHex').val('');
-        }
-    }
-
-    function txOnChangeDest() {
-        var balance = parseFloat($('#txBalance').val());
-        var fval = parseFloat('0'+$('#txValue').val());
-        var fee = parseFloat('0'+$('#txFee').val());
-
-        if (fval + fee > balance) {
-            fee = balance - fval;
-            $('#txFee').val(fee > 0 ? fee : '0.00');
-        }
-
-        clearTimeout(timeout);
-        timeout = setTimeout(txRebuild, TIMEOUT);
-    }
-
-    function txShowUnspent() {
-        var div = $('#txUnspentForm');
-
-        if (div.hasClass('hide')) {
-            div.removeClass('hide');
-            $('#txShowUnspent').text('Hide Outputs');
-        } else {
-            div.addClass('hide');
-            $('#txShowUnspent').text('Show Outputs');
-        }
-    }
-
-    function txChangeType() {
-        txType = $(this).attr('id');
-    }
-
-    function txChangeFrom() {
-      txFrom = $(this).attr('id');
-      var bFromKey = txFrom=='txFromSec' || txFrom=='txFromPass';
-      $('#txJSON').attr('readonly', txFrom!='txFromJSON');
-      $('#txHex').attr('readonly', txFrom!='txFromRaw');
-      $('#txFee').attr('readonly', !bFromKey);
-      $('#txAddr').attr('readonly', !bFromKey);
-      $('#txBalance').attr('readonly', !bFromKey);
-
-      $.each($(document).find('.txCC'), function() {
-        $(this).find('#txDest').attr('readonly', !bFromKey);
-        $(this).find('#txValue').attr('readonly', !bFromKey);
-      });
-
-      if ( txFrom=='txFromRaw' )
-        $('#txHex').focus();
-      else if ( txFrom=='txFromJSON' )
-        $('#txJSON').focus();
-      else if ( bFromKey )
-        $('#txSec').focus();
-    }
-
-    function txOnChangeFee() {
-
-        var balance = parseFloat($('#txBalance').val());
-        var fee = parseFloat('0'+$('#txFee').val());
-
-        var fval = 0;
-        var o = txGetOutputs();
-        for (i in o) {
-            TX.addOutput(o[i].dest, o[i].fval);
-            fval += o[i].fval;
-        }
-
-        if (fval + fee > balance) {
-            fval = balance - fee;
-            $('#txValue').val(fval < 0 ? 0 : fval);
-        }
-
-        if (fee == 0 && fval == balance - 0.0005) {
-            $('#txValue').val(balance);
-        }
-
-        clearTimeout(timeout);
-        timeout = setTimeout(txRebuild, TIMEOUT);
-    }
-
-    function txGetOutputs() {
-        var res = [];
-        $.each($(document).find('.txCC'), function() {
-            var dest = $(this).find('#txDest').val();
-            var fval = parseFloat('0' + $(this).find('#txValue').val());
-            res.push( {"dest":dest, "fval":fval } );
-        });
-        return res;
-    }
-
-    // -- sign --
-    var sgData = null;
-    var sgType = 'clearsign';
-
-    function sgOnChangeType() {
-        var id = $(this).attr('name');
-        if (sgType!=id)
-        {
-          sgType = id;
-          if (sgData!=null)
-            sgSign();
-        }
-    }
-
-    function updateAddr(from, to) {
-        var sec = from.val();
-        var addr = '';
-        var eckey = null;
-        var compressed = false;
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-            if (payload.length > 32) {
-                payload.pop();
-                compressed = true;
-            }
-            eckey = new Bitcoin.ECKey(payload);
-            var curve = getSECCurveByName("secp256k1");
-            var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = getEncoded(pt, compressed);
-            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
-            setErrorState(from, false);
-        } catch (err) {
-            setErrorState(from, true, "Bad private key");
-        }
-        to.val(addr);
-        return {"key":eckey, "compressed":compressed, "addrtype":version, "address":addr};
-    }
-
-    function sgGenAddr() {
-        updateAddr($('#sgSec'), $('#sgAddr'));
-    }
-
-    function sgOnChangeSec() {
-        $('#sgSig').val('');
-        sgData = null;
-        clearTimeout(timeout);
-        timeout = setTimeout(sgGenAddr, TIMEOUT);
-    }
-
-    function fullTrim(message)
-    {
-        message = message.replace(/^\s+|\s+$/g, '');
-        message = message.replace(/^\n+|\n+$/g, '');
-        return message;
-    }
-
-    var sgHdr = [
-      "-----BEGIN BITCOIN SIGNED MESSAGE-----",
-      "-----BEGIN SIGNATURE-----",
-      "-----END BITCOIN SIGNED MESSAGE-----"
-    ];
-
-    var qtHdr = [
-      "-----BEGIN BITCOIN SIGNED MESSAGE-----",
-      "-----BEGIN BITCOIN SIGNATURE-----",
-      "-----END BITCOIN SIGNATURE-----"
-    ];
-
-    function makeSignedMessage(type, msg, addr, sig)
-    {
-      if (type=='clearsign')
-        return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
-      else if (type=='armory')
-        return sig;
-      else
-        return qtHdr[0]+'\n'+msg +'\n'+qtHdr[1]+'\nVersion: Bitcoin-qt (1.0)\nAddress: '+addr+'\n\n'+sig+'\n'+qtHdr[2];
-    }
-
-    function sgSign() {
-      var message = $('#sgMsg').val();
-      var p = updateAddr($('#sgSec'), $('#sgAddr'));
-
-      if ( !message || !p.address )
-        return;
-
-      message = fullTrim(message);
-
-      if (sgType=='armory') {
-        var sig = armory_sign_message (p.key, p.address, message, p.compressed, p.addrtype);
-      } else {
-        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-      }
-
-      sgData = {"message":message, "address":p.address, "signature":sig};
-
-      $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
-    }
-
-    function sgOnChangeMsg() {
-        $('#sgSig').val('');
-        sgData = null;
-        clearTimeout(timeout);
-        timeout = setTimeout(sgUpdateMsg, TIMEOUT);
-    }
-
-    function sgUpdateMsg() {
-        $('#vrMsg').val($('#sgMsg').val());
-    }
-
-    // -- verify --
-    function vrOnChangeSig() {
-        //$('#vrAlert').empty();
-        window.location.hash='#verify';
-    }
-
-    function vrPermalink()
-    {
-      var msg = $('#vrMsg').val();
-      var sig = $('#vrSig').val();
-      var addr = $('#vrAddr').val();
-      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig)+'&vrAddr='+encodeURIComponent(addr);
-    }
-
-    function splitSignature(s)
-    {
-      var addr = '';
-      var sig = s;
-      if ( s.indexOf('\n')>=0 )
-      {
-        var a = s.split('\n');
-        addr = a[0];
-
-        // always the last
-        sig = a[a.length-1];
-
-        // try named fields
-        var h1 = 'Address: ';
-        for (i in a) {
-          var m = a[i];
-          if ( m.indexOf(h1)>=0 )
-            addr = m.substring(h1.length, m.length);
-        }
-
-        // address should not contain spaces
-        if (addr.indexOf(' ')>=0)
-          addr = '';
-
-        // some forums break signatures with spaces
-        sig = sig.replace(" ","");
-      }
-      return { "address":addr, "signature":sig };
-    }
-
-    function splitSignedMessage(s)
-    {
-      s = s.replace('\r','');
-
-      for (var i=0; i<2; i++ )
-      {
-        var hdr = i==0 ? sgHdr : qtHdr;
-
-        var p0 = s.indexOf(hdr[0]);
-        if ( p0>=0 )
-        {
-          var p1 = s.indexOf(hdr[1]);
-          if ( p1>p0 )
-          {
-            var p2 = s.indexOf(hdr[2]);
-            if ( p2>p1 )
-            {
-              var msg = s.substring(p0+hdr[0].length+1, p1-1);
-              var sig = s.substring(p1+hdr[1].length+1, p2-1);
-              var m = splitSignature(sig);
-              msg = fullTrim(msg); // doesn't work without this
-              return { "message":msg, "address":m.address, "signature":m.signature };
-            }
-          }
-        }
-      }
-      return false;
-    }
-
-    function vrVerify() {
-        var s = $('#vrSig').val();
-        var p = splitSignedMessage(s);
-        var res = verify_message(p.signature, p.message, PUBLIC_KEY_VERSION);
-
-        if (!res) {
-          var values = armory_split_message(s);
-          res = armory_verify_message(values);
-          p = {"address":values.Address};
-        }
-
-        $('#vrAlert').empty();
-
-        var clone = $('#vrError').clone();
-
-        if ( p && res && (p.address==res || p.address==''))
-        {
-          clone = p.address==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
-          clone.find('#vrAddr').text(res);
-        }
-
-        clone.appendTo($('#vrAlert'));
 
         return false;
-    }
-
-    function crChange()
-    {
-      PUBLIC_KEY_VERSION = parseInt($(this).attr('title'));
-      PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
-      ADDRESS_URL_PREFIX = $(this).attr('href');
-      $('#crName').text($(this).text());
-      $('#crSelect').dropdown('toggle');
-      gen_update();
-      translate();
-      return false;
     }
 
     $(document).ready( function() {
@@ -1290,119 +350,25 @@
             window.location.hash = $(this).attr('href');
         });
 
-        // generator
+        // bip32
 
-        onInput('#pass', onChangePass);
-        onInput('#hash', onChangeHash);
-        onInput('#sec', onChangePrivKey);
+        $('#gen_from label input').on('change', onUpdateGenFrom );
+        updateGenFrom();
 
-        $('#genRandom').click(genRandom);
+        $("#bip32_source_passphrase").val("crazy horse battery staple");
+        //$("#bip32_source_key").val("xprv9s21ZrQH143K2pUUptTR16Ji3MJpt9rfUq74vGyNqNdmTv6UBoRQKCTNS6zDKZzmVBBuZDzVf1uweMNyf1LmtZFvbmJqx7K1YAPPGitEtYG");
+        onInput("#bip32_source_passphrase", onUpdateSourcePassphrase);
+        onInput("#bip32_source_key", onUpdateSourceKey);
+        updateSourcePassphrase();
+        //updateSourceKey();
 
-        $('#gen_from label input').on('change', update_gen_from );
-        $('#gen_comp label input').on('change', update_gen_compressed );
+        $('#bip32_derivation_path').on('change', onUpdateDerivationPath);
+        $('input[name="key_derivation"]').on('change', onKeyDerivationChanged);
+        onInput("#bip32_custom_path", onUpdateCustomPath);
+        onInput("#account_index", onAccountIndexChanged);
+        onInput("#keypair_index", onKeypairIndexChanged);
 
-        genRandomPass();
-
-        // chains
-
-        $('#chRandom').click(chOnRandom);
-
-        $('#chType label input').on('change', chOnChangeType);
-        $('#chFormat label input').on('change', chOnChangeFormat);
-
-        onInput($('#chRange'), chOnChangeRange);
-        onInput($('#chCode'), chOnChangeCode);
-        onInput($('#chBackup'), chOnChangeBackup);
-        onInput($('#chChange'), chOnChangeRange);
-        chRange = parseInt($('#chRange').val());
-
-        // transactions
-
-        $('#txSec').val(tx_sec);
-        $('#txAddr').val(tx_addr);
-        $('#txDest').val(tx_dest);
-
-        txSetUnspent(tx_unspent);
-
-        $('#txGetUnspent').click(txGetUnspent);
-        $('#txType label input').on('change', txChangeType);
-        $('#txFrom label input').on('change', txChangeFrom);
-
-        onInput($('#txSec'), txOnChangeSec);
-        onInput($('#txAddr'), txOnChangeAddr);
-        onInput($('#txUnspent'), txOnChangeUnspent);
-        onInput($('#txHex'), txOnChangeHex);
-        onInput($('#txJSON'), txOnChangeJSON);
-        onInput($('#txDest'), txOnChangeDest);
-        onInput($('#txValue'), txOnChangeDest);
-        onInput($('#txFee'), txOnChangeFee);
-
-        $('#txAddDest').click(txOnAddDest);
-        $('#txRemoveDest').click(txOnRemoveDest);
-        $('#txSend').click(txSend);
-        $('#txSign').click(txSign);
-
-        // converter
-
-        onInput('#src', onChangeFrom);
-
-        $('#enc_from label input').on('change', update_enc_from );
-        $('#enc_to label input').on('change', update_enc_to );
-
-        // sign
-
-        $('#sgSec').val($('#sec').val());
-        $('#sgAddr').val($('#addr').val());
-        $('#sgMsg').val("This is an example of a signed message.");
-
-        onInput('#sgSec', sgOnChangeSec);
-        onInput('#sgMsg', sgOnChangeMsg);
-
-        $('#sgSign').click(sgSign);
-        $('#sgForm').submit(sgSign);
-
-        // verify
-
-        $('#vrVerify').click(vrVerify);
-        onInput('#vrSig', vrOnChangeSig);
-
-        $('#sgType label input').on('change', sgOnChangeType);
-
-        $('#vrSig').val('-----BEGIN BITCOIN SIGNED MESSAGE-----\n'
-        +'This is an example of a signed message.\n'
-        +'-----BEGIN SIGNATURE-----\n'
-        +'<insert address here>\n'
-        +'Gyk26Le4ER0EUvZiFGUCXhJKWVEoTtQNU449puYZPaiUmYyrcozt2LuAMgLvnEgpoF6cw8ob9Mj/CjP9ATydO1k=\n'
-        +'-----END BITCOIN SIGNED MESSAGE-----');
-
-        // -- permalink support (deprecated) --
-        var vrMsg = '';
-        var vrSig = '';
-        var vrAddr = '';
-        if ( window.location.hash && window.location.hash.indexOf('?')!=-1 )
-        {
-          var args = window.location.hash.split('?')[1].split('&');
-          for ( var i=0; i<args.length; i++ )
-          {
-            var arg = args[i].split('=');
-            if ( arg[0]=='vrMsg')
-              vrMsg=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrSig')
-              vrSig=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrAddr')
-              vrAddr=decodeURIComponent(arg[1]);
-          }
-
-          if (!vrAddr)
-            vrAddr = "<insert address here>"
-
-          if (vrMsg && vrSig && vrAddr)
-          {
-            $('#vrSig').val(makeSignedMessage( sgType, vrMsg, vrAddr, vrSig ));
-            vrVerify();
-          }
-        }
-        // -- /permalink support --
+        updateDerivationPath();
 
         // currency select
 

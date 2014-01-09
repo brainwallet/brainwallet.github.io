@@ -4,3 +4,19 @@ body {
 }
 
 .form-control[disabled], .form-control[readonly] { cursor: auto; }
+
+hidden {
+    display: none;
+}
+
+.col-lg-2 {
+    width: 18%;
+}
+
+.col-lg-offset-2 {
+    margin-left: 18%;
+}
+
+.col-lg-10 {
+    width: 82%;
+}
