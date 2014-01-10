@@ -194,7 +194,6 @@ BIP32.prototype.derive_child = function(i) {
 
     var ret = null;
     if( this.has_private_key ) {
-        // Private-key derivation is the same whether we have private key or not.
         var data = null;
 
         if( use_private ) {
@@ -220,7 +219,6 @@ BIP32.prototype.derive_child = function(i) {
         ret.has_private_key = true;
 
     } else {
-        // Public-key derivation is the same whether we have private key or not.
         var data = this.eckey.pub.getEncoded(true).concat(ib);
         var j = new jsSHA(Crypto.util.bytesToHex(data), 'HEX');   
         var hash = j.getHMAC(Crypto.util.bytesToHex(this.chain_code), "HEX", "SHA-512", "HEX");

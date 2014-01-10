@@ -3,6 +3,9 @@
     var bip32_source_key = null;
     var bip32_derivation_path = null;
     var gen_from = "pass";
+    var hash_worker = null;
+    var hash_worker_working = false;
+    var bip32_passphrase_hash = null;
 
     var TIMEOUT = 600;
     var timeout = null;
@@ -22,13 +25,24 @@
         return padding + str;
     }
 
-    function setErrorState(field, err, msg) {
-        var group = field.closest('.controls');
+    function setWarningState(field, err, msg) {
+        var group = field.closest('.form-group');
         if (err) {
-            group.addClass('has-error');
+            group.removeClass('has-error').addClass('has-warning');
+            group.attr('title', msg);
+        } else {
+            group.removeClass('has-warning').removeClass('has-error');
+            group.attr('title', '');
+        }
+    }
+
+    function setErrorState(field, err, msg) {
+        var group = field.closest('.form-group');
+        if (err) {
+            group.removeClass('has-warning').addClass('has-error');
             group.attr('title',msg);
         } else {
-            group.removeClass('has-error');
+            group.removeClass('has-warning').removeClass('has-error');
             group.attr('title','');
         }
     }
@@ -63,22 +77,48 @@
             $("#bip32_source_passphrase").attr('readonly', false);
             $("#bip32_source_key").attr('readonly', true);
         } else {
+            setErrorState($("#bip32_source_passphrase"), false);
             $("#bip32_source_passphrase").attr('readonly', true);
             $("#bip32_source_key").attr('readonly', false);
+            stop_hash_worker();
+            $("#cancel_hash_worker").attr('disabled', true);
         }
     }
 
     function onUpdateSourcePassphrase() {
         clearTimeout(timeout);
         timeout = setTimeout(updateSourcePassphrase, TIMEOUT);
+        setWarningState($("#bip32_source_passphrase"), false);
+    }
+
+    function onCancelHashWorkerClicked() {
+        stop_hash_worker();
+
+        var passphrase = $("#bip32_source_passphrase").val();
+        bip32_passphrase_hash = Crypto.util.bytesToHex(Crypto.SHA256(passphrase, { asBytes: true }));
+        updatePassphraseHash();
+
+        setWarningState($("#bip32_source_passphrase"), true, "The passphrase was hashed using a single SHA-256 and should be considered WEAK and INSECURE");
     }
 
     function updateSourcePassphrase() {
         var passphrase = $("#bip32_source_passphrase").val();
+        if( typeof(Worker) === undefined ) {
+            setErrorState($("#bip32_source_passphrase"), true, "Your browser doesn't support Web Workers");
+        } else {
+            setErrorState($("#bip32_source_passphrase"), false);
+        }
 
-        var hash_str = Crypto.util.bytesToHex(Crypto.SHA256(passphrase, { asBytes: true }));
+        try {
+            start_hash_worker(passphrase);
+        } catch (err) {
+            setErrorState($("#bip32_source_passphrase"), true, "Your browser doesn't support Web Workers: " + err.toString());
+            alert("It appears your browser cannot load or execute web workers.  If you are running locally using Chrome, run with the --allow-file-access-from-files option or use a HTTP server such as Python (python3 -m http.server)");
+        }
+    }
 
-        var hasher = new jsSHA(hash_str, 'HEX');   
+    function updatePassphraseHash() {
+        var hasher = new jsSHA(bip32_passphrase_hash, 'HEX');   
         var I = hasher.getHMAC("Bitcoin seed", "TEXT", "SHA-512", "HEX");
         var il = Crypto.util.hexToBytes(I.slice(0, 64));
         var ir = Crypto.util.hexToBytes(I.slice(64, 128));
@@ -121,15 +161,25 @@
     }
 
     function updateSourceKey() {
+        $("#bip32_key_info_title").html('');
+        $("#bip32_key_info_version").val('');
+        $("#bip32_key_info_depth").val('');
+        $("#bip32_key_info_parent_fingerprint").val('');
+        $("#bip32_key_info_child_index").val('');
+        $("#bip32_key_info_chain_code").val('');
+        $("#bip32_key_info_key").val('');
+
+        setErrorState($('#bip32_source_key'), false);
+
         try {
             var source_key_str = $("#bip32_source_key").val();
+            if(source_key_str.length == 0) return;
             bip32_source_key = new BIP32(source_key_str);
         } catch(err) {
             bip32_source_key = null;
             setErrorState($('#bip32_source_key'), true, 'Invalid key: ' + err.toString());
             return;
         }
-        setErrorState($('#bip32_source_key'), false);
 
         //console.log(bip32_source_key);
         updateSourceKeyInfo();
@@ -229,10 +279,6 @@
         updateResult();
     }
 
-    function onKeyDerivationChanged() {
-        updateResult();
-    }
-
     function updateResult() {
         var p = '' + bip32_derivation_path;
         var k = parseInt($("#account_index").val());
@@ -240,25 +286,23 @@
 
         p = p.replace('i', i).replace('k', k);
 
-        var pubpriv = $('input[name="key_derivation"]:checked').attr('id');
-
-        if( pubpriv == "key_derivation_private" && p[p.length-1] != "\'" ) {
-            p = p + "\'";
-        }
+        setErrorState($('#bip32_derivation_path'), false);
+        $("#derived_private_key").val('');
+        $("#derived_public_key").val('');
+        $("#addr").val('');
+        $("#genAddrQR").val('');
 
         try {
+            if(bip32_source_key == null) {
+                // if this is the case then there's an error state set on the source key
+                return;
+            }
             console.log("Deriving: " + p);
             var result = bip32_source_key.derive(p);
         } catch (err) {
             setErrorState($('#bip32_derivation_path'), true, 'Error deriving key: ' + err.toString());
-            $("#derived_private_key").val('');
-            $("#derived_public_key").val('');
-            $("#addr").val('');
-            $("#genAddrQR").val('');
             return;
         }
-
-        setErrorState($('#bip32_derivation_path'), false);
 
         if( result.has_private_key ) {
             $("#derived_private_key").val(result.extended_private_key_string("base58"));
@@ -341,6 +385,58 @@
         return false;
     }
 
+    // -- web worker for hashing passphrase --
+    function hash_worker_message(e) {
+        // ignore the hash worker
+        if(!hash_worker_working) return;
+
+        var m = e.data;
+        switch(m.cmd) {
+        case 'progress':
+            $("#bip32_hashing_progress_bar").width('' + m.progress + "%");
+            break;
+        case 'done':
+            $("#bip32_hashing_progress_bar").width('100%');
+            $("#bip32_hashing_style").removeClass("active");
+            $("#cancel_hash_worker").attr('disabled', true);
+            hash_worker_working = false;
+            bip32_passphrase_hash = m.result;
+            updatePassphraseHash();
+            break;
+        }
+        console.log(m);
+    }
+
+    function start_hash_worker(passphrase) {
+        if( hash_worker === null ) {
+            hash_worker = new Worker("js/hash_worker.js");
+            hash_worker.addEventListener('message', hash_worker_message, false);
+        }
+
+        bip32_passphrase_hash = null;
+        bip32_source_key = null;
+
+        $("#bip32_source_key").val('');
+        updateSourceKey();
+        updateResult();
+
+        $("#bip32_hashing_progress_bar").css('width', '0%');
+        $("#bip32_hashing_style").addClass("active");
+
+        hash_worker_working = true;
+        $("#cancel_hash_worker").attr('disabled', false);
+        hash_worker.postMessage({"cmd": "start", "bip32_source_passphrase": passphrase});
+    }
+    
+    function stop_hash_worker() {
+        $("#cancel_hash_worker").attr('disabled', true);
+        hash_worker_working = false;
+        $("#bip32_hashing_progress_bar").css("width", "0%");
+        if( hash_worker != null ) {
+            hash_worker.postMessage({"cmd": "stop"});
+        }
+    }
+
     $(document).ready( function() {
 
         if (window.location.hash)
@@ -356,14 +452,16 @@
         updateGenFrom();
 
         $("#bip32_source_passphrase").val("crazy horse battery staple");
-        //$("#bip32_source_key").val("xprv9s21ZrQH143K2pUUptTR16Ji3MJpt9rfUq74vGyNqNdmTv6UBoRQKCTNS6zDKZzmVBBuZDzVf1uweMNyf1LmtZFvbmJqx7K1YAPPGitEtYG");
+        $("#bip32_source_key").val("xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73");
         onInput("#bip32_source_passphrase", onUpdateSourcePassphrase);
+
+        $("#cancel_hash_worker").on('click', onCancelHashWorkerClicked);
         onInput("#bip32_source_key", onUpdateSourceKey);
-        updateSourcePassphrase();
-        //updateSourceKey();
+        $("#bip32_hashing_progress_bar").width('100%');
+        $("#cancel_hash_worker").attr('disabled', true);
+        updateSourceKey();
 
         $('#bip32_derivation_path').on('change', onUpdateDerivationPath);
-        $('input[name="key_derivation"]').on('change', onKeyDerivationChanged);
         onInput("#bip32_custom_path", onUpdateCustomPath);
         onInput("#account_index", onAccountIndexChanged);
         onInput("#keypair_index", onKeypairIndexChanged);
