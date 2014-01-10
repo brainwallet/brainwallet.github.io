@@ -418,6 +418,10 @@
         return true;
     }
 
+    function isEasy16(str) {
+      return !/[^asdfghjkwertuion \r\n]+/i.test(str);
+    }
+
     function autodetect(str) {
         var enc = [];
         var bstr = str.replace(/[ :,\n]+/g,'').trim();
@@ -448,6 +452,8 @@
           // arbitrary text should have higher priority than base58
           enc.push('base58');
         }
+        if (isEasy16(bstr))
+          enc.push('easy16');
         return enc;
     }
 
@@ -472,6 +478,30 @@
         return str.replace(/[a-zA-Z]/g, function(c) {
           return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
         });
+    }
+
+    function fromEasy16(str) {
+      var keys = str.split('\n');
+      var res = [];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i].replace(' ','');
+        var raw = Crypto.util.hexToBytes(armory_map(k, armory_f, armory_t));
+        data = raw.slice(0, 16);
+        res = res.concat(data);
+      }
+      return res;
+    }
+
+    function toEasy16(bytes) {
+        var keys = armory_encode_keys(bytes,[]);
+        var lines = keys.split('\n');
+        var res = [];
+        for (var i in lines) {
+          if (lines[i].trim(' ').split(' ').length==9)
+            res.push(lines[i]);
+          console.log(lines[i], res);
+        }
+        return res.join('\n');
     }
 
     function toBin(bytes)
@@ -547,6 +577,8 @@
                 bytes = stringToBytes(rot13(str));
             } else if (from == 'bin') {
                 bytes = fromBin(str);
+            } else if (from == 'easy16') {
+                bytes = fromEasy16(str);
             }
 
             var ver = '';
@@ -571,6 +603,8 @@
                 text = rot13(bytesToString(bytes));
             } else if (to == 'bin') {
                 text = toBin(bytes);
+            } else if (to == 'easy16') {
+                text = toEasy16(bytes);
             }
         }
 
