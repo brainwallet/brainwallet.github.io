@@ -11,3 +11,7 @@ body {
   column-count:2;
   width: 360px;
 }
+
+.dropdown-menu-two-column li {
+	padding-top: 3px;
+}
