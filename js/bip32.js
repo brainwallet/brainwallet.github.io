@@ -1,8 +1,12 @@
 
-var MAINNET_PUBLIC = 0x0488b21e;
-var MAINNET_PRIVATE = 0x0488ade4;
-var TESTNET_PUBLIC = 0x043587cf;
-var TESTNET_PRIVATE = 0x04358394;
+var BITCOIN_MAINNET_PUBLIC = 0x0488b21e;
+var BITCOIN_MAINNET_PRIVATE = 0x0488ade4;
+var BITCOIN_TESTNET_PUBLIC = 0x043587cf;
+var BITCOIN_TESTNET_PRIVATE = 0x04358394;
+var DOGECOIN_MAINNET_PUBLIC = 0x02facafd;
+var DOGECOIN_MAINNET_PRIVATE = 0x02fac398;
+var DOGECOIN_TESTNET_PUBLIC = 0x0432a9a8;
+var DOGECOIN_TESTNET_PRIVATE = 0x0432a243;
 
 var BIP32 = function(bytes) {
     // decode base58
@@ -35,7 +39,19 @@ BIP32.prototype.init_from_bytes = function(bytes) {
     
     var key_bytes = bytes.slice(45, 78);
 
-    if( (this.version == MAINNET_PRIVATE || this.version == TESTNET_PRIVATE) && key_bytes[0] == 0 ) {
+    var is_private = 
+        (this.version == BITCOIN_MAINNET_PRIVATE  ||
+         this.version == BITCOIN_TESTNET_PRIVATE  ||
+         this.version == DOGECOIN_MAINNET_PRIVATE ||
+         this.version == DOGECOIN_TESTNET_PRIVATE);
+
+    var is_public = 
+        (this.version == BITCOIN_MAINNET_PUBLIC  ||
+         this.version == BITCOIN_TESTNET_PUBLIC  ||
+         this.version == DOGECOIN_MAINNET_PUBLIC ||
+         this.version == DOGECOIN_TESTNET_PUBLIC);
+
+    if( is_private && key_bytes[0] == 0 ) {
         this.eckey = new Bitcoin.ECKey(key_bytes.slice(1, 33));
         this.eckey.setCompressed(true);
 
@@ -44,7 +60,7 @@ BIP32.prototype.init_from_bytes = function(bytes) {
         this.eckey.pub = pt;
         this.eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(this.eckey.pub.getEncoded(true));
         this.has_private_key = true;
-    } else if( (this.version == MAINNET_PUBLIC || this.version == TESTNET_PUBLIC) && (key_bytes[0] == 0x02 || key_bytes[0] == 0x03) ) {
+    } else if( is_public && (key_bytes[0] == 0x02 || key_bytes[0] == 0x03) ) {
         this.eckey = new Bitcoin.ECKey();
         this.eckey.pub = decompress_pubkey(key_bytes);
         this.eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(this.eckey.pub.getEncoded(true));
@@ -61,9 +77,26 @@ BIP32.prototype.init_from_bytes = function(bytes) {
 BIP32.prototype.build_extended_public_key = function() {
     this.extended_public_key = [];
 
-    var v = MAINNET_PUBLIC;
-    if( this.version == TESTNET_PUBLIC || this.version == TESTNET_PRIVATE ) {
-        v = TESTNET_PUBLIC;
+    var v = null;
+    switch(this.version) {
+    case BITCOIN_MAINNET_PUBLIC:
+    case BITCOIN_MAINNET_PRIVATE:
+        v = BITCOIN_MAINNET_PUBLIC;
+        break;
+    case BITCOIN_TESTNET_PUBLIC:
+    case BITCOIN_TESTNET_PRIVATE:
+        v = BITCOIN_TESTNET_PUBLIC;
+        break;
+    case DOGECOIN_MAINNET_PUBLIC:
+    case DOGECOIN_MAINNET_PRIVATE:
+        v = DOGECOIN_MAINNET_PUBLIC;
+        break;
+    case DOGECOIN_TESTNET_PUBLIC:
+    case DOGECOIN_TESTNET_PRIVATE:
+        v = DOGECOIN_TESTNET_PUBLIC;
+        break;
+     default:
+        throw new Error("Unknown version");
     }
 
     // Version
@@ -108,10 +141,7 @@ BIP32.prototype.build_extended_private_key = function() {
     if( !this.has_private_key ) return;
     this.extended_private_key = [];
 
-    var v = MAINNET_PRIVATE;
-    if( this.version == TESTNET_PUBLIC || this.version == TESTNET_PRIVATE ) {
-        v = TESTNET_PRIVATE;
-    }
+    var v = this.version;
 
     // Version
     this.extended_private_key.push(v >> 24);
@@ -190,7 +220,13 @@ BIP32.prototype.derive_child = function(i) {
     var use_private = (i & 0x80000000) != 0;
     var ecparams = getSECCurveByName("secp256k1");
 
-    if( use_private && (!this.has_private_key || (this.version != MAINNET_PRIVATE && this.version != TESTNET_PRIVATE)) ) throw new Error("Cannot do private key derivation without private key");
+    var is_private = 
+        (this.version == BITCOIN_MAINNET_PRIVATE  ||
+         this.version == BITCOIN_TESTNET_PRIVATE  ||
+         this.version == DOGECOIN_MAINNET_PRIVATE ||
+         this.version == DOGECOIN_TESTNET_PRIVATE);
+
+    if( use_private && (!this.has_private_key || !is_private) ) throw new Error("Cannot do private key derivation without private key");
 
     var ret = null;
     if( this.has_private_key ) {
