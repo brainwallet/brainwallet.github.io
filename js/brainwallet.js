@@ -12,10 +12,45 @@
 
     var coin = "btc_main";
 
+    var COINS = {
+        btc_main: {
+            name: "Bitcoin",
+            network: "Mainnet",
+            prefix: 0,
+            private_prefix: 0+0x80,
+            bip32_public: BITCOIN_MAINNET_PUBLIC,
+            bip32_private: BITCOIN_MAINNET_PRIVATE
+        },
+        btc_test: {
+            name: "Bitcoin",
+            network: "Testnet",
+            prefix: 0x6f,
+            private_prefix: 0x6f+0x80,
+            bip32_public: BITCOIN_TESTNET_PUBLIC,
+            bip32_private: BITCOIN_TESTNET_PRIVATE
+        },
+        doge_main: {
+            name: "Dogecoin",
+            network: "Mainnet",
+            prefix: 0x1e,
+            private_prefix: 0x1e+0x80,
+            bip32_public: DOGECOIN_MAINNET_PUBLIC,
+            bip32_private: DOGECOIN_MAINNET_PRIVATE
+        },
+        doge_test: {
+            name: "Dogecoin",
+            network: "Testnet",
+            prefix: 0x71,
+            private_prefix: 0x71+0x80,
+            bip32_public: DOGECOIN_TESTNET_PUBLIC,
+            bip32_private: DOGECOIN_TESTNET_PRIVATE
+        }
+    };
+
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
     var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
-    var BIP32_TYPE = MAINNET_PRIVATE;
+    var BIP32_TYPE = BITCOIN_MAINNET_PRIVATE;
 
     function pad(str, len, ch) {
         padding = '';
@@ -134,7 +169,7 @@
             gen_bip32.chain_code = ir;
             gen_bip32.child_index = 0;
             gen_bip32.parent_fingerprint = Bitcoin.Util.hexToBytes("00000000");
-            gen_bip32.version = BIP32_TYPE;
+            gen_bip32.version = COINS[coin].bip32_private;
             gen_bip32.depth = 0;
 
             gen_bip32.build_extended_public_key();
@@ -186,26 +221,37 @@
         updateDerivationPath();
     }
 
-    function updateSourceKeyInfo() {
-        if( isMasterKey(bip32_source_key) ) {
-            if( bip32_source_key.has_private_key ) {
-                $("#bip32_key_info_title").html("<b>Master Private Key</b>");
-            } else {
-                $("#bip32_key_info_title").html("<b>Master Public Key</b>");
-            }
-        } else {
-            if( bip32_source_key.has_private_key ) {
-                $("#bip32_key_info_title").html("<b>Derived Private Key</b>");
-            } else {
-                $("#bip32_key_info_title").html("<b>Derived Public Key</b>");
+    function getCoinFromKey(k) {
+        for(var coin_name in COINS) {
+            var c = COINS[coin_name];
+            if(k.version == c.bip32_public || k.version == c.bip32_private) {
+                return c;
             }
         }
 
-        var testnet = (bip32_source_key.version == TESTNET_PUBLIC || bip32_source_key.version == TESTNET_PRIVATE);
+        return null;
+    }
+
+    function updateSourceKeyInfo() {
+        var key_coin = getCoinFromKey(bip32_source_key);
+
+        if( isMasterKey(bip32_source_key) ) {
+            if( bip32_source_key.has_private_key ) {
+                $("#bip32_key_info_title").html("<b>" + key_coin.name + " Master Private Key</b>");
+            } else {
+                $("#bip32_key_info_title").html("<b>" + key_coin.name + " Master Public Key</b>");
+            }
+        } else {
+            if( bip32_source_key.has_private_key ) {
+                $("#bip32_key_info_title").html("<b>" + key_coin.name + " Derived Private Key</b>");
+            } else {
+                $("#bip32_key_info_title").html("<b>" + key_coin.name + " Derived Public Key</b>");
+            }
+        }
 
         var v = '' + pad8(bip32_source_key.version.toString(16));
-        if( bip32_source_key.has_private_key ) v = v + " (" + (testnet ? "Testnet" : "Mainnet") + " private key)";
-        else                                   v = v + " (" + (testnet ? "Testnet" : "Mainnet") + " public key)";
+        if( bip32_source_key.has_private_key ) v = v + " (" + key_coin.name + " " + key_coin.network + " private key)";
+        else                                   v = v + " (" + key_coin.name + " " + key_coin.network + " public key)";
 
         $("#bip32_key_info_version").val(v);
 
@@ -220,7 +266,7 @@
         $("#bip32_key_info_chain_code").val('' + byteArrayToHexString(bip32_source_key.chain_code));
 
         if( bip32_source_key.has_private_key ) {
-            var bytes = [testnet ? (PRIVATE_KEY_VERSION+0x6f) : PRIVATE_KEY_VERSION].concat(bip32_source_key.eckey.priv.toByteArrayUnsigned()).concat([1]);
+            var bytes = [key_coin.private_prefix].concat(bip32_source_key.eckey.priv.toByteArrayUnsigned()).concat([1]);
             var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true}).slice(0, 4);
             $("#bip32_key_info_key").val(Bitcoin.Base58.encode(bytes.concat(checksum)));
 
@@ -312,11 +358,11 @@
 
         $("#derived_public_key").val(result.extended_public_key_string("base58"));
 
-        var testnet = (result.version == TESTNET_PUBLIC || result.version == TESTNET_PRIVATE);
+        var key_coin = getCoinFromKey(result);
 
         var hash160 = result.eckey.pubKeyHash;
         var addr = new Bitcoin.Address(hash160);
-        addr.version = PUBLIC_KEY_VERSION + (testnet ? 0x6f : 0);
+        addr.version = key_coin.prefix;
         $("#addr").val(addr.toString());
 
         var qrCode = qrcode(3, 'M');
@@ -344,35 +390,27 @@
 
     function crChange(e)
     {
+        var key_coin = getCoinFromKey(bip32_source_key);
+
         e.preventDefault();
         coin = $(this).attr("id");
         ADDRESS_URL_PREFIX = $(this).attr('href');
         $('#crName').text($(this).text());
         $('#crSelect').dropdown('toggle');
 
-        if( coin == "btc_main" ) BIP32_TYPE = MAINNET_PRIVATE;
-        else if( coin == "btc_test" ) BIP32_TYPE = TESTNET_PRIVATE;
+        if( gen_from == 'pass' && bip32_source_key === null ) {
+            updateSourcePassphrase();
+        } else if( bip32_source_key !== null ) {
+            if( COINS[coin].prefix != key_coin.prefix ) { // key is changing to another realm..
+                var is_private = (bip32_source_key.version == key_coin.bip32_private);
+                var is_public = (bip32_source_key.version == key_coin.bip32_public);
 
-        if( gen_from == 'pass' ) updateSourcePassphrase();
-        else if( gen_from == 'key' ) {
-            if( ( bip32_source_key.version == MAINNET_PUBLIC || bip32_source_key.version == MAINNET_PRIVATE ) && coin == 'btc_test' ) {
-                if( bip32_source_key.version == MAINNET_PUBLIC ) {
-                    bip32_source_key.version = TESTNET_PUBLIC;
+                if( is_public ) {
+                    bip32_source_key.version = COINS[coin].bip32_public;
                     bip32_source_key.build_extended_public_key();
                     $("#bip32_source_key").val(bip32_source_key.extended_public_key_string("base58"));
-                } else if( bip32_source_key.version == MAINNET_PRIVATE ) {
-                    bip32_source_key.version = TESTNET_PRIVATE;
-                    bip32_source_key.build_extended_public_key();
-                    bip32_source_key.build_extended_private_key();
-                    $("#bip32_source_key").val(bip32_source_key.extended_private_key_string("base58"));
-                }
-            } else if( ( bip32_source_key.version == TESTNET_PUBLIC || bip32_source_key.version == TESTNET_PRIVATE ) && coin == 'btc_main' ) {
-                if( bip32_source_key.version == TESTNET_PUBLIC ) {
-                    bip32_source_key.version = MAINNET_PUBLIC;
-                    bip32_source_key.build_extended_public_key();
-                    $("#bip32_source_key").val(bip32_source_key.extended_public_key_string("base58"));
-                } else if( bip32_source_key.version == TESTNET_PRIVATE ) {
-                    bip32_source_key.version = MAINNET_PRIVATE;
+                } else if( is_private ) {
+                    bip32_source_key.version = COINS[coin].bip32_private;
                     bip32_source_key.build_extended_public_key();
                     bip32_source_key.build_extended_private_key();
                     $("#bip32_source_key").val(bip32_source_key.extended_private_key_string("base58"));
