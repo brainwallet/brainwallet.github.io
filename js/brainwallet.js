@@ -111,12 +111,14 @@
         if( gen_from == 'pass' ) {
             $("#bip32_source_passphrase").attr('readonly', false);
             $("#bip32_source_key").attr('readonly', true);
+            $("#gen_from_msg").html("Your passphrase is hashed using 50,000 rounds of HMAC-SHA256");
         } else {
             setErrorState($("#bip32_source_passphrase"), false);
             $("#bip32_source_passphrase").attr('readonly', true);
             $("#bip32_source_key").attr('readonly', false);
             stop_hash_worker();
             $("#cancel_hash_worker").attr('disabled', true);
+            $("#gen_from_msg").html("You can manually enter an Extended Private or Public key");
         }
     }
 
@@ -124,6 +126,14 @@
         clearTimeout(timeout);
         timeout = setTimeout(updateSourcePassphrase, TIMEOUT);
         setWarningState($("#bip32_source_passphrase"), false);
+    }
+
+    function onShowPassphraseChanged() {
+        if($(this).is(":checked")) {
+            $("#bip32_source_passphrase").attr('type', 'text');
+        } else {
+            $("#bip32_source_passphrase").attr('type', 'password');
+        }
     }
 
     function onCancelHashWorkerClicked() {
@@ -492,6 +502,8 @@
         $("#bip32_source_passphrase").val("crazy horse battery staple");
         $("#bip32_source_key").val("xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73");
         onInput("#bip32_source_passphrase", onUpdateSourcePassphrase);
+
+        $("#checkbox_show_passphrase").on('change', onShowPassphraseChanged );
 
         $("#cancel_hash_worker").on('click', onCancelHashWorkerClicked);
         onInput("#bip32_source_key", onUpdateSourceKey);

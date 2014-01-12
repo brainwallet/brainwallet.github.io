@@ -72,6 +72,7 @@
                     <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label>
                     <label class="btn btn-default" title="Base58-encoded"><input id="from_key" name="gen_from" type="radio" />BIP32 Key</label>
                   </div>
+                  &nbsp;&nbsp;<span class="help-inline" id="gen_from_msg"></span>
                 </div>
               </div>
               <div class="form-group">
@@ -79,8 +80,11 @@
                 <div class="col-lg-10">
                   <div class="row">
                     <div class="col-lg-12">
-                      <div class="input-append">
-                        <input class="form-control" id="bip32_source_passphrase" type="text" />
+                      <div class="input-group">
+                        <input class="form-control" id="bip32_source_passphrase" type="password" />
+                        <div class="input-group-addon" style="height: 34px;">
+                          <input type="checkbox" id="checkbox_show_passphrase" />Show Passphrase
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -103,8 +107,10 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="bip32_source_key">BIP32 Extended Key</label>
                 <div class="col-lg-10">
-                  <div class="input-append">
-                    <input class="form-control" id="bip32_source_key" type="text" />
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <input class="form-control" id="bip32_source_key" type="text" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -171,20 +177,20 @@
                 <label class="col-lg-2 control-label" for="bip32_derivation_path">Derivation Path</label>
                 <div class="col-lg-10">
                   <select class="form-control" id="bip32_derivation_path">
-                      <option value="m">Info: m</option>
-                      <option value="m/i">Simple: m/i</option>
-                      <option value="m/k'/0" selected>External account (master): m/k'/0</option>
-                      <option value="m/k'/0/i">External account i'th keypair: m/k'/0/i</option>
-                      <option value="m/k'/1">Internal account (master): m/k'/1</option>
-                      <option value="m/k'/1/i">Internal account i'th keypair: m/k'/1/i</option>
-                      <option value="custom">Custom</option>
+                    <option value="m">Info: m</option>
+                    <option value="m/i">Simple: m/i</option>
+                    <option value="m/k'/0" selected>External account (master): m/k'/0</option>
+                    <option value="m/k'/0/i">External account i'th keypair: m/k'/0/i</option>
+                    <option value="m/k'/1">Internal account (master): m/k'/1</option>
+                    <option value="m/k'/1/i">Internal account i'th keypair: m/k'/1/i</option>
+                    <option value="custom">Custom</option>
                   </select>
                 </div>
               </div>
               <div class="form-group" id="custom_group">
                 <label class="col-lg-2 control-label" for="bip32_custom_path">Custom Path</label>
                 <div class="col-lg-10">
-                  <div class="input-append">
+                  <div class="input-group">
                     <input class="form-control" id="bip32_custom_path" type="text" placeholder="m/i" />
                   </div>
                 </div>
@@ -204,17 +210,13 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="derived_private_key">Derived Private Key</label>
                 <div class="col-lg-10">
-                  <div class="input-append">
-                    <input class="form-control" id="derived_private_key" readonly="readonly" type="text" />
-                  </div>
+                  <input class="form-control" id="derived_private_key" readonly="readonly" type="text" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="derived_public_key">Derived Public Key</label>
                 <div class="col-lg-10">
-                  <div class="input-append">
-                    <input class="form-control" id="derived_public_key" readonly="readonly" type="text" />
-                  </div>
+                  <input class="form-control" id="derived_public_key" readonly="readonly" type="text" />
                 </div>
               </div>
               <div class="form-group">
