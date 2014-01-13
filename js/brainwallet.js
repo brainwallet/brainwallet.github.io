@@ -44,6 +44,22 @@
             private_prefix: 0x71+0x80,
             bip32_public: DOGECOIN_TESTNET_PUBLIC,
             bip32_private: DOGECOIN_TESTNET_PRIVATE
+        },
+        ltc_main: {
+            name: "Litecoin",
+            network: "Mainnet",
+            prefix: 0x30,
+            private_prefix: 0x30+0x80,
+            bip32_public: LITECOIN_MAINNET_PUBLIC,
+            bip32_private: LITECOIN_MAINNET_PRIVATE
+        },
+        ltc_test: {
+            name: "Litecoin",
+            network: "Testnet",
+            prefix: 0x6f,
+            private_prefix: 0x6f+0x80,
+            bip32_public: LITECOIN_TESTNET_PUBLIC,
+            bip32_private: LITECOIN_TESTNET_PRIVATE
         }
     };
 
