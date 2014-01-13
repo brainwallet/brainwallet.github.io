@@ -14,7 +14,7 @@ importScripts("sha256.js");
     
         switch (m.cmd) {
         case 'start':
-            last = Crypto.util.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000"); // 64-bit 0
+            last = Crypto.util.hexToBytes("0000000000000000000000000000000000000000000000000000000000000000"); // 256-bit 0
             bip32_source_passphrase = m.bip32_source_passphrase;
             state = 'start';
             break;
@@ -37,14 +37,9 @@ importScripts("sha256.js");
                 return;
             case 'start':
                 self.postMessage({'cmd': 'progress', 'progress': 0});
-
-                // perform the first hash, since it's special
-                var hasher = new jsSHA(Crypto.util.bytesToHex(last), 'HEX');   
-                last = Crypto.util.hexToBytes(hasher.getHMAC(bip32_source_passphrase, "TEXT", "SHA-256", "HEX"));
-                index = 1;
-
+                index = 0;
                 state = 'hashing';
-                break;
+                // fall through
             case 'hashing':
                 var hasher = new jsSHA(Crypto.util.bytesToHex(last), 'HEX');   
                 last = Crypto.util.hexToBytes(hasher.getHMAC(bip32_source_passphrase, "TEXT", "SHA-256", "HEX"));
@@ -62,6 +57,8 @@ importScripts("sha256.js");
             }
         }
 
+        // we use this style of run-some, wait-some to allow the browser to parse messages,
+        // allowing us to restart/stop mid-hash
         setTimeout(main, 0);
     }
     

@@ -345,6 +345,8 @@
         setErrorState($('#bip32_derivation_path'), false);
         $("#derived_private_key").val('');
         $("#derived_public_key").val('');
+        $("#derived_private_key_wif").val('');
+        $("#derived_public_key_hex").val('');
         $("#addr").val('');
         $("#genAddrQR").val('');
 
@@ -360,16 +362,22 @@
             return;
         }
 
+        var key_coin = getCoinFromKey(result);
+
         if( result.has_private_key ) {
             $("#derived_private_key").val(result.extended_private_key_string("base58"));
+
+            var bytes = [key_coin.private_prefix].concat(result.eckey.priv.toByteArrayUnsigned()).concat([1]);
+            var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true}).slice(0, 4);
+            $("#derived_private_key_wif").val(Bitcoin.Base58.encode(bytes.concat(checksum)))
         } else {
             $("#derived_private_key").val("No private key available");
+            $("#derived_private_key_wif").val("No private key available");
         }
 
         $("#derived_public_key").val(result.extended_public_key_string("base58"));
-
-        var key_coin = getCoinFromKey(result);
-
+        $("#derived_public_key_hex").val(Crypto.util.bytesToHex(result.eckey.pub.getEncoded(true)));
+ 
         var hash160 = result.eckey.pubKeyHash;
         var addr = new Bitcoin.Address(hash160);
         addr.version = key_coin.prefix;
