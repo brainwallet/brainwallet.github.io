@@ -429,7 +429,7 @@
         if ( isBin(bstr) )
           enc.push('bin');
 
-        if (isHex(str)) 
+        if (isHex(bstr))
             enc.push('hex');
         if (isBase58(bstr)) {
             // push base58check first (higher priority)
