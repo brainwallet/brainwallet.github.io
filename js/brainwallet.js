@@ -442,6 +442,8 @@
             enc.push('mnemonic');
         if (issubset(rfc1751_wordlist, str)) 
             enc.push('rfc1751');
+        if (isEasy16(bstr))
+          enc.push('easy16');
         if (isBase64(bstr))
             enc.push('base64');
         if (str.length > 0) {
@@ -452,8 +454,6 @@
           // arbitrary text should have higher priority than base58
           enc.push('base58');
         }
-        if (isEasy16(bstr))
-          enc.push('easy16');
         return enc;
     }
 
