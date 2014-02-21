@@ -104,8 +104,11 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="pass">Passphrase</label>
                 <div class="col-lg-10 controls">
-                  <div class="input-append">
-                    <input class="form-control" id="pass" placeholder="Long sentence that does not appear in songs or literature. SHA256 used as private key. Should not be empty!" type="text" autofocus/>
+                  <div class="input-group">
+                    <input class="form-control" id="pass" placeholder="Long sentence that does not appear in songs or literature. SHA256 used as private key. Should not be empty!" type="password" autofocus/>
+                    <span class="input-group-btn">
+                      <button id="togglePass" class="btn btn-info" type="button">Toggle</button>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -129,7 +132,7 @@
                   </div>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group" style="display:none">
                 <label class="col-lg-2 control-label" for="sec">Private Key</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="sec" readonly="readonly" spellcheck="false" title="Wallet Import Format (Base58Check of Secret Exponent)" type="text" />
@@ -143,8 +146,12 @@
               </div>
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="genAddrQR">Address QR Code</label>
-                <div class="col-lg-10 controls">
+                <div class="col-lg-4 controls">
                   <a href="#" id="genAddrURL" target="_blank" title="Click to view address history (external link)"><span id="genAddrQR"></span></a>
+                  <span id='toggleKeyCode' class='btn btn-default'>Toggle Key</span>
+                </div>
+                <div class="col-lg-3 controls">
+                  <span id="genKeyQR" style="display:none"></span>
                 </div>
               </div>
               <div class="form-group">
