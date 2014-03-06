@@ -408,6 +408,10 @@
       return !/[^01 \r\n]+/i.test(str);
     }
 
+    function isDec(str) {
+      return !/[^0123456789]+/i.test(str);
+    }
+
     function issubset(a, ssv) {
         var b = ssv.trim().split(' ');
         for (var i = 0; i < b.length; i++) {
@@ -427,7 +431,10 @@
         var bstr = str.replace(/[ :,\n]+/g,'').trim();
 
         if ( isBin(bstr) )
-          enc.push('bin');
+            enc.push('bin');
+
+        if (isDec(bstr) )
+            enc.push('dec');
 
         if (isHex(bstr))
             enc.push('hex');
@@ -499,7 +506,6 @@
         for (var i in lines) {
           if (lines[i].trim(' ').split(' ').length==9)
             res.push(lines[i]);
-          console.log(lines[i], res);
         }
         return res.join('\n');
     }
@@ -526,6 +532,74 @@
           res.push(parseInt(chunks[j], 2));
       }
       return res;
+    }
+
+    function strIsOdd(str) {
+
+        var i = str.length-1;
+
+        if (str.charAt(i) == "1") {
+            return true;
+        } if (str.charAt(i) == "3") {
+            return true;
+        } if (str.charAt(i) == "5") {
+            return true;
+        } if (str.charAt(i) == "7") {
+            return true;
+        } if (str.charAt(i) == "9") {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    function bigNumberDivide(str) {
+        var additive = 0;
+        var nextAdditive = 0;
+        var newString = "";
+
+        for (var i=0; i<str.length; i++) {
+            
+            additive = nextAdditive;
+            if (strIsOdd(str.charAt(i))) {
+                nextAdditive = 5;
+            }
+            else {
+                nextAdditive = 0;
+            }
+            
+            var num = parseInt(str.charAt(i));
+            var numResult = Math.floor(num / 2) + additive;
+            newString = newString.concat(numResult.toString());
+        }
+
+        // Trim potential zero off newString
+        if (newString != "0" && newString.charAt(0) == "0") {
+            newString = newString.slice(1, newString.length);
+        }
+        return newString;
+    }
+
+    function fromDec(str)
+    {
+        var res = "";
+        
+        while (str != "0") {
+            if (strIsOdd(str)) {
+                res = "1".concat(res);
+            }
+            else {
+                res = "0".concat(res);
+            }
+
+            str = bigNumberDivide(str);
+        }
+
+        //Take newly created binary representation of decimal string and convert to byte format
+        res = fromBin(res);
+
+        return res;
     }
 
     function enct(id) {
@@ -579,6 +653,8 @@
                 bytes = fromBin(str);
             } else if (from == 'easy16') {
                 bytes = fromEasy16(str);
+            } else if (from == 'dec') {
+                bytes = fromDec(bstr);
             }
 
             var ver = '';
