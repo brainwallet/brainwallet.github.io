@@ -650,7 +650,7 @@
             } else if (from == 'rot13') {
                 bytes = stringToBytes(rot13(str));
             } else if (from == 'bin') {
-                bytes = fromBin(str);
+                bytes = fromBin(('0000000'+bstr).slice(-Math.ceil(bstr.length/8)*8)); // needs padding
             } else if (from == 'easy16') {
                 bytes = fromEasy16(str);
             } else if (from == 'dec') {
