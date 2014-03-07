@@ -640,7 +640,7 @@
             } else if (from == 'base58') {
                 bytes = Bitcoin.Base58.decode(bstr);
             } else if (from == 'hex') {
-                bytes = Crypto.util.hexToBytes(bstr);
+                bytes = Crypto.util.hexToBytes(bstr.length%2?'0'+bstr:bstr); // needs padding
             } else if (from == 'rfc1751') {
                 try { bytes = english_to_key(str); } catch (err) { type = ' ' + err; bytes = []; };
             } else if (from == 'mnemonic') {
