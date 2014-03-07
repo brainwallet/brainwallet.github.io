@@ -534,72 +534,16 @@
       return res;
     }
 
-    function strIsOdd(str) {
-
-        var i = str.length-1;
-
-        if (str.charAt(i) == "1") {
-            return true;
-        } if (str.charAt(i) == "3") {
-            return true;
-        } if (str.charAt(i) == "5") {
-            return true;
-        } if (str.charAt(i) == "7") {
-            return true;
-        } if (str.charAt(i) == "9") {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    function bigNumberDivide(str) {
-        var additive = 0;
-        var nextAdditive = 0;
-        var newString = "";
-
-        for (var i=0; i<str.length; i++) {
-            
-            additive = nextAdditive;
-            if (strIsOdd(str.charAt(i))) {
-                nextAdditive = 5;
-            }
-            else {
-                nextAdditive = 0;
-            }
-            
-            var num = parseInt(str.charAt(i));
-            var numResult = Math.floor(num / 2) + additive;
-            newString = newString.concat(numResult.toString());
-        }
-
-        // Trim potential zero off newString
-        if (newString != "0" && newString.charAt(0) == "0") {
-            newString = newString.slice(1, newString.length);
-        }
-        return newString;
-    }
-
     function fromDec(str)
     {
-        var res = "";
-        
-        while (str != "0") {
-            if (strIsOdd(str)) {
-                res = "1".concat(res);
-            }
-            else {
-                res = "0".concat(res);
-            }
+        var h = new BigInteger(str).toString(16);
+        return Crypto.util.hexToBytes(h.length%2?'0'+h:h);
+    }
 
-            str = bigNumberDivide(str);
-        }
-
-        //Take newly created binary representation of decimal string and convert to byte format
-        res = fromBin(res);
-
-        return res;
+    function toDec(bytes)
+    {
+        var h = Crypto.util.bytesToHex(bytes);
+        return new BigInteger(h,16).toString(10);
     }
 
     function enct(id) {
@@ -681,6 +625,8 @@
                 text = toBin(bytes);
             } else if (to == 'easy16') {
                 text = toEasy16(bytes);
+            } else if (to == 'dec') {
+                text = toDec(bytes);
             }
         }
 
