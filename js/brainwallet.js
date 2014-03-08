@@ -550,6 +550,25 @@
         return $('#from_'+id).parent().text();
     }
 
+    function pad_array(bytes, n)
+    {
+      if (n==0) // remove padding
+      {
+        var res = bytes.slice(0);
+        while (res.length>1 && res[0]==0)
+          res.shift();
+        return res;
+      }
+
+      // align to n bytes
+      var len = bytes.length;
+      var padding = Math.ceil(len/n)*n - len;
+      var res = bytes.slice(0);
+      for (i=0;i<padding;i++)
+        res.unshift(0);
+      return res;
+    }
+
     function translate() {
 
         var str = $('#src').val();
@@ -614,9 +633,9 @@
             } else if (to == 'text') {
                 text = bytesToString(bytes);
             } else if (to == 'rfc1751') {
-                text = key_to_english(bytes);
+                text = key_to_english(pad_array(bytes,8));
             } else if (to == 'mnemonic') {
-                text = mn_encode(Crypto.util.bytesToHex(bytes));
+                text = mn_encode(Crypto.util.bytesToHex(pad_array(bytes,4)));
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
             } else if (to == 'rot13') {
@@ -624,7 +643,7 @@
             } else if (to == 'bin') {
                 text = toBin(bytes);
             } else if (to == 'easy16') {
-                text = toEasy16(bytes);
+                text = toEasy16(pad_array(bytes,32));
             } else if (to == 'dec') {
                 text = toDec(bytes);
             }
