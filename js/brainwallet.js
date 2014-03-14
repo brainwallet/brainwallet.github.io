@@ -775,7 +775,7 @@
 
                 var lines = str.split('\n');
                 var text = lines.join(' ');
-                var words = text.split(' ');
+                var words = text.split(/\s+/);
                 if (words.length!=9*2 && words.length!=9*4)
                 {
                   $('#chList').text('');
