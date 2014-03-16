@@ -527,7 +527,9 @@
       var res = [];
       for (var i=0; i<arr.length; i++)
       {
-        var chunks = arr[i].match(/.{1,8}/g);
+        var bstr = arr[i];
+        var s = ('0000000'+bstr).slice(-Math.ceil(bstr.length/8)*8); // needs padding
+        var chunks = s.match(/.{1,8}/g);
          for (var j=0;j<chunks.length;j++)
           res.push(parseInt(chunks[j], 2));
       }
@@ -613,7 +615,7 @@
             } else if (from == 'rot13') {
                 bytes = stringToBytes(rot13(str));
             } else if (from == 'bin') {
-                bytes = fromBin(('0000000'+bstr).slice(-Math.ceil(bstr.length/8)*8)); // needs padding
+                bytes = fromBin(str);
             } else if (from == 'easy16') {
                 bytes = fromEasy16(str);
             } else if (from == 'dec') {
