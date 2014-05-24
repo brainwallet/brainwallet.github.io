@@ -343,7 +343,6 @@
     function genRandomPass() {
         // chosen by fair dice roll
         // guaranted to be random
-        $('#pass').val('correct horse battery staple');
         $('#from_pass').button('toggle');
         $('#pass').focus();
         gen_from = 'pass';
