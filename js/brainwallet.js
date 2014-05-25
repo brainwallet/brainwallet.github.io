@@ -275,6 +275,18 @@
     }
 
     function onChangePass() {
+        if ($('#pass').val()=="" ) //do not allow empty password
+        {
+          clearTimeout(timeout);
+          $('#hash').val('');
+          $('#sec').val('');
+          $('#addr').val('');
+          $('#genAddrQR').html('');
+          $('#der').val('');
+          $('#pub').val('');
+          $('#h160').val('');
+          return;
+        }
         calc_hash();
         clearTimeout(timeout);
         timeout = setTimeout(generate, TIMEOUT);
@@ -346,9 +358,9 @@
         $('#from_pass').button('toggle');
         $('#pass').focus();
         gen_from = 'pass';
-        update_gen();
-        calc_hash();
-        generate();
+        //update_gen();
+        //calc_hash();
+        //generate();
     }
 
     // --- converter ---
