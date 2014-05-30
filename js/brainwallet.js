@@ -185,6 +185,9 @@
     }
 
     function generate() {
+        if ( !$('#hash').val() ) // empty hash
+          return;
+
         var hash_str = pad($('#hash').val(), 64, '0');
 
         var hash = Crypto.util.hexToBytes(hash_str);
@@ -1461,7 +1464,7 @@
       $('#crName').text(name);
 
       $('#crSelect').dropdown('toggle');
-      gen_update();
+      generate();
       translate();
       return false;
     }
