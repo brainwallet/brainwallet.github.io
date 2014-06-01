@@ -1446,7 +1446,7 @@
       $('#crName').text(name);
 
       $('#crSelect').dropdown('toggle');
-      generate();
+      gen_update();
       translate();
       return false;
     }
