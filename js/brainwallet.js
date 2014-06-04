@@ -350,10 +350,11 @@
 
     // --- converter ---
 
-    var from = 'hex';
+    var from = '';
     var to = 'hex';
 
     function update_enc_from() {
+        $(this).addClass('active');
         from = $(this).attr('id').substring(5);
         translate();
     }
@@ -425,13 +426,10 @@
     function autodetect(str) {
         var enc = [];
         var bstr = str.replace(/[ :,\n]+/g,'').trim();
-
         if ( isBin(bstr) )
             enc.push('bin');
-
         if (isDec(bstr) )
             enc.push('dec');
-
         if (isHex(bstr))
             enc.push('hex');
         if (isBase58(bstr)) {
@@ -460,20 +458,24 @@
         return enc;
     }
 
-    function update_toolbar(enc) {
+    function update_toolbar(enc_list) {
         var reselect = false;
+
         $.each($('#enc_from').children(), function() {
-            var id = $(this).children().attr('id').substring(5);
-            var disabled = (enc && enc.indexOf(id) == -1);
+            var enc = $(this).children().attr('id').substring(5);
+            var disabled = (enc_list && enc_list.indexOf(enc) == -1);
             if (disabled && $(this).hasClass('active')) {
                 $(this).removeClass('active');
                 reselect = true;
             }
             $(this).attr('disabled', disabled);
         });
-        if (enc && enc.length > 0 && reselect) {
-            $('#from_' + enc[0]).click();//addClass('active');
-            from = enc[0];
+
+        if (enc_list && enc_list.length > 0) {
+            if (reselect || from=='') {
+              from = enc_list[0];
+              $('#from_' + from).click();
+            }
         }
     }
 
