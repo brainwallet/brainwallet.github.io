@@ -409,8 +409,10 @@
       return !/[^0123456789]+/i.test(str);
     }
 
-    function issubset(a, ssv) {
+    function issubset(a, ssv, min_words) {
         var b = ssv.trim().split(' ');
+        if (min_words>b.length)
+            return false;
         for (var i = 0; i < b.length; i++) {
             if (a.indexOf(b[i].toLowerCase()) == -1 
                 && a.indexOf(b[i].toUpperCase()) == -1)
@@ -439,9 +441,9 @@
                 enc.push('base58check');
             } catch (err) {};
         }
-        if (issubset(mn_words, str))
+        if (issubset(mn_words, str, 3))
             enc.push('mnemonic');
-        if (issubset(rfc1751_wordlist, str)) 
+        if (issubset(rfc1751_wordlist, str, 6))
             enc.push('rfc1751');
         if (isEasy16(bstr))
           enc.push('easy16');
@@ -753,7 +755,7 @@
         }
 
         if (chType == 'electrum') {
-            if (issubset(mn_words, str))  {
+            if (issubset(mn_words, str, 12))  {
                 var seed = mn_decode(str);
                 $('#chRoot').val(seed);
                 var words = str.split(' ');
