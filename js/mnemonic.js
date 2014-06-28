@@ -27,10 +27,11 @@ function mn_decode(str) {
     var out = '';
     var n = mn_words.length;
     var wlist = str.split(' ');
-    for (var i = 0; i < wlist.length; i += 3) {
+    var len = wlist.length;
+    for (var i = 0; i < len; i += 3) {
         var w1 = mn_words.indexOf(wlist[i]);
-        var w2 = (mn_words.indexOf(wlist[i+1])) % n;
-        var w3 = (mn_words.indexOf(wlist[i+2])) % n;
+        var w2 = (mn_words.indexOf(wlist[(i+1)%len])) % n;
+        var w3 = (mn_words.indexOf(wlist[(i+2)%len])) % n;
         var x = w1 + n * mn_mod((w2 - w1), n) + n * n * mn_mod((w3 - w2), n);
         out += ('0000000' + x.toString(16)).slice(-8);
     }
