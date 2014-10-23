@@ -182,7 +182,11 @@ BIP32.prototype.build_extended_private_key = function() {
 
     // Private key
     this.extended_private_key.push(0);
-    this.extended_private_key = this.extended_private_key.concat(this.eckey.priv.toByteArrayUnsigned());
+    var k = this.eckey.priv.toByteArrayUnsigned();
+    while (k.length < 32) {
+        k.unshift(0);
+    }
+    this.extended_private_key = this.extended_private_key.concat(k);
 }
 
 BIP32.prototype.extended_private_key_string = function(format) {
@@ -251,7 +255,11 @@ BIP32.prototype.derive_child = function(i) {
         var data = null;
 
         if( use_private ) {
-            data = [0].concat(this.eckey.priv.toByteArrayUnsigned()).concat(ib);
+            var k = this.eckey.priv.toByteArrayUnsigned();
+            while (k.length < 32) {
+                k.unshift(0);
+            }
+            data = [0].concat(k).concat(ib);
         } else {
             data = this.eckey.pub.getEncoded(true).concat(ib);
         }
