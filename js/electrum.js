@@ -75,7 +75,7 @@ var Electrum = new function () {
     }
 
     function calcAddr() {
-        var r = electrum_extend_chain(pubKey, privKey, counter % range, counter >= range, true);
+        var r = electrum_extend_chain(pubKey, privKey, counter<range ? counter : counter-range, counter >= range, true);
         onUpdate(r);
         counter++;
         if (counter >= range+addChange) {
