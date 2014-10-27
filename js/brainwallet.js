@@ -764,6 +764,10 @@
                   $('#chList').text('');
                   return;
                 }
+            } else {
+              $('#chRoot').val('');
+              $('#chCode').val('');
+              chOnStop();
             }
         }
 
