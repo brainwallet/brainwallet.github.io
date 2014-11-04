@@ -523,7 +523,7 @@
 
     function fromBin(str)
     {
-      var arr = str.split(/[\r\n ]+/);
+      var arr = str.trim().split(/[\r\n ]+/);
       var res = [];
       for (var i=0; i<arr.length; i++)
       {
