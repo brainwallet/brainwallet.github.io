@@ -45,6 +45,14 @@
             bip32_public: DOGECOIN_TESTNET_PUBLIC,
             bip32_private: DOGECOIN_TESTNET_PRIVATE
         },
+        jbs_main: {
+            name: "Jumbucks",
+            network: "Mainnet",
+            prefix: 0x2b,
+            private_prefix: 0x2b+0x80,
+            bip32_public: JUMBUCKS_MAINNET_PUBLIC,
+            bip32_private: JUMBUCKS_MAINNET_PRIVATE
+        },
         ltc_main: {
             name: "Litecoin",
             network: "Mainnet",
