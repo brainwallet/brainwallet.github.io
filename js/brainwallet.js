@@ -755,6 +755,7 @@
         }
 
         if (chType == 'electrum') {
+            str = str.trim();
             if (issubset(mn_words, str, 12))  {
                 var seed = mn_decode(str);
                 $('#chRoot').val(seed);
