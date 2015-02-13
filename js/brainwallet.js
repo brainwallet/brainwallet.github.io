@@ -391,7 +391,11 @@
         if( result.has_private_key ) {
             $("#derived_private_key").val(result.extended_private_key_string("base58"));
 
-            var bytes = [key_coin.private_prefix].concat(result.eckey.priv.toByteArrayUnsigned()).concat([1]);
+            var privkeyBytes = result.eckey.priv.toByteArrayUnsigned();
+            while (privkeyBytes.length < 32) {
+                privkeyBytes.unshift(0);
+            };
+            var bytes = [key_coin.private_prefix].concat(privkeyBytes).concat([1]);
             var checksum = Crypto.SHA256(Crypto.SHA256(bytes, {asBytes: true}), {asBytes: true}).slice(0, 4);
             $("#derived_private_key_wif").val(Bitcoin.Base58.encode(bytes.concat(checksum)))
         } else {
