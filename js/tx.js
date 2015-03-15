@@ -466,7 +466,7 @@ function parseScript(script) {
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
 function tx_fetch(url, onSuccess, onError, postdata) {
-    var useYQL = true;
+    var useYQL = false;
 
     if (useYQL) {
         var q = 'select * from html where url="'+url+'"';
@@ -478,10 +478,12 @@ function tx_fetch(url, onSuccess, onError, postdata) {
         url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
     }
 
+    alert(url);
     $.ajax({
         url: url,
         success: function(res) {
-            onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
+            onSuccess(prompt());
+            // onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
         },
         error:function (xhr, opt, err) {
             if (onError)
