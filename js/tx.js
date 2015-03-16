@@ -466,30 +466,34 @@ function parseScript(script) {
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
 function tx_fetch(url, onSuccess, onError, postdata) {
-    var useYQL = false;
+    // var useYQL = false;
 
-    if (useYQL) {
-        var q = 'select * from html where url="'+url+'"';
-        if (postdata) {
-            q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-            q += 'select * from htmlpost where url="' + url + '" ';
-            q += 'and postdata="' + postdata + '" and xpath="//p"';
-        }
-        url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
-    }
+    // if (useYQL) {
+    //     var q = 'select * from html where url="'+url+'"';
+    //     if (postdata) {
+    //         q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
+    //         q += 'select * from htmlpost where url="' + url + '" ';
+    //         q += 'and postdata="' + postdata + '" and xpath="//p"';
+    //     }
+    //     url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
+    // }
+    
+    $.get('https://jsonp.nodejitsu.com/?url=' + url)
+    .done(function(data) {
+        onSuccess(JSON.stringify(data));
+    })
+    .fail(onError);
 
-    alert(url);
-    $.ajax({
-        url: url,
-        success: function(res) {
-            onSuccess(prompt());
-            // onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
-        },
-        error:function (xhr, opt, err) {
-            if (onError)
-                onError(err);
-        }
-    });
+    // $.ajax({
+    //     url: proxiedUrl,
+    //     success: function(res) {
+    //         onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
+    //     },
+    //     error:function (xhr, opt, err) {
+    //         if (onError)
+    //             onError(err);
+    //     }
+    // });
 }
 
 var tx_dest = '15ArtCgi3wmpQAAfYx4riaFmo4prJA4VsK';
