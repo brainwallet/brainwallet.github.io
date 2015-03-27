@@ -478,12 +478,10 @@ function tx_fetch(url, onSuccess, onError, postdata) {
          }
          url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
     }
-    console.log(url);
 
     $.ajax({
         url: url,
         success: function(res) {
-            console.log(res);
             onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
         },
         error:function (xhr, opt, err) {
