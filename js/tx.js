@@ -474,7 +474,7 @@ function tx_fetch(url, onSuccess, onError, postdata) {
          if (postdata) {
             q = 'use "https://brainwallet.github.io/js/htmlpost.xml" as htmlpost; ';
             q += 'select * from htmlpost where url=\'' + url + '\' ';
-            q += 'and postdata="tx=12341234" and xpath="/"'
+            q += 'and postdata="' + postdata + '" and xpath="/"'
          }
          url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
     }
