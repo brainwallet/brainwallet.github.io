@@ -929,7 +929,9 @@
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = new Bitcoin.Address(eckey.getPubKeyHash());
             addr.version = (version-128)&255;
+            $('#txSign').attr('disabled', false);
         } catch (err) {
+          $('#txSign').attr('disabled', true);
         }
 
         $('#txAddr').val(addr);
@@ -1526,6 +1528,7 @@
         $('#txRemoveDest').click(txOnRemoveDest);
         $('#txSend').click(txSend);
         $('#txSign').click(txSign);
+        $('#txSign').attr('disabled', true);
 
         // converter
 
