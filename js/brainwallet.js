@@ -1051,10 +1051,9 @@
 
     function txSend() {
         var txAddr = $('#txAddr').val();
-        var address = TX.getAddress();
 
         var r = '';
-        if (txAddr != address)
+        if (txAddr!='' && txAddr!=TX.getAddress())
             r += 'Warning! Source address does not match private key.\n\n';
 
         var tx = $('#txHex').val();

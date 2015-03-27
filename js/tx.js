@@ -466,34 +466,31 @@ function parseScript(script) {
 
 // Some cross-domain magic (to bypass Access-Control-Allow-Origin)
 function tx_fetch(url, onSuccess, onError, postdata) {
-    // var useYQL = false;
+    var useYQL = true;
 
-    // if (useYQL) {
-    //     var q = 'select * from html where url="'+url+'"';
-    //     if (postdata) {
-    //         q = 'use "http://brainwallet.github.com/js/htmlpost.xml" as htmlpost; ';
-    //         q += 'select * from htmlpost where url="' + url + '" ';
-    //         q += 'and postdata="' + postdata + '" and xpath="//p"';
-    //     }
-    //     url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
-    // }
-    
-    $.get('https://jsonp.nodejitsu.com/?url=' + url)
-    .done(function(data) {
-        onSuccess(JSON.stringify(data));
-    })
-    .fail(onError);
+    if (useYQL) {
+         // note YQL supports only apostropes now, quotation mark is unsupported
+         var q = 'select * from html where url=\''+url+'\'';
+         if (postdata) {
+            q = 'use "https://brainwallet.github.io/js/htmlpost.xml" as htmlpost; ';
+            q += 'select * from htmlpost where url=\'' + url + '\' ';
+            q += 'and postdata="tx=12341234" and xpath="/"'
+         }
+         url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
+    }
+    console.log(url);
 
-    // $.ajax({
-    //     url: proxiedUrl,
-    //     success: function(res) {
-    //         onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
-    //     },
-    //     error:function (xhr, opt, err) {
-    //         if (onError)
-    //             onError(err);
-    //     }
-    // });
+    $.ajax({
+        url: url,
+        success: function(res) {
+            console.log(res);
+            onSuccess(useYQL ? $(res).find('results').text() : res.responseText);
+        },
+        error:function (xhr, opt, err) {
+            if (onError)
+                onError(err);
+        }
+    });
 }
 
 var tx_dest = '15ArtCgi3wmpQAAfYx4riaFmo4prJA4VsK';
