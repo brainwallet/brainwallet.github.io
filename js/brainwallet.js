@@ -10,7 +10,7 @@
 
     var PUBLIC_KEY_VERSION = 0;
     var PRIVATE_KEY_VERSION = 0x80;
-    var ADDRESS_URL_PREFIX = 'http://blockchain.info'
+    var ADDRESS_URL_PREFIX = 'http://blockchain.info';
 
     function parseBase58Check(address) {
         var bytes = Bitcoin.Base58.decode(address);
@@ -445,8 +445,10 @@
                 enc.push('base58check');
             } catch (err) {};
         }
-        if (issubset(mn_words, str, 3))
+        if (issubset(mn_words, str.replace(/[ :,\n]+/g, ' ').trim(), 3))
             enc.push('mnemonic');
+        if (BIP39.validateMnemonic(str.replace(/[ :,\n]+/g, ' ').trim()))
+            enc.push('bip39');
         if (issubset(rfc1751_wordlist, str, 6))
             enc.push('rfc1751');
         if (isEasy16(bstr))
@@ -613,7 +615,9 @@
             } else if (from == 'rfc1751') {
                 try { bytes = english_to_key(str); } catch (err) { type = ' ' + err; bytes = []; };
             } else if (from == 'mnemonic') {
-                bytes = Crypto.util.hexToBytes(mn_decode(str.trim()));
+                bytes = Crypto.util.hexToBytes(mn_decode(str.replace(/[ :,\n]+/g, ' ').trim()));
+            } else if (from == 'bip39') {
+                bytes = Crypto.util.hexToBytes(BIP39.mnemonicToEntropy(str.replace(/[ :,\n]+/g, ' ').trim()));
             } else if (from == 'base64') {
                 try { bytes = Crypto.util.base64ToBytes(bstr); } catch (err) {}
             } else if (from == 'rot13') {
@@ -642,6 +646,8 @@
                 text = key_to_english(pad_array(bytes,8));
             } else if (to == 'mnemonic') {
                 text = mn_encode(Crypto.util.bytesToHex(pad_array(bytes,4)));
+            } else if (to == 'bip39') {
+                text = BIP39.entropyToMnemonic(Crypto.util.bytesToHex(pad_array(bytes, 4)));
             } else if (to == 'base64') {
                 text = Crypto.util.bytesToBase64(bytes);
             } else if (to == 'rot13') {
