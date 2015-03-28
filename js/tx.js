@@ -469,11 +469,10 @@ function tx_fetch(url, onSuccess, onError, postdata) {
     var useYQL = true;
 
     if (useYQL) {
-         // note YQL supports only apostropes now, quotation mark is unsupported
-         var q = 'select * from html where url=\''+url+'\'';
+         var q = 'select * from html where url="'+url+'"';
          if (postdata) {
             q = 'use "https://brainwallet.github.io/js/htmlpost.xml" as htmlpost; ';
-            q += 'select * from htmlpost where url=\'' + url + '\' ';
+            q += 'select * from htmlpost where url="' + url + '" ';
             q += 'and postdata="' + postdata + '" and xpath="/"'
          }
          url = 'https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(q);
