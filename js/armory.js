@@ -1,4 +1,4 @@
-/*
+  /*
     armory.js : Armory deterministic wallet implementation (public domain)
 */
 
@@ -243,6 +243,9 @@ function armory_verify_message(values)
   var msg = values['Message'];
   var pub = values['PublicKey'];
   var sig = values['Signature'];
+
+  if (!adr || !msg || !pub || !sig )
+    return false;
 
   var digest = 'Bitcoin Signed Message:\n' +msg;
   var hash = Crypto.SHA256(Crypto.SHA256(digest, {asBytes: true}), {asBytes: true});
