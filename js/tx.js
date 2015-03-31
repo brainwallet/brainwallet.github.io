@@ -15,7 +15,7 @@ var TX = new function () {
     var inputs = [];
     var outputs = [];
     var eckey = null;
-    var balance = 0;
+    var balance = BigInteger.ZERO;
 
     this.init = function(_eckey) {
         outputs = [];
