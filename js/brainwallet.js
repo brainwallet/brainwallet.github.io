@@ -1575,6 +1575,9 @@
           $('#vrMsg').attr('rows', bHide ? 14:10);
         });
 
+        if (window.location.hash=='#verify')
+          setTimeout( function(){ $('#vrMsg').focus(); }, 1);
+
         // -- permalink support (deprecated) --
         var vrMsg = '';
         var vrSig = '';
