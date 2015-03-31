@@ -1556,13 +1556,6 @@
 
         $('#sgType label input').on('change', sgOnChangeType);
 
-        $('#vrSig').val('-----BEGIN BITCOIN SIGNED MESSAGE-----\n'
-        +'This is an example of a signed message.\n'
-        +'-----BEGIN SIGNATURE-----\n'
-        +'<insert address here>\n'
-        +'Gyk26Le4ER0EUvZiFGUCXhJKWVEoTtQNU449puYZPaiUmYyrcozt2LuAMgLvnEgpoF6cw8ob9Mj/CjP9ATydO1k=\n'
-        +'-----END BITCOIN SIGNED MESSAGE-----');
-
         // -- permalink support (deprecated) --
         var vrMsg = '';
         var vrSig = '';
