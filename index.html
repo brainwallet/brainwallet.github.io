@@ -20,6 +20,7 @@
     <script src="js/electrum.js"></script>
     <script src="js/tx.js"></script>
     <script src="js/bitcoinsig.js"></script>
+    <script src="js/secure-random.js"></script>
     <script src="js/brainwallet.js"></script>
   </head>
   <body onclick="rng_seed_time();" onkeypress="rng_seed_time();">
@@ -101,7 +102,12 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="hash">Secret Exponent</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="hash" maxlength="64" readonly="readonly" spellcheck="false" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text" />
+                  <div class="input-group">
+                    <input class="form-control" id="hash" maxlength="64" readonly="readonly" spellcheck="false" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text" />
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="genRandom" title="Generate random exponent" type="button" disabled="disabled">Secure Random</button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="form-group">
@@ -166,7 +172,12 @@
               <div class="form-group">
                 <label class="col-lg-2 control-label" for="chRoot">Root Key</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="chRoot" maxlength="32" readonly="readonly" type="text" />
+                  <div class="input-group">
+                    <input class="form-control" id="chRoot" maxlength="32" readonly="readonly" type="text" />
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="chRandom" title="Random" type="button" disabled="disabled">Secure Random</button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="form-group">

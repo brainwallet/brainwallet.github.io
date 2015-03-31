@@ -142,7 +142,7 @@
         gen_from = 'hash';
         $('#from_hash').click();
         update_gen();
-        var bytes = Crypto.util.randomBytes(32);
+        var bytes = secureRandom(32);
         $('#hash').val(Crypto.util.bytesToHex(bytes));
         generate();
     }
@@ -805,8 +805,8 @@
     }
 
     function chOnRandom() {
-        var cc = Crypto.util.randomBytes(32);
-        var pk = Crypto.util.randomBytes(32);
+        var cc = secureRandom(32);
+        var pk = secureRandom(32);
 
         if (chType == 'armory') {
             cc = armory_derive_chaincode(pk);
@@ -1595,6 +1595,15 @@
         // currency select
 
         $('#crCurrency ul li a').on('click', crChange);
+
+        // init secure random
+        try {
+          var r = secureRandom(32);
+          $('#genRandom').attr('disabled', false);
+          $('#chRandom').attr('disabled', false);
+        } catch (err) {
+          console.log ('secureRandom is not supported');
+        }
 
     });
 })(jQuery);
