@@ -1006,7 +1006,8 @@
           var bytes = sendTx.serialize();
           var hex = Crypto.util.bytesToHex(bytes);
           $('#txHex').val(hex);
-          $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
+          if (!TX.getBalance().equals(BigInteger.ZERO))
+            $('#txFee').val(Bitcoin.Util.formatValue(TX.getFee(sendTx)));
           setErrorState($('#txJSON'), false, '');
         } catch (err) {
           setErrorState($('#txJSON'), true, 'syntax error');
