@@ -1489,6 +1489,12 @@
             window.location.hash = $(this).attr('href');
         });
 
+        $('#tab-chains').on('shown.bs.tab', function() { $('#chBackup').focus(); });
+        $('#tab-tx').on('shown.bs.tab', function() { $('#txSec').focus(); });
+        $('#tab-converter').on('shown.bs.tab', function() { $('#src').focus(); });
+        $('#tab-sign').on('shown.bs.tab', function() { $('#sgSec').focus(); });
+        $('#tab-verify').on('shown.bs.tab', function() { $('#vrMsg').focus(); });
+
         // generator
 
         onInput('#pass', onChangePass);
@@ -1574,9 +1580,6 @@
           $('.vrSig').attr('hidden', bHide);
           $('#vrMsg').attr('rows', bHide ? 14:10);
         });
-
-        if (window.location.hash=='#verify')
-          setTimeout( function(){ $('#vrMsg').focus(); }, 1);
 
         // -- permalink support (deprecated) --
         var vrMsg = '';
