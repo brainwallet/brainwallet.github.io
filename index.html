@@ -408,20 +408,40 @@
               <legend>Verify Message</legend>
               <div class="hidden">
                 <div class="col-lg-offset-2 col-lg-10 alert alert-success fade in" id="vrSuccess">
-                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr"></span>
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddrLabel"></span>
                 </div>
                 <div class="col-lg-offset-2 col-lg-10 alert alert-danger fade in" id="vrError">
                   <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message failed to verify!
                 </div>
                 <div class="col-lg-offset-2 col-lg-10 alert alert-warning fade in" id="vrWarning">
-                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddr"></span> (but address was not found in the signature!)
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddrLabel"></span> (but address was not found in the signature!)
                 </div>
               </div>
               <div id="vrAlert"></div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="vrSig">Signed Message</label>
+                <label class="col-lg-2 control-label" for="vrFrom">Verify from</label>
                 <div class="col-lg-10 controls">
-                  <textarea class="form-control" id="vrSig" rows="17" spellcheck="false"></textarea>
+                  <div class="btn-group" data-toggle="buttons" id="vrFrom">
+                    <label class="btn btn-default active" title="RFC2440-like"><input id="vrFromMessage" name="vrFrom" type="radio"/>Signed Message</label> <label class="btn btn-default"><input id="vrFromForm" name="vrFrom" type="radio" />Bitcoin-QT</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group vrAddr" hidden>
+                <label class="col-lg-2 control-label" for="vrAddr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="vrAddr" type="text"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="vrSig">Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="vrMsg" rows="14" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group vrSig" hidden>
+                <label class="col-lg-2 control-label" for="vrSig">Signature</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="vrSig" type="text"/>
                 </div>
               </div>
               <div class="form-group">

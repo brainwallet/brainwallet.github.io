@@ -1349,10 +1349,6 @@
     }
 
     // -- verify --
-    function vrOnChangeSig() {
-        //$('#vrAlert').empty();
-        window.location.hash='#verify';
-    }
 
     function vrPermalink()
     {
@@ -1422,28 +1418,43 @@
     }
 
     function vrVerify() {
-        var s = $('#vrSig').val();
-        var p = splitSignedMessage(s);
-        var res = verify_message(p.signature, p.message, PUBLIC_KEY_VERSION);
+        var res = false;
 
+        var vrMsg = $('#vrMsg').val();
+        var vrAddr = $('#vrAddr').val();
+        var vrSig = $('#vrSig').val();
+
+        var bSplit = $('#vrFromMessage').parent().hasClass('active');
+
+        // try armory first
+        if (bSplit) {
+          var p = armory_split_message(vrMsg);
+          res = armory_verify_message(p);
+          vrAddr = p.Address;
+        }
+
+        // try clearsign
         if (!res) {
-          var values = armory_split_message(s);
-          res = armory_verify_message(values);
-          p = {"address":values.Address};
+
+          if (bSplit) {
+            var p = splitSignedMessage(vrMsg);
+            vrAddr = p.address;
+            vrMsg = p.message;
+            vrSig = p.signature;
+          }
+
+          res = verify_message(vrSig, vrMsg, PUBLIC_KEY_VERSION);
         }
 
         $('#vrAlert').empty();
-
         var clone = $('#vrError').clone();
 
-        if ( p && res && (p.address==res || p.address==''))
-        {
-          clone = p.address==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
-          clone.find('#vrAddr').text(res);
+        if ( res && (vrAddr==res || vrAddr=='')) {
+          clone = vrAddr==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
+          clone.find('#vrAddrLabel').text(res);
         }
 
         clone.appendTo($('#vrAlert'));
-
         return false;
     }
 
@@ -1553,9 +1564,16 @@
         // verify
 
         $('#vrVerify').click(vrVerify);
-        onInput('#vrSig', vrOnChangeSig);
+        onInput('#vrSig', function(){ window.location.hash='#verify'; });
 
         $('#sgType label input').on('change', sgOnChangeType);
+
+        $('#vrFrom label input').on('change', function() {
+          var bHide = $(this).attr('id')=="vrFromMessage";
+          $('.vrAddr').attr('hidden', bHide);
+          $('.vrSig').attr('hidden', bHide);
+          $('#vrMsg').attr('rows', bHide ? 14:10);
+        });
 
         // -- permalink support (deprecated) --
         var vrMsg = '';
