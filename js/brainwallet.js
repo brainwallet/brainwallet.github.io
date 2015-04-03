@@ -1564,22 +1564,26 @@
         onInput('#sgSec', sgOnChangeSec);
         onInput('#sgMsg', sgOnChangeMsg);
 
+        $('#sgType label input').on('change', sgOnChangeType);
+
         $('#sgSign').click(sgSign);
         $('#sgForm').submit(sgSign);
 
         // verify
 
         $('#vrVerify').click(vrVerify);
-        onInput('#vrSig', function(){ window.location.hash='#verify'; });
 
-        $('#sgType label input').on('change', sgOnChangeType);
+        onInput('#vrSig', function(){ window.location.hash='#verify'; });
 
         $('#vrFrom label input').on('change', function() {
           var bHide = $(this).attr('id')=="vrFromMessage";
           $('.vrAddr').attr('hidden', bHide);
           $('.vrSig').attr('hidden', bHide);
           $('#vrMsg').attr('rows', bHide ? 14:10);
+          $('#vrAlert').empty();
         });
+
+        $('#vrAddr,#vrMsg,#vrSig').on('input', function() { $('#vrAlert').empty(); });
 
         // -- permalink support (deprecated) --
         var vrMsg = '';
