@@ -961,6 +961,7 @@
         var fval = Bitcoin.Util.formatValue(value);
         var fee = parseFloat($('#txFee').val());
         $('#txBalance').val(fval);
+        alert('Balance: ' + fval);
         var value = Math.floor((fval-fee)*1e8)/1e8;
         $('#txValue').val(value);
         txRebuild();
@@ -976,7 +977,7 @@
     }
 
     function txParseUnspent(text) {
-        if (text == '') {
+        if (text=='' || text=='{}') {
             alert('No data');
             return;
         }
@@ -1082,9 +1083,9 @@
         if (url != null && url != "") {
 
             $.post(url, { tx: tx }, function(data) {
-              txSent ( data );
+              txSent(data.responseText);
             }).fail(function(jqxhr, textStatus, error) {
-              alert( typeof(jqxhr.responseText)=='undefined' ? jqxhr.statusText 
+              alert( typeof(jqxhr.responseText)=='undefined' ? jqxhr.statusText
                 : ( jqxhr.responseText!='' ? jqxhr.responseText : 'No data, probably Access-Control-Allow-Origin error.') );
             });
 

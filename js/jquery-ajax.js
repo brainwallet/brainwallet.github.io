@@ -1,13 +1,14 @@
 // This is modified jquery.xdomainajax.js plugin
 // see https://github.com/padolsey-archive/jquery.fn/tree/master/cross-domain-ajax
+// can't invoke fail() handler yet (YQL doesn't throw errors), returns ether '' or '{}'.
 
 jQuery.ajax = (function(_ajax){
 
     var protocol = location.protocol,
         hostname = location.hostname,
         exRegex = RegExp(protocol + '//' + hostname),
-        YQL = 'http' + (/^https/.test(protocol)?'s':'') + '://query.yahooapis.com/v1/public/yql?callback=?',
-        query = 'select * from html where url="{URL}" and xpath="*"';
+        YQL = 'http' + (/^https/.test(protocol)?'s':'') + '://query.yahooapis.com/v1/public/yql',
+        query = 'select * from html where url="{URL}"';
 
     function isExternal(url) {
         return !exRegex.test(url) && /:\/\//.test(url);
@@ -15,48 +16,43 @@ jQuery.ajax = (function(_ajax){
 
     return function(o) {
 
-        var url = o.url;
+        if ( /get/i.test(o.type) || /post/i.test(o.type) ) {
 
-        if ( /get/i.test(o.type) && !/json/i.test(o.dataType) && isExternal(url) ) {
+            var url = o.url;
+
+            var bPost = /post/i.test(o.type);
+            var bJson = /json/i.test(o.dataType);
 
             o.url = YQL;
-            o.dataType = 'json';
+            delete(o.dataType);
 
-            o.data = {
-                q: query.replace(
-                    '{URL}',
-                    url + (o.data ?
-                        (/\?/.test(url) ? '&' : '?') + jQuery.param(o.data)
-                    : '')
-                ),
-                format: 'xml'
-            };
+            if (bPost)
+                query = 'use "https://brainwallet.github.io/js/htmlpost.xml" as htmlpost;'
+                  + ' select * from htmlpost where url="{URL}"'
+                  + ' and postdata="{POSTDATA}" and xpath="/"';
 
-            // Since it's a JSONP request
-            // complete === success
+            var postdata = bPost && o.data ? jQuery.param(o.data): '';
+            var q = query.replace('{URL}', url).replace('{POSTDATA}',postdata);
+            o.data = { q: q, format: 'xml' };
+
             if (!o.success && o.complete) {
                 o.success = o.complete;
                 delete o.complete;
             }
 
-            o.success = (function(_success){
+            o.success = (function(_success) {
                 return function(data) {
                     if (_success) {
-                        // Fake XHR callback.
-                        _success.call(this, {
-                            responseText: (data.results[0] || '')
-                                // YQL screws with <script>s
-                                // Get rid of them
-                                .replace(/<script[^>]+?\/>|<script(.|\s)*?\/script>/gi, '')
-                        }, 'success');
+                        var text = $(data).find('results').text();
+                        _success.call(this,
+                         bJson ? ( text!='' ? JSON.parse(text) : {} ) : ( { responseText: text } )
+                        , 'success' );
                     }
-                    
                 };
             })(o.success);
-            
         }
 
         return _ajax.apply(this, arguments);
     };
-    
+
 })(jQuery.ajax);
