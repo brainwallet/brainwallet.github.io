@@ -990,9 +990,18 @@
             'http://blockexplorer.com/q/mytransactions/' + addr;
 
         url = prompt('Press OK to download transaction history:', url);
+
         if (url != null && url != "") {
+
             $('#txUnspent').val('');
-            tx_fetch(url, txParseUnspent);
+
+            $.getJSON(url, function(data) {
+              txParseUnspent ( JSON.stringify(data, null, 2) );
+            }).fail(function(jqxhr, textStatus, error) {
+              alert( typeof(jqxhr.responseText)=='undefined' ? jqxhr.statusText 
+                : ( jqxhr.responseText!='' ? jqxhr.responseText : 'No data, probably Access-Control-Allow-Origin error.') );
+            });
+
         } else {
           txSetUnspent($('#txUnspent').val());
         }
@@ -1061,13 +1070,26 @@
 
         var tx = $('#txHex').val();
 
-        //url = 'http://bitsend.rowit.co.uk/?transaction=' + tx;
         url = 'http://blockchain.info/pushtx';
-        postdata = 'tx=' + tx;
+
+        // alternatives are:
+        // http://eligius.st/~wizkid057/newstats/pushtxn.php (supports non-standard transactions)
+        // https://btc.blockr.io/tx/push
+        // http://bitsend.rowit.co.uk (defunct)
+
         url = prompt(r + 'Press OK to send transaction to:', url);
+
         if (url != null && url != "") {
-            tx_fetch(url, txSent, txSent, postdata);
+
+            $.post(url, { tx: tx }, function(data) {
+              txSent ( data );
+            }).fail(function(jqxhr, textStatus, error) {
+              alert( typeof(jqxhr.responseText)=='undefined' ? jqxhr.statusText 
+                : ( jqxhr.responseText!='' ? jqxhr.responseText : 'No data, probably Access-Control-Allow-Origin error.') );
+            });
+
         }
+
         return false;
     }
 
