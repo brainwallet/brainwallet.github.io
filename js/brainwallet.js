@@ -986,7 +986,7 @@
     function txGetUnspent() {
         var addr = $('#txAddr').val();
 
-        var url = (txType == 'txBCI') ? 'https://blockchain.info/unspent?address=' + addr :
+        var url = (txType == 'txBCI') ? 'https://blockchain.info/unspent?cors=true&address=' + addr :
             'https://blockexplorer.com/q/mytransactions/' + addr;
 
         url = prompt('Press OK to download transaction history:', url);
@@ -1070,7 +1070,7 @@
 
         var tx = $('#txHex').val();
 
-        url = 'https://blockchain.info/pushtx';
+        url = 'https://blockchain.info/pushtx?cors=true';
 
         // alternatives are:
         // http://eligius.st/~wizkid057/newstats/pushtxn.php (supports non-standard transactions)
