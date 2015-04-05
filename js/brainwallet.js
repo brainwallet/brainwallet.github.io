@@ -961,7 +961,6 @@
         var fval = Bitcoin.Util.formatValue(value);
         var fee = parseFloat($('#txFee').val());
         $('#txBalance').val(fval);
-        alert('Balance: ' + fval);
         var value = Math.floor((fval-fee)*1e8)/1e8;
         $('#txValue').val(value);
         txRebuild();
