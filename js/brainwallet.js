@@ -1021,6 +1021,8 @@
         } catch (err) {
           setErrorState($('#txJSON'), true, 'syntax error');
         }
+
+        $('#txSend').attr('disabled', $('#txHex').val()=="");
     }
 
     function txOnChangeHex() {
@@ -1031,6 +1033,7 @@
         var sendTx = TX.deserialize(bytes);
         var text = TX.toBBE(sendTx);
         $('#txJSON').val(text);
+        $('#txSend').attr('disabled', $('#txHex').val()=="");
     }
 
     function txOnAddDest() {
@@ -1147,6 +1150,7 @@
             $('#txJSON').val('');
             $('#txHex').val('');
         }
+        $('#txSend').attr('disabled', $('#txHex').val()=="");
     }
 
     function txSign() {
@@ -1169,6 +1173,7 @@
             $('#txJSON').val('');
             $('#txHex').val('');
         }
+        $('#txSend').attr('disabled', $('#txHex').val()=="");
     }
 
     function txOnChangeDest() {
@@ -1569,6 +1574,7 @@
         $('#txSend').click(txSend);
         $('#txSign').click(txSign);
         $('#txSign').attr('disabled', true);
+        $('#txSend').attr('disabled', true);
 
         // converter
 
