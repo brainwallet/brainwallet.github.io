@@ -805,11 +805,10 @@
     }
 
     function chOnRandom() {
-        var cc = secureRandom(32);
         var pk = secureRandom(32);
 
         if (chType == 'armory') {
-            cc = armory_derive_chaincode(pk);
+            var cc = armory_derive_chaincode(pk);
             $('#chRoot').val(Crypto.util.bytesToHex(pk));
             $('#chCode').val(Crypto.util.bytesToHex(cc));
             $('#chBackup').val(armory_encode_keys(pk, cc).split('\n').slice(0,2).join('\n'));
