@@ -1,5 +1,7 @@
+Brainwallet
+===========
+
 JavaScript Client-Side Bitcoin Address Generator
-================================================
 
 Notable features
 ----------------
