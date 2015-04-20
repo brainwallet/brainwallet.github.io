@@ -20,7 +20,7 @@ Newly added for supporting new wallets
 
 How to check out the wallet format? Why not try to read base58.h of each wallets yourself? The author also read it in detail and tested carefully before putting in.
 
-Wallets are usually following the 0x80 Rule,Although authors checked these base58.h carefully, Please check carefully before production use by using walletQT or walletDaemon
+Wallets are usually following the 0x80 Rule,Although authors checked these base58.h carefully, Please check carefully before production use by testing with walletQT or walletDaemon if it is a new currency
 
 For supporting or contribution, Why don't you send me some coins to one of the following?
 
