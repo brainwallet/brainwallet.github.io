@@ -1,0 +1,41 @@
+20 April 2015
+
+The concept of decentralized cryptocurrency or decentralized cryptoshare has been flaming for at least six years.
+
+Now I like to write down what you will need when as people uses the 128 shifting for their models.
+
+The generation must be extremely careful as you have to follow the source code to follow up.
+
+Here are some ids which I have found from these purposed cryptos so far For example, BTC,DVC,TRA,PPC,PND and SDC
+
+some crypto is using chainparam instead of writing directly in base58.h,with hard fork chain 
+
+After I have read different versions of crypto, I just have handled very little.
+
+So far, For examples,there are some properties for the purpose, the writing is in DEC so far
+BTC,DVC,TRA: 0, Secret is 128 (128 addition found from other cryptos also assume the library used is correct
+just need to be careful by studying official sourcecode, official wallet before actually use as some developers 
+F*** that up luckily it is not bitcoin, just some not so important coins, and still young with massive amount of space)
+
+Peercoin and Pandacoin (PND) use 55, the privatekey requires to add 128, which loop once more because of range
+In numeric method terms, addition arithmetics reduce mistakes.
+
+SDC uses 42
+
+
+So far, the library the author used,does no wrong so your fund deposited is safe with his code while I just 
+add new idenfication codes for different usages.
+
+
+
+
+For more ,It is suggested to leave the zone, go back to the main page of the github by clicking 
+the feline on the top left, try to search who has put the sourcecode of crypto
+
+
+Also For some serious readers, I also have forked the crypto used too.
+
+
+
+
+
