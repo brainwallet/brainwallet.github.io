@@ -1,4 +1,4 @@
-Brainwallet
+Brainwallet (new currency added)
 ===========
 
 JavaScript Client-Side Bitcoin Address Generator
