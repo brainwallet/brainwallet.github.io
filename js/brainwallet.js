@@ -1612,13 +1612,15 @@
           // convert from Bitcoin-QT to signed message and vice-versa
           if (bJoin) {
             var p = { "address": $('#vrAddr').val(), "message":$('#vrMsg').val(), "signature":$('#vrSig').val() };
-            if ( p.address || p.message || signature )
+            if ( p.address && p.message && signature )
               $('#vrMsg').val(joinMessage("inputs_io", p.address, p.message, p.signature));
           } else {
             var p = splitMessage($('#vrMsg').val());
-            $('#vrAddr').val(p.address)
-            $('#vrMsg').val(p.message)
-            $('#vrSig').val(p.signature);
+            if (p) {
+              $('#vrAddr').val(p.address)
+              $('#vrMsg').val(p.message)
+              $('#vrSig').val(p.signature);
+            }
           }
 
         });
