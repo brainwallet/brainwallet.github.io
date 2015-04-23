@@ -1333,7 +1333,7 @@
       "-----END BITCOIN SIGNATURE-----"
     ];
 
-    function makeSignedMessage(type, msg, addr, sig)
+    function joinMessage(type, addr, msg, sig)
     {
       if (type=='inputs_io')
         return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
@@ -1358,9 +1358,9 @@
         var sig = sign_message(p.key, message, p.compressed, p.addrtype);
       }
 
-      sgData = {"message":message, "address":p.address, "signature":sig};
+      sgData = { "address":p.address, "message":message, "signature":sig};
 
-      $('#sgSig').val(makeSignedMessage(sgType, sgData.message, sgData.address, sgData.signature));
+      $('#sgSig').val(joinMessage(sgType, sgData.address, sgData.message, sgData.signature));
     }
 
     function sgOnChangeMsg() {
@@ -1414,7 +1414,7 @@
       return { "address":addr, "signature":sig };
     }
 
-    function splitSignedMessage(s)
+    function splitMessage(s)
     {
       s = s.replace('\r','');
 
@@ -1463,7 +1463,7 @@
         if (!res) {
 
           if (bSplit) {
-            var p = splitSignedMessage(vrMsg);
+            var p = splitMessage(vrMsg);
             vrAddr = p.address;
             vrMsg = p.message;
             vrSig = p.signature;
@@ -1603,11 +1603,24 @@
         onInput('#vrSig', function(){ window.location.hash='#verify'; });
 
         $('#vrFrom label input').on('change', function() {
-          var bHide = $(this).attr('id')=="vrFromMessage";
-          $('.vrAddr').attr('hidden', bHide);
-          $('.vrSig').attr('hidden', bHide);
-          $('#vrMsg').attr('rows', bHide ? 14:10);
+          var bJoin = $(this).attr('id')=="vrFromMessage";
+          $('.vrAddr').attr('hidden', bJoin);
+          $('.vrSig').attr('hidden', bJoin);
+          $('#vrMsg').attr('rows', bJoin ? 14:10);
           $('#vrAlert').empty();
+
+          // convert from Bitcoin-QT to signed message and vice-versa
+          if (bJoin) {
+            var p = { "address": $('#vrAddr').val(), "message":$('#vrMsg').val(), "signature":$('#vrSig').val() };
+            if ( p.address || p.message || signature )
+              $('#vrMsg').val(joinMessage("inputs_io", p.address, p.message, p.signature));
+          } else {
+            var p = splitMessage($('#vrMsg').val());
+            $('#vrAddr').val(p.address)
+            $('#vrMsg').val(p.message)
+            $('#vrSig').val(p.signature);
+          }
+
         });
 
         $('#vrAddr,#vrMsg,#vrSig').on('input', function() { $('#vrAlert').empty(); });
@@ -1635,7 +1648,7 @@
 
           if (vrMsg && vrSig && vrAddr)
           {
-            $('#vrSig').val(makeSignedMessage( sgType, vrMsg, vrAddr, vrSig ));
+            $('#vrSig').val(joinMessage( sgType, vrAddr, vrMsg, vrSig ));
             vrVerify();
           }
         }
