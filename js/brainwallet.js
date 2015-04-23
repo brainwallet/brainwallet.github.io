@@ -912,34 +912,11 @@
     var txFrom = 'txFromSec';
 
     function txGenSrcAddr() {
-        var sec = $('#txSec').val();
-        var addr = '';
+        var updated = updateAddr ($('#txSec'), $('#txAddr'));
 
-        try {
-            var res = parseBase58Check(sec); 
-            var version = res[0];
-            var payload = res[1];
-            var compressed = false;
-            if (payload.length > 32) {
-                payload.pop();
-                compressed = true;
-            }
-            var eckey = new Bitcoin.ECKey(payload);
-            var curve = getSECCurveByName("secp256k1");
-            var pt = curve.getG().multiply(eckey.priv);
-            eckey.pub = getEncoded(pt, compressed);
-            eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
-            addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = PUBLIC_KEY_VERSION;
-            $('#txSign').attr('disabled', false);
-        } catch (err) {
-          $('#txSign').attr('disabled', true);
-        }
-
-        $('#txAddr').val(addr);
         $('#txBalance').val('0.00');
 
-        if (addr != "" && txFrom=='txFromSec')
+        if (updated && txFrom=='txFromSec')
             txGetUnspent();
     }
 
@@ -1278,7 +1255,8 @@
         }
     }
 
-    function updateAddr(from, to) {
+    function updateAddr(from, to, bUpdate) {
+        setErrorState(from, false);
         var sec = from.val();
         var addr = '';
         var eckey = null;
@@ -1305,10 +1283,10 @@
                 wif.version = PRIVATE_KEY_VERSION;
                 from.val(wif.toString());
             }
-
-            setErrorState(from, false);
         } catch (err) {
-            setErrorState(from, true, "Bad private key");
+            if (from.val())
+              setErrorState(from, true, "Bad private key");
+            return false;
         }
         to.val(addr);
         return {"key":eckey, "compressed":compressed, "addrtype":PUBLIC_KEY_VERSION, "address":addr};
@@ -1356,9 +1334,10 @@
 
     function sgSign() {
       var message = $('#sgMsg').val();
+
       var p = updateAddr($('#sgSec'), $('#sgAddr'));
 
-      if ( !message || !p.address )
+      if ( !message || !p )
         return;
 
       message = fullTrim(message);
@@ -1532,6 +1511,7 @@
       translate();
 
       updateAddr($('#sgSec'), $('#sgAddr'));
+      updateAddr($('#txSec'), $('#txAddr'));
 
       return false;
     }
