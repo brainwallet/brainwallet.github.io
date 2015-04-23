@@ -1458,6 +1458,9 @@
         if (bSplit && !vrMsg)
           return;
 
+        if (!bSplit && (!vrMsg || !vrAddr || !vrSig))
+          return;
+
         // try armory first
         if (bSplit) {
           var p = armory_split_message(vrMsg);
@@ -1618,8 +1621,6 @@
         // verify
 
         $('#vrVerify').click(vrVerify);
-
-        onInput('#vrSig', function(){ window.location.hash='#verify'; });
 
         $('#vrFrom label input').on('change', function() {
           var bJoin = $(this).attr('id')=="vrFromMessage";
