@@ -1366,12 +1366,9 @@
 
     // -- verify --
 
-    function vrPermalink()
+    function vrPermalink(addr,msg,sig)
     {
-      var msg = $('#vrMsg').val();
-      var sig = $('#vrSig').val();
-      var addr = $('#vrAddr').val();
-      return '?vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig)+'&vrAddr='+encodeURIComponent(addr);
+      return '?vrAddr='+encodeURIComponent(addr)+'&vrMsg='+encodeURIComponent(msg)+'&vrSig='+encodeURIComponent(sig);
     }
 
     function splitSignature(s)
@@ -1473,7 +1470,11 @@
 
         if ( res && (vrAddr==res || vrAddr=='')) {
           clone = vrAddr==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
-          clone.find('#vrAddrLabel').text(res);
+
+          // insert link here
+          res += ' [<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>]';
+
+          clone.find('#vrAddrLabel').html(res);
         }
 
         clone.appendTo($('#vrAlert'));
@@ -1487,6 +1488,7 @@
 
 
     function vrOnChange() {
+        window.location.hash='#verify';
         clearTimeout(timeout);
         timeout = setTimeout(vrOnInput, TIMEOUT);
     }
@@ -1639,7 +1641,7 @@
         onInput($('#vrMsg'), vrOnChange);
         onInput($('#vrSig'), vrOnChange);
 
-        // -- permalink support (deprecated) --
+        // -- permalink support (deprecated?) --
         var vrMsg = '';
         var vrSig = '';
         var vrAddr = '';
@@ -1649,20 +1651,22 @@
           for ( var i=0; i<args.length; i++ )
           {
             var arg = args[i].split('=');
-            if ( arg[0]=='vrMsg')
+            if ( arg[0]=='vrAddr')
+              vrAddr=decodeURIComponent(arg[1]);
+            else if ( arg[0]=='vrMsg')
               vrMsg=decodeURIComponent(arg[1]);
             else if ( arg[0]=='vrSig')
               vrSig=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrAddr')
-              vrAddr=decodeURIComponent(arg[1]);
           }
+
+          console.log(vrAddr,vrMsg,vrSig);
 
           if (!vrAddr)
             vrAddr = "<insert address here>"
 
           if (vrMsg && vrSig && vrAddr)
           {
-            $('#vrSig').val(joinMessage( sgType, vrAddr, vrMsg, vrSig ));
+            $('#vrMsg').val(joinMessage( sgType, vrAddr, vrMsg, vrSig ));
             vrVerify();
           }
         }
