@@ -629,8 +629,9 @@
 
             var ver = '';
             if (to == 'base58check') {
-               var version = bytes.shift();
-               var addr = new Bitcoin.Address(bytes);
+               var buf = bytes.slice();
+               var version = buf.shift();
+               var addr = new Bitcoin.Address(buf);
                addr.version = version;
                text = addr.toString();
                ver = ' ver. 0x' + Crypto.util.bytesToHex([addr.version]);
