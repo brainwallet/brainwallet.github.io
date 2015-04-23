@@ -214,6 +214,18 @@
         gen_update();
     }
 
+    function getAddressURL(addr)
+    {
+        if (ADDRESS_URL_PREFIX.indexOf('explorer.dot-bit.org')>=0 )
+          return ADDRESS_URL_PREFIX+'/a/'+addr;
+        else if (ADDRESS_URL_PREFIX.indexOf('address.dws')>=0 )
+          return ADDRESS_URL_PREFIX+ "?" + addr;
+        else if (ADDRESS_URL_PREFIX.indexOf('chainbrowser.com')>=0 )
+          return ADDRESS_URL_PREFIX+'/address/'+addr+'/';
+        else
+          return ADDRESS_URL_PREFIX+'/address/'+addr;
+    }
+
     function gen_update() {
 
         var eckey = gen_eckey;
@@ -253,22 +265,9 @@
         qrCode.make();
 
         $('#genAddrQR').html(qrCode.createImgTag(4));
-        $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/address/'+addr);
+        $('#genAddrURL').attr('href', getAddressURL(addr));
         $('#genAddrURL').attr('title', addr);
-
-        // NMC fix
-        if (ADDRESS_URL_PREFIX.indexOf('explorer.dot-bit.org')>=0 )
-          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/a/'+addr);
-
-        // chainz blockexplorer fix
-        if(ADDRESS_URL_PREFIX.indexOf('address.dws')>=0 )
-          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+ "?" + addr);
-
-        // chainbrowser fix (needs closing slash for some reason)
-        if (ADDRESS_URL_PREFIX.indexOf('chainbrowser.com')>=0 )
-          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/address/'+addr+'/');
     }
-
 
     function calc_hash() {
         var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
@@ -1472,7 +1471,9 @@
           clone = vrAddr==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
 
           // insert link here
-          res += ' (<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>)';
+          if (vrAddr==res)
+            res = vrAddr + //' <a href="'+getAddressURL(vrAddr)+'">'+vrAddr+'</a>'+
+              ' (<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>)';
 
           clone.find('#vrAddrLabel').html(res);
         }
