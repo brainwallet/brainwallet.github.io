@@ -1489,8 +1489,10 @@
 
     function crChange()
     {
-      PUBLIC_KEY_VERSION = parseInt($(this).attr('data-target'));
-      PRIVATE_KEY_VERSION = (PUBLIC_KEY_VERSION+128)&255;
+      var p = $(this).attr('data-target').split(',',2);
+      if (p.length>0)
+        PUBLIC_KEY_VERSION = parseInt(p[0]);
+      PRIVATE_KEY_VERSION = p.length>1 ? parseInt(p[1]) : ((PUBLIC_KEY_VERSION+128) & 255);
       ADDRESS_URL_PREFIX = $(this).attr('href');
 
       var name = $(this).text();
