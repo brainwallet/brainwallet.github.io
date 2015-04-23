@@ -1,3 +1,10 @@
+Comments about the tool.
+With PGP,then this one,for groupminting or other service,then This will be useful as
+The secret exponent is the only thing for control. BitGo and other parties may already know how bad it is. Fortunately,due to great numbers , security suggestions,and the exprity of PGP cert then the information is not easy to be stolen as operators know it's too noticeable when abuse it.
+
+Thank you for providing may be the most defensive tool so people only need to care the 64-hex chars right now.
+
+
 UPDATED ON 22 APRIL 2015
 I have found a way for a PAPER CLAMCOIN wallet. Which is almost KILLED me even get from FREE.
 To import, Because CLAMCOIN QT Supports BTC, LTC and DOGE in.
