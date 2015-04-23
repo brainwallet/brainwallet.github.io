@@ -1458,7 +1458,7 @@
         if (bSplit && !vrMsg)
           return;
 
-        if (!bSplit && (!vrMsg || !vrAddr || !vrSig))
+        if (!bSplit && (!vrMsg || !vrSig))
           return;
 
         // try armory first
