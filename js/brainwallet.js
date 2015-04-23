@@ -605,6 +605,7 @@
                     var res = parseBase58Check(bstr);
                     type = ' ver. 0x' + Crypto.util.bytesToHex([res[0]]);
                     bytes = res[1];
+                    bytes.unshift(res[0]);
                 } catch (err) {};
             } else if (from == 'base58') {
                 bytes = Bitcoin.Base58.decode(bstr);
@@ -628,8 +629,9 @@
 
             var ver = '';
             if (to == 'base58check') {
+               var version = bytes.shift();
                var addr = new Bitcoin.Address(bytes);
-               addr.version = bytes.length <= 20 ? PUBLIC_KEY_VERSION : PRIVATE_KEY_VERSION;
+               addr.version = version;
                text = addr.toString();
                ver = ' ver. 0x' + Crypto.util.bytesToHex([addr.version]);
             } else if (to == 'base58') {
