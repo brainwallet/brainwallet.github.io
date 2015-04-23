@@ -1455,6 +1455,9 @@
 
         var bSplit = $('#vrFromMessage').parent().hasClass('active');
 
+        if (bSplit && !vrMsg)
+          return;
+
         // try armory first
         if (bSplit) {
           var p = armory_split_message(vrMsg);
@@ -1485,6 +1488,17 @@
 
         clone.appendTo($('#vrAlert'));
         return false;
+    }
+
+    function vrOnInput() {
+        $('#vrAlert').empty();
+        vrVerify();
+    }
+
+
+    function vrOnChange() {
+        clearTimeout(timeout);
+        timeout = setTimeout(vrOnInput, TIMEOUT);
     }
 
     function crChange()
@@ -1612,7 +1626,6 @@
           $('.vrAddr').attr('hidden', bJoin);
           $('.vrSig').attr('hidden', bJoin);
           $('#vrMsg').attr('rows', bJoin ? 14:9);
-          $('#vrAlert').empty();
 
           // convert from Bitcoin-QT to signed message and vice-versa
           if (bJoin) {
@@ -1630,7 +1643,9 @@
 
         });
 
-        $('#vrAddr,#vrMsg,#vrSig').on('input', function() { $('#vrAlert').empty(); });
+        onInput($('#vrAddr'), vrOnChange);
+        onInput($('#vrMsg'), vrOnChange);
+        onInput($('#vrSig'), vrOnChange);
 
         // -- permalink support (deprecated) --
         var vrMsg = '';
