@@ -1606,7 +1606,7 @@
           var bJoin = $(this).attr('id')=="vrFromMessage";
           $('.vrAddr').attr('hidden', bJoin);
           $('.vrSig').attr('hidden', bJoin);
-          $('#vrMsg').attr('rows', bJoin ? 14:7);
+          $('#vrMsg').attr('rows', bJoin ? 14:9);
           $('#vrAlert').empty();
 
           // convert from Bitcoin-QT to signed message and vice-versa
