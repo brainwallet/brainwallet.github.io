@@ -1472,7 +1472,7 @@
           clone = vrAddr==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
 
           // insert link here
-          res += ' [<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>]';
+          res += ' (<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>)';
 
           clone.find('#vrAddrLabel').html(res);
         }
