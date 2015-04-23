@@ -306,7 +306,7 @@
         var sec = $('#sec').val();
 
         try { 
-            var res = parseBase58Check(sec); 
+            var res = parseBase58Check(sec);
             var version = res[0];
             var payload = res[1];
         } catch (err) {
@@ -930,7 +930,7 @@
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
+            addr.version = PUBLIC_KEY_VERSION;
             $('#txSign').attr('disabled', false);
         } catch (err) {
           $('#txSign').attr('disabled', true);
@@ -1285,7 +1285,7 @@
         var compressed = false;
         try {
             var res = parseBase58Check(sec); 
-            var version = res[0];
+            var privkey_version = res[0];
             var payload = res[1];
             if (payload.length > 32) {
                 payload.pop();
@@ -1297,13 +1297,21 @@
             eckey.pub = getEncoded(pt, compressed);
             eckey.pubKeyHash = Bitcoin.Util.sha256ripe160(eckey.pub);
             addr = new Bitcoin.Address(eckey.getPubKeyHash());
-            addr.version = (version-128)&255;
+            addr.version = PUBLIC_KEY_VERSION;
+
+            if (privkey_version!=PRIVATE_KEY_VERSION)
+            {
+                var wif = new Bitcoin.Address(payload);
+                wif.version = PRIVATE_KEY_VERSION;
+                from.val(wif.toString());
+            }
+
             setErrorState(from, false);
         } catch (err) {
             setErrorState(from, true, "Bad private key");
         }
         to.val(addr);
-        return {"key":eckey, "compressed":compressed, "addrtype":version, "address":addr};
+        return {"key":eckey, "compressed":compressed, "addrtype":PUBLIC_KEY_VERSION, "address":addr};
     }
 
     function sgGenAddr() {
@@ -1522,6 +1530,9 @@
       $('#crSelect').dropdown('toggle');
       gen_update();
       translate();
+
+      updateAddr($('#sgSec'), $('#sgAddr'));
+
       return false;
     }
 
