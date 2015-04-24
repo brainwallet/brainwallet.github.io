@@ -1530,6 +1530,8 @@
             window.location.hash = $(this).attr('href');
         });
 
+
+        $('#tab-gen').on('shown.bs.tab', function() { $('#'+gen_from).focus(); });
         $('#tab-chains').on('shown.bs.tab', function() { $('#chBackup').focus(); });
         $('#tab-tx').on('shown.bs.tab', function() { $('#txSec').focus(); });
         $('#tab-converter').on('shown.bs.tab', function() { $('#src').focus(); });
