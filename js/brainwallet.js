@@ -1355,12 +1355,6 @@
     function sgOnChangeMsg() {
         $('#sgSig').val('');
         sgData = null;
-        clearTimeout(timeout);
-        timeout = setTimeout(sgUpdateMsg, TIMEOUT);
-    }
-
-    function sgUpdateMsg() {
-        $('#vrMsg').val($('#sgMsg').val());
     }
 
     // -- verify --
