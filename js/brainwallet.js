@@ -1435,6 +1435,7 @@
         var vrMsg = $('#vrMsg').val();
         var vrAddr = $('#vrAddr').val();
         var vrSig = $('#vrSig').val();
+        var vrVer = PUBLIC_KEY_VERSION;
 
         var bSplit = $('#vrFromMessage').parent().hasClass('active');
 
@@ -1459,9 +1460,12 @@
             vrAddr = p.address;
             vrMsg = p.message;
             vrSig = p.signature;
+            try {
+            vrVer = parseBase58Check(vrAddr)[0];
+            } catch (err) {};
           }
 
-          res = verify_message(vrSig, vrMsg, PUBLIC_KEY_VERSION);
+          res = verify_message(vrSig, vrMsg, vrVer);
         }
 
         $('#vrAlert').empty();
@@ -1659,8 +1663,6 @@
             else if ( arg[0]=='vrSig')
               vrSig=decodeURIComponent(arg[1]);
           }
-
-          console.log(vrAddr,vrMsg,vrSig);
 
           if (!vrAddr)
             vrAddr = "<insert address here>"
