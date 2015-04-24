@@ -1460,10 +1460,11 @@
             vrAddr = p.address;
             vrMsg = p.message;
             vrSig = p.signature;
-            try {
-            vrVer = parseBase58Check(vrAddr)[0];
-            } catch (err) {};
           }
+
+          try {
+            vrVer = parseBase58Check(vrAddr)[0];
+          } catch (err) {};
 
           res = verify_message(vrSig, vrMsg, vrVer);
         }
