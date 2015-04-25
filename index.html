@@ -93,7 +93,9 @@
                 <label class="col-lg-2 control-label" for="from_pass">Get Address From</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="gen_from">
-                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label> <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label> <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
+                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" checked/>Passphrase</label>
+                    <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label>
+                    <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
                   </div>
                 </div>
               </div>
@@ -385,11 +387,11 @@
                 <label class="col-lg-2 control-label" for="sgType">Signature Type</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="sgType">
-                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="inputs_io" type="radio" />Inputs.IO</label>
-                    <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="multibit" type="radio" />Multibit</label>
-                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="armory_base64" type="radio" />Armory Base64</label>
-                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="armory_clearsign" type="radio" />Armory Clearsign</label>
-                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.88"><input name="armory" type="radio" />Armory Hex</label>
+                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="sgType" value="inputs_io" type="radio" checked/>Inputs.IO</label>
+                    <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="sgType" value="multibit" type="radio" />Multibit</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="sgType" value="armory_base64" type="radio" />Armory Base64</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="sgType" value="armory_clearsign" type="radio" />Armory Clearsign</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.88"><input name="sgType" value="armory" type="radio" />Armory Hex</label>
                   </div>
                 </div>
               </div>
@@ -427,7 +429,8 @@
                 <label class="col-lg-2 control-label" for="vrFrom">Verify From</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="vrFrom">
-                    <label class="btn btn-default active" title="RFC2440-like"><input id="vrFromMessage" name="vrFrom" type="radio"/>Signed Message</label> <label class="btn btn-default"><input id="vrFromForm" name="vrFrom" type="radio" />Bitcoin-QT</label>
+                    <label class="btn btn-default active" title="RFC2440-like"><input id="vrFromMessage" name="vrFrom" type="radio" checked/>Signed Message</label>
+                    <label class="btn btn-default"><input id="vrFromForm" name="vrFrom" type="radio" />Bitcoin-QT</label>
                   </div>
                 </div>
               </div>

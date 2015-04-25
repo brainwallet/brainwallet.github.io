@@ -1241,19 +1241,6 @@
     }
 
     // -- sign --
-    var sgData = null;
-    var sgType = 'inputs_io';
-
-    function sgOnChangeType() {
-        var id = $(this).attr('name');
-        if (sgType!=id)
-        {
-          sgType = id;
-          if (sgData!=null)
-            sgSign();
-        }
-    }
-
     function updateAddr(from, to, bUpdate) {
         setErrorState(from, false);
         var sec = from.val();
@@ -1297,7 +1284,6 @@
 
     function sgOnChangeSec() {
         $('#sgSig').val('');
-        sgData = null;
         clearTimeout(timeout);
         timeout = setTimeout(sgGenAddr, TIMEOUT);
     }
@@ -1332,27 +1318,21 @@
     }
 
     function sgSign() {
-      var message = $('#sgMsg').val();
+      var sgType = $('#sgType input:radio:checked').attr('value');
+      var sgMsg = $('#sgMsg').val();
 
       var p = updateAddr($('#sgSec'), $('#sgAddr'));
 
-      if ( !message || !p )
+      if ( !sgMsg || !p )
         return;
 
-      message = fullTrim(message);
+      sgMsg = fullTrim(sgMsg);
 
       if (sgType=='armory' || sgType=='armory_base64' || sgType=='armory_clearsign') {
-        $('#sgSig').val(armory_sign_message (p.key, p.address, message, p.compressed, p.addrtype, sgType));
+        $('#sgSig').val(armory_sign_message (p.key, p.address, sgMsg, p.compressed, p.addrtype, sgType));
       } else {
-        var sig = sign_message(p.key, message, p.compressed, p.addrtype);
-        sgData = { "address":p.address, "message":message, "signature":sig};
-        $('#sgSig').val(joinMessage(sgType, sgData.address, sgData.message, sgData.signature));
+        $('#sgSig').val(joinMessage(sgType, p.address, sgMsg, sign_message(p.key, sgMsg, p.compressed, p.addrtype)));
       }
-    }
-
-    function sgOnChangeMsg() {
-        $('#sgSig').val('');
-        sgData = null;
     }
 
     // -- verify --
@@ -1604,9 +1584,9 @@
         $('#sgMsg').val("This is an example of a signed message.");
 
         onInput('#sgSec', sgOnChangeSec);
-        onInput('#sgMsg', sgOnChangeMsg);
+        onInput('#sgMsg', function() { $('#sgSig').val(''); } );
 
-        $('#sgType label input').on('change', sgOnChangeType);
+        $('#sgType label input').on('change', sgSign );
 
         $('#sgSign').click(sgSign);
         $('#sgForm').submit(sgSign);
@@ -1620,6 +1600,7 @@
           $('.vrAddr').attr('hidden', bJoin);
           $('.vrSig').attr('hidden', bJoin);
           $('#vrMsg').attr('rows', bJoin ? 14:9);
+
 
           // convert from Bitcoin-QT to signed message and vice-versa
           if (bJoin) {
@@ -1664,7 +1645,7 @@
 
           if (vrMsg && vrSig && vrAddr)
           {
-            $('#vrMsg').val(joinMessage( sgType, vrAddr, vrMsg, vrSig ));
+            $('#vrMsg').val(joinMessage( "inputs_io", vrAddr, vrMsg, vrSig ));
             vrVerify();
           }
         }
