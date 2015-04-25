@@ -1325,10 +1325,10 @@
     {
       if (type=='inputs_io')
         return sgHdr[0]+'\n'+msg +'\n'+sgHdr[1]+'\n'+addr+'\n'+sig+'\n'+sgHdr[2];
-      else if (type=='armory')
-        return sig;
-      else
+      else if (type=='multibit')
         return qtHdr[0]+'\n'+msg +'\n'+qtHdr[1]+'\nVersion: Bitcoin-qt (1.0)\nAddress: '+addr+'\n\n'+sig+'\n'+qtHdr[2];
+      else
+        return sig;
     }
 
     function sgSign() {
@@ -1341,15 +1341,13 @@
 
       message = fullTrim(message);
 
-      if (sgType=='armory') {
-        var sig = armory_sign_message (p.key, p.address, message, p.compressed, p.addrtype);
+      if (sgType=='armory' || sgType=='armory_base64' || sgType=='armory_clearsign') {
+        $('#sgSig').val(armory_sign_message (p.key, p.address, message, p.compressed, p.addrtype, sgType));
       } else {
         var sig = sign_message(p.key, message, p.compressed, p.addrtype);
+        sgData = { "address":p.address, "message":message, "signature":sig};
+        $('#sgSig').val(joinMessage(sgType, sgData.address, sgData.message, sgData.signature));
       }
-
-      sgData = { "address":p.address, "message":message, "signature":sig};
-
-      $('#sgSig').val(joinMessage(sgType, sgData.address, sgData.message, sgData.signature));
     }
 
     function sgOnChangeMsg() {
@@ -1396,6 +1394,10 @@
 
     function splitMessage(s)
     {
+      var p = armory_split_message(s);
+      if (p.message && p.signature)
+        return p;
+
       s = s.replace('\r','');
 
       for (var i=0; i<2; i++ )
@@ -1424,7 +1426,7 @@
     }
 
     function vrVerify() {
-        var res = false;
+        var addr = false;
 
         var vrMsg = $('#vrMsg').val();
         var vrAddr = $('#vrAddr').val();
@@ -1439,42 +1441,38 @@
         if (!bSplit && (!vrMsg || !vrSig))
           return;
 
-        // try armory first
         if (bSplit) {
-          var p = armory_split_message(vrMsg);
-          res = armory_verify_message(p);
-          vrAddr = p.Address;
-        }
 
-        // try clearsign
-        if (!res) {
+          p = splitMessage(vrMsg);
 
-          if (bSplit) {
-            var p = splitMessage(vrMsg);
-            vrAddr = p.address;
-            vrMsg = p.message;
-            vrSig = p.signature;
+          vrAddr = p.address;
+          vrMsg = p.message;
+          vrSig = p.signature;
+
+          // try armory first
+          addr = armory_verify_message(p);
+
+          if (!addr) {
+            try { vrVer = parseBase58Check(vrAddr)[0]; } catch (err) {};
+            addr = verify_message(vrSig, vrMsg, vrVer);
           }
-
-          try {
-            vrVer = parseBase58Check(vrAddr)[0];
-          } catch (err) {};
-
-          res = verify_message(vrSig, vrMsg, vrVer);
         }
 
         $('#vrAlert').empty();
+
         var clone = $('#vrError').clone();
 
-        if ( res && (vrAddr==res || vrAddr=='')) {
-          clone = vrAddr==res ? $('#vrSuccess').clone() : $('#vrWarning').clone();
+        if (addr && (vrAddr==addr || !vrAddr)) {
+          clone = vrAddr==addr ? $('#vrSuccess').clone() : $('#vrWarning').clone();
+
+          var label = addr;
 
           // insert link here
-          if (vrAddr==res)
-            res = vrAddr + //' <a href="'+getAddressURL(vrAddr)+'">'+vrAddr+'</a>'+
+          if (vrAddr==addr)
+            label = vrAddr + //' <a href="'+getAddressURL(vrAddr)+'">'+vrAddr+'</a>'+
               ' (<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>)';
 
-          clone.find('#vrAddrLabel').html(res);
+          clone.find('#vrAddrLabel').html(label);
         }
 
         clone.appendTo($('#vrAlert'));
@@ -1626,7 +1624,7 @@
           // convert from Bitcoin-QT to signed message and vice-versa
           if (bJoin) {
             var p = { "address": $('#vrAddr').val(), "message":$('#vrMsg').val(), "signature":$('#vrSig').val() };
-            if ( p.message && p.signature )
+            if (p.message && p.signature && $('#vrMsg'))
               $('#vrMsg').val(joinMessage("inputs_io", p.address, p.message, p.signature));
           } else {
             var p = splitMessage($('#vrMsg').val());
