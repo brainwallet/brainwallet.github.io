@@ -268,7 +268,7 @@ function armory_split_message(str)
     var msg =''; try { msg = Crypto.charenc.UTF8.bytesToString(msg_bytes); } catch (err) {  console.log(err); return null; };
     var sig = Crypto.util.bytesToBase64(sig_bytes);
 
-    return { "message": msg, "signature": sig };
+    return { "message": msg, "signature": sig, "type": "armory_base64" };
   }
 
   regs = str.match(/-----BEGIN BITCOIN SIGNED MESSAGE-----\nComment.*\n+([\s\S]*?)\n-----BEGIN BITCOIN SIGNATURE-----\n+([\s\S]*?)\n-----END BITCOIN SIGNATURE-----/m);
@@ -281,7 +281,7 @@ function armory_split_message(str)
     // again, armory needs \r\n in message for some reason
     msg = msg.replace(/\n/g,'\r\n');
 
-    return { "message": msg, "signature": sig };
+    return { "message": msg, "signature": sig, "type": "armory_clearsign" };
   }
 
   var a = str.split('\n');
@@ -322,7 +322,7 @@ function armory_split_message(str)
     // return signature in a standard base64 form
     var bytes = [27].concat(Crypto.util.hexToBytes(p.Signature));
     sig = Crypto.util.bytesToBase64(bytes);
-    return {"message":p.Message, "address":p.Address, "signature":sig, "pubkey":p.PublicKey};
+    return {"message":p.Message, "address":p.Address, "signature":sig, "pubkey":p.PublicKey, "type": "armory_hex" };
   }
 
   return null;
@@ -330,8 +330,6 @@ function armory_split_message(str)
 
 function armory_verify_message(p)
 {
-  console.log(p);
-
   var adr = p['address'];
   var msg = p['message'];
   var pub = p['pubkey'];

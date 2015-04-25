@@ -1328,7 +1328,7 @@
 
       sgMsg = fullTrim(sgMsg);
 
-      if (sgType=='armory' || sgType=='armory_base64' || sgType=='armory_clearsign') {
+      if (sgType=='armory_base64' || sgType=='armory_clearsign' || sgType=='armory_hex') {
         $('#sgSig').val(armory_sign_message (p.key, p.address, sgMsg, p.compressed, p.addrtype, sgType));
       } else {
         $('#sgSig').val(joinMessage(sgType, p.address, sgMsg, sign_message(p.key, sgMsg, p.compressed, p.addrtype)));
@@ -1383,6 +1383,7 @@
       for (var i=0; i<2; i++ )
       {
         var hdr = i==0 ? sgHdr : qtHdr;
+        var type = i==0 ? "inputs_io" : "multibit";
 
         var p0 = s.indexOf(hdr[0]);
         if ( p0>=0 )
@@ -1397,7 +1398,7 @@
               var sig = s.substring(p1+hdr[1].length+1, p2-1);
               var m = splitSignature(sig);
               msg = fullTrim(msg); // doesn't work without this
-              return { "message":msg, "address":m.address, "signature":m.signature };
+              return { "message":msg, "address":m.address, "signature":m.signature, "type":type };
             }
           }
         }
@@ -1421,6 +1422,8 @@
         if (!bSplit && (!vrMsg || !vrSig))
           return;
 
+        var armoryMsg = '';
+
         if (bSplit) {
 
           p = splitMessage(vrMsg);
@@ -1435,6 +1438,11 @@
           if (!addr) {
             try { vrVer = parseBase58Check(vrAddr)[0]; } catch (err) {};
             addr = verify_message(vrSig, vrMsg, vrVer);
+          }
+
+          if (p && p.type=="armory_base64" && p.message) {
+            armoryMsg = p.message;
+            console.log(armoryMsg);
           }
         }
 
@@ -1456,6 +1464,10 @@
         }
 
         clone.appendTo($('#vrAlert'));
+
+        if (armoryMsg)
+          alert(armoryMsg);
+
         return false;
     }
 
