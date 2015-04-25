@@ -1407,11 +1407,11 @@
     }
 
     function vrVerify() {
-        var addr = false;
 
         var vrMsg = $('#vrMsg').val();
         var vrAddr = $('#vrAddr').val();
         var vrSig = $('#vrSig').val();
+
         var vrVer = PUBLIC_KEY_VERSION;
 
         var bSplit = $('#vrFromMessage').parent().hasClass('active');
@@ -1422,28 +1422,25 @@
         if (!bSplit && (!vrMsg || !vrSig))
           return;
 
-        var armoryMsg = '';
-
         if (bSplit) {
-
           p = splitMessage(vrMsg);
-
           vrAddr = p.address;
           vrMsg = p.message;
           vrSig = p.signature;
+        }
 
-          // try armory first
-          addr = armory_verify_message(p);
+        // try armory first
+        var addr = armory_verify_message(p);
 
-          if (!addr) {
-            try { vrVer = parseBase58Check(vrAddr)[0]; } catch (err) {};
-            addr = verify_message(vrSig, vrMsg, vrVer);
-          }
+        if (!addr) {
+          try { vrVer = parseBase58Check(vrAddr)[0]; } catch (err) {};
+          addr = verify_message(vrSig, vrMsg, vrVer);
+        }
 
-          if (p && p.type=="armory_base64" && p.message) {
-            armoryMsg = p.message;
-            console.log(armoryMsg);
-          }
+        var armoryMsg = "";
+        if (p && p.type=="armory_base64" && p.message) {
+          armoryMsg = p.message;
+          console.log(armoryMsg);
         }
 
         $('#vrAlert').empty();
