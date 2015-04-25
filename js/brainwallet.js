@@ -1598,7 +1598,7 @@
         onInput('#sgSec', sgOnChangeSec);
         onInput('#sgMsg', function() { $('#sgSig').val(''); } );
 
-        $('#sgType label input').on('change', sgSign );
+        $('#sgType label input').on('change', function() { if ($('#sgSig').val()!='') sgSign(); } );
 
         $('#sgSign').click(sgSign);
         $('#sgForm').submit(sgSign);
