@@ -1462,8 +1462,7 @@
 
         clone.appendTo($('#vrAlert'));
 
-        if (armoryMsg)
-          alert(armoryMsg);
+        //if (armoryMsg) alert(armoryMsg);
 
         return false;
     }
