@@ -317,11 +317,20 @@ function armory_split_message(str)
     }
   }
 
-  return {"message":p.Message, "address":p.Address, "signature":p.Signature, "pubkey":p.PublicKey};
+  if (p.Message && p.Signature && p.Address && p.PublicKey)
+  {
+    // return signature in a standard base64 form
+    var bytes = [27].concat(Crypto.util.hexToBytes(p.Signature));
+    sig = Crypto.util.bytesToBase64(bytes);
+    return {"message":p.Message, "address":p.Address, "signature":sig, "pubkey":p.PublicKey};
+  }
+
+  return null;
 }
 
 function armory_verify_message(p)
 {
+  console.log(p);
 
   var adr = p['address'];
   var msg = p['message'];
@@ -334,8 +343,8 @@ function armory_verify_message(p)
   var digest = 'Bitcoin Signed Message:\n' +msg;
   var hash = Crypto.SHA256(Crypto.SHA256(digest, {asBytes: true}), {asBytes: true});
 
-  var sig = [27].concat(Crypto.util.hexToBytes(sig));
-  sig = Bitcoin.ECDSA.parseSigCompact(sig);
+  var bytes = Crypto.util.base64ToBytes(sig);
+  sig = Bitcoin.ECDSA.parseSigCompact(bytes);
 
   var res = false;
 

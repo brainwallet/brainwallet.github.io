@@ -1375,7 +1375,7 @@
     function splitMessage(s)
     {
       var p = armory_split_message(s);
-      if (p.message && p.signature)
+      if (p)
         return p;
 
       s = s.replace('\r','');
