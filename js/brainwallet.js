@@ -1427,10 +1427,10 @@
           vrAddr = p.address;
           vrMsg = p.message;
           vrSig = p.signature;
-        }
 
-        // try armory first
-        var addr = armory_verify_message(p);
+          // try armory first
+          var addr = armory_verify_message(p);
+        }
 
         if (!addr) {
           try { vrVer = parseBase58Check(vrAddr)[0]; } catch (err) {};
