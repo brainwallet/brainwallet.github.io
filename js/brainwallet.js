@@ -1650,12 +1650,8 @@
             var arg = args[i].split('=');
             p[arg[0]] = decodeURIComponent(arg[1]);
           }
-
-          if (!p.vrAddr)
-            p.vrAddr = "<insert address here>"
-
-          if (p.vrMsg && p.vrSig && p.vrAddr) {
-            $('#vrMsg').val(joinMessage( "inputs_io", p.vrAddr, p.vrMsg, p.vrSig ));
+          if (p.vrMsg && p.vrSig) {
+            $('#vrMsg').val(joinMessage( "inputs_io", (p.vrAddr||"<insert address here>"), p.vrMsg, p.vrSig ));
             vrVerify();
           }
         }
