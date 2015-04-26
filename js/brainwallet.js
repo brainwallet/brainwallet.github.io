@@ -1422,6 +1422,8 @@
         if (!bSplit && (!vrMsg || !vrSig))
           return;
 
+        var addr = null;
+
         if (bSplit) {
           p = splitMessage(vrMsg);
           vrAddr = p.address;
@@ -1429,7 +1431,7 @@
           vrSig = p.signature;
 
           // try armory first
-          var addr = armory_verify_message(p);
+          addr = armory_verify_message(p);
         }
 
         if (!addr) {
