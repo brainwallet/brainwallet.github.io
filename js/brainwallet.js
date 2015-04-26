@@ -1627,7 +1627,7 @@
               if (p.type=="armory_hex") {
                 $('#vrAlert').empty();
                 console.log('impossible to convert signature, message digest is incompatible with bitcoin-qt');
-                return;
+                p = { "message": $('#vrMsg').val() };
               }
 
               $('#vrAddr').val(p.address)
