@@ -1642,34 +1642,23 @@
         onInput($('#vrMsg'), vrOnChange);
         onInput($('#vrSig'), vrOnChange);
 
-        // -- permalink support (deprecated?) --
-        var vrMsg = '';
-        var vrSig = '';
-        var vrAddr = '';
-        if ( window.location.hash && window.location.hash.indexOf('?')!=-1 )
-        {
+        // permalink support
+        if ( window.location.hash && window.location.hash.indexOf('?')!=-1 ) {
           var args = window.location.hash.split('?')[1].split('&');
-          for ( var i=0; i<args.length; i++ )
-          {
+          var p = {};
+          for ( var i=0; i<args.length; i++ ) {
             var arg = args[i].split('=');
-            if ( arg[0]=='vrAddr')
-              vrAddr=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrMsg')
-              vrMsg=decodeURIComponent(arg[1]);
-            else if ( arg[0]=='vrSig')
-              vrSig=decodeURIComponent(arg[1]);
+            p[arg[0]] = decodeURIComponent(arg[1]);
           }
 
-          if (!vrAddr)
-            vrAddr = "<insert address here>"
+          if (!p.vrAddr)
+            p.vrAddr = "<insert address here>"
 
-          if (vrMsg && vrSig && vrAddr)
-          {
-            $('#vrMsg').val(joinMessage( "inputs_io", vrAddr, vrMsg, vrSig ));
+          if (p.vrMsg && p.vrSig && p.vrAddr) {
+            $('#vrMsg').val(joinMessage( "inputs_io", p.vrAddr, p.vrMsg, p.vrSig ));
             vrVerify();
           }
         }
-        // -- /permalink support --
 
         // currency select
 
