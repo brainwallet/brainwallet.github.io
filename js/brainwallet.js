@@ -1455,8 +1455,8 @@
           var label = addr;
 
           // insert link here
-          if (vrAddr==addr)
-            label = vrAddr + //' <a href="'+getAddressURL(vrAddr)+'">'+vrAddr+'</a>'+
+          if (vrAddr==addr && p.type!="armory_hex")
+            label = vrAddr +
               ' (<a href="#verify'+vrPermalink(vrAddr,vrMsg,vrSig)+'" target=_blank>permalink</a>)';
 
           clone.find('#vrAddrLabel').html(label);
@@ -1611,7 +1611,6 @@
           $('.vrSig').attr('hidden', bJoin);
           $('#vrMsg').attr('rows', bJoin ? 14:9);
 
-
           // convert from Bitcoin-QT to signed message and vice-versa
           if (bJoin) {
             var p = { "address": $('#vrAddr').val(), "message":$('#vrMsg').val(), "signature":$('#vrSig').val() };
@@ -1620,6 +1619,13 @@
           } else {
             var p = splitMessage($('#vrMsg').val());
             if (p) {
+
+              if (p.type=="armory_hex") {
+                $('#vrAlert').empty();
+                console.log('impossible to convert signature, message digest is incompatible with bitcoin-qt');
+                return;
+              }
+
               $('#vrAddr').val(p.address)
               $('#vrMsg').val(p.message)
               $('#vrSig').val(p.signature);
