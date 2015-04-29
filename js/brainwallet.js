@@ -527,6 +527,7 @@
     function fromBin(str)
     {
       var arr = str.trim().split(/[\r\n ]+/);
+      arr = [arr.join('')]; // this line actually kills separating bytes with spaces (people get confused), comment it out if you want
       var res = [];
       for (var i=0; i<arr.length; i++)
       {
