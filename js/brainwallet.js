@@ -1513,7 +1513,8 @@
 
     $(document).ready( function() {
 
-        if ((window.location.host=='brainwallet.github.io' || window.location.host=='brainwallet.org') && window.location.protocol!="https:")
+        //if ((window.location.host=='brainwallet.github.io' || window.location.host=='brainwallet.org') && window.location.protocol!="https:")
+        if (window.location.host=='brainwallet.github.io' && window.location.protocol!="https:")
             window.location.protocol = "https";
 
         if (window.location.hash)
