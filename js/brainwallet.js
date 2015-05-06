@@ -1513,8 +1513,8 @@
 
     $(document).ready( function() {
 
-        if (window.location.host=='brainwallet.github.io' && window.location.protocol!="https:")
-            window.location.protocol = "https";
+//        if (window.location.host=='brainwallet.github.io' && window.location.protocol!="https:")
+//            window.location.protocol = "https";
 
         if (window.location.hash)
           $('#tab-' + window.location.hash.substr(1).split('?')[0]).tab('show');
