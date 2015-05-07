@@ -94,10 +94,10 @@
                 <label class="col-lg-2 control-label" for="from_pass">Get Address From</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="gen_from">
-                    <label class="btn btn-default active" title="Long original sentence. Should not be empty. Single SHA256 used as private key."><input id="from_pass" name="gen_from" type="radio" checked/>Passphrase</label>
-                    <label class="btn btn-default" title="Secret Exponent"><input id="from_hash" name="gen_from" type="radio" />HEX Private Key</label>
-                    <label class="btn btn-default" title="Wallet Import Format"><input id="from_sec" name="gen_from" type="radio" />WIF Private Key</label>
-                    <label class="btn btn-default" title="ASN.1 DER-encoded ECDSA Private Key"><input id="from_der" name="gen_from" type="radio" />DER Private Key</label>
+                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" checked/>Passphrase</label>
+                    <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label>
+                    <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
+                    <label class="btn btn-default" title="DER-encoded"><input id="from_der" name="gen_from" type="radio" />ASN.1 Key</label>
                   </div>
                 </div>
               </div>
@@ -105,14 +105,14 @@
                 <label class="col-lg-2 control-label" for="pass">Passphrase</label>
                 <div class="col-lg-10 controls">
                   <div class="input-append">
-                    <input class="form-control" id="pass" placeholder="Long original sentence. Should not be empty. Single SHA256 used as private key." type="text" autofocus/>
+                    <input class="form-control" id="pass" placeholder="Long original sentence that does not appear in any song or literature. Single SHA256 used as Private Key." type="text" autofocus/>
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="hash">HEX Private Key</label>
+                <label class="col-lg-2 control-label" for="hash">Secret Exponent</label>
                 <div class="col-lg-10 controls">
-                  <input class="form-control" id="hash" maxlength="64" readonly="readonly" spellcheck="false" title="SHA256(Passphrase), Secret Exponent, 256-bit ECDSA private key" type="text" />
+                  <input class="form-control" id="hash" maxlength="64" readonly="readonly" spellcheck="false" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text" />
                 </div>
               </div>
               <div class="form-group">
@@ -124,7 +124,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="sec">WIF Private Key</label>
+                <label class="col-lg-2 control-label" for="sec">Private Key</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="sec" readonly="readonly" spellcheck="false" title="Wallet Import Format (Base58Check of Secret Exponent)" type="text" />
                 </div>
@@ -142,7 +142,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="der">DER Private Key</label>
+                <label class="col-lg-2 control-label" for="der">ASN.1 Key</label>
                 <div class="col-lg-10 controls">
                   <textarea class="form-control" id="der" readonly="readonly" rows="5" title="ASN.1 DER-encoded ECDSA private key (OpenSSL)"></textarea>
                 </div>
@@ -234,12 +234,12 @@
                 <label class="col-lg-2 control-label" for="txFrom">Build Transaction From</label>
                 <div class="col-lg-10 controls">
                   <div class="btn-group" data-toggle="buttons" id="txFrom">
-                    <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />WIF Private Key</label> <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label> <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
+                    <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />Private Key</label> <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label> <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="txSec">WIF Private Key</label>
+                <label class="col-lg-2 control-label" for="txSec">Private Key</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="txSec" spellcheck="false" type="text" />
                 </div>
@@ -368,7 +368,7 @@
             <fieldset>
               <legend>Sign Message</legend>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="sgSec">WIF Private Key</label>
+                <label class="col-lg-2 control-label" for="sgSec">Private Key</label>
                 <div class="col-lg-10 controls">
                   <input class="form-control" id="sgSec" spellcheck="false" type="text" />
                 </div>
