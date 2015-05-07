@@ -337,7 +337,7 @@
 
     function genUpdateDER() {
       var s = $('#der').val();
-      s = s.replace(/[^A-Fa-f0-9]+/g, '').trim();
+      s = s.replace(/[^A-Fa-f0-9]+/g, '');
       var bytes = Crypto.util.hexToBytes(s);
       try {
         var asn1 = ASN1.decode(bytes);
