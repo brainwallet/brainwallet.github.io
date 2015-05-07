@@ -356,6 +356,8 @@
         setCompressed(pub[0]!=0x04);
 
         setErrorState($('#der'), false);
+        $('#pass').val('');
+
         generate();
       } catch (err) {
         setErrorState($('#der'), true, err);
