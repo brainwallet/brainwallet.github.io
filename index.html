@@ -20,6 +20,7 @@
     <script src="js/tx.js"></script>
     <script src="js/bitcoinsig.js"></script>
     <script src="js/secure-random.js"></script>
+    <script src="js/asn1.js"></script>
     <script src="js/brainwallet.js"></script>
   </head>
   <body onclick="rng_seed_time();" onkeypress="rng_seed_time();">
@@ -96,6 +97,7 @@
                     <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" checked/>Passphrase</label>
                     <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label>
                     <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
+                    <label class="btn btn-default" title="DER-encoded"><input id="from_der" name="gen_from" type="radio" />ASN.1 (DER)</label>
                   </div>
                 </div>
               </div>

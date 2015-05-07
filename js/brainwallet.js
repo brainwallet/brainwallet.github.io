@@ -141,24 +141,26 @@
         $('#hash').focus();
         gen_from = 'hash';
         $('#from_hash').click();
-        update_gen();
+        genUpdate();
         var bytes = secureRandom(32);
         $('#hash').val(Crypto.util.bytesToHex(bytes));
         generate();
     }
 
-    function update_gen() {
+    function genUpdate() {
         setErrorState($('#hash'), false);
         setErrorState($('#sec'), false);
+        setErrorState($('#der'), false);
         $('#pass').attr('readonly', gen_from != 'pass');
         $('#hash').attr('readonly', gen_from != 'hash');
         $('#sec').attr('readonly', gen_from != 'sec');
+        $('#der').attr('readonly', gen_from != 'der');
         $('#sec').parent().parent().removeClass('error');
     }
 
-    function update_gen_from() {
+    function genUpdateFrom() {
         gen_from = $(this).attr('id').substring(5);
-        update_gen();
+        genUpdate();
         if (gen_from == 'pass') {
             if (gen_ps_reset) {
                 gen_ps_reset = false;
@@ -169,19 +171,9 @@
             $('#hash').focus();
         } else if (gen_from == 'sec') {
             $('#sec').focus();
+        } else if (gen_from == 'der') {
+            $('#der').focus();
         }
-    }
-
-    function update_gen_from_focus() {
-        gen_from = $(this).attr('id');
-        update_gen();
-        if (gen_from == 'pass') {
-            if (gen_ps_reset) {
-                gen_ps_reset = false;
-                onChangePass();
-            }
-        }
-        $('#from_'+gen_from).button('toggle');
     }
 
     function generate() {
@@ -269,13 +261,13 @@
         $('#genAddrURL').attr('title', addr);
     }
 
-    function calc_hash() {
+    function genCalcHash() {
         var hash = Crypto.SHA256($('#pass').val(), { asBytes: true });
         $('#hash').val(Crypto.util.bytesToHex(hash));
     }
 
     function onChangePass() {
-        calc_hash();
+        genCalcHash();
         clearTimeout(timeout);
         timeout = setTimeout(generate, TIMEOUT);
     }
@@ -293,6 +285,14 @@
         }
 
         timeout = setTimeout(generate, TIMEOUT);
+    }
+
+    function setCompressed(compressed) {
+      gen_compressed = compressed; // global
+      // toggle radio button without firing an event
+      $('#gen_comp label input').off();
+      $('#gen_comp label input[name='+(gen_compressed?'compressed':'uncompressed')+']').click();
+      $('#gen_comp label input').on('change', genOnChangeCompressed);
     }
 
     function genOnChangePrivKey() {
@@ -325,19 +325,43 @@
 
         if (payload.length > 32) {
             payload.pop();
-            gen_compressed = true;
+            setCompressed(true);
         } else {
-            gen_compressed = false;
+            setCompressed(false);
         }
-
-        // toggle radio button without firing an event
-        $('#gen_comp label input').off();
-        $('#gen_comp label input[name='+(gen_compressed?'compressed':'uncompressed')+']').click();
-        $('#gen_comp label input').on('change', genOnChangeCompressed);
 
         $('#hash').val(Crypto.util.bytesToHex(payload));
 
         timeout = setTimeout(generate, TIMEOUT);
+    }
+
+    function genUpdateDER() {
+      var bytes = Crypto.util.hexToBytes($('#der').val());
+      try {
+        var asn1 = ASN1.decode(bytes);
+        var r = asn1.sub[1];
+        if (r.length!=32)
+          throw('key length mismatch');
+        var ofs = r.header + r.stream.pos;
+        var priv = r.stream.enc.slice(ofs, ofs + r.length);
+        var hex = Crypto.util.bytesToHex(priv);
+        $('#hash').val(hex);
+
+        // get public key
+        r = asn1.sub[2].sub[0].sub[3];
+        ofs = r.header + r.stream.pos;
+        var pub = r.stream.enc.slice(ofs, ofs + r.length);
+        setCompressed(pub[0]!=0x04);
+
+        setErrorState($('#der'), false);
+        generate();
+      } catch (err) {
+        setErrorState($('#der'), true, err);
+      }
+    }
+
+    function genOnChangeDER() {
+      timeout = setTimeout(genUpdateDER, TIMEOUT);
     }
 
     function genRandomPass() {
@@ -346,8 +370,8 @@
         $('#from_pass').button('toggle');
         $('#pass').focus();
         gen_from = 'pass';
-        update_gen();
-        calc_hash();
+        genUpdate();
+        genCalcHash();
         generate();
     }
 
@@ -1536,10 +1560,11 @@
         onInput('#pass', onChangePass);
         onInput('#hash', onChangeHash);
         onInput('#sec', genOnChangePrivKey);
+        onInput('#der', genOnChangeDER);
 
         $('#genRandom').click(genRandom);
 
-        $('#gen_from label input').on('change', update_gen_from );
+        $('#gen_from label input').on('change', genUpdateFrom );
         $('#gen_comp label input').on('change', genOnChangeCompressed);
 
         genRandomPass();
