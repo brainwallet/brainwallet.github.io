@@ -126,7 +126,7 @@
     }
 
     function setErrorState(field, err, msg) {
-        var group = field.closest('.controls');
+        var group = field.closest('.controls').parent();
         if (err) {
             group.addClass('has-error');
             group.attr('title',msg);
@@ -316,7 +316,7 @@
         if (version != PRIVATE_KEY_VERSION) {
             setErrorState($('#sec'), true, 'Invalid private key version');
             return;
-        } else if (payload.length < 32) {
+        } else if (payload.length != 32 && payload.length != 33) {
             setErrorState($('#sec'), true, 'Invalid payload (must be 32 or 33 bytes)');
             return;
         }
@@ -1284,6 +1284,10 @@
             var res = parseBase58Check(sec); 
             var privkey_version = res[0];
             var payload = res[1];
+
+            if (payload.length!=32 && payload.length!=33)
+              throw ('Invalid payload (must be 32 or 33 bytes)');
+
             if (payload.length > 32) {
                 payload.pop();
                 compressed = true;
@@ -1304,7 +1308,7 @@
             }
         } catch (err) {
             if (from.val())
-              setErrorState(from, true, "Bad private key");
+              setErrorState(from, true, err);
             return false;
         }
         to.val(addr);
