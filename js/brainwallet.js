@@ -1486,6 +1486,10 @@
 
         var clone = $('#vrError').clone();
 
+        // also check address was mentioned somewhere in the message (may be unsafe)
+        if (vrMsg.search(addr)!=-1)
+          vrAddr = addr;
+
         if (addr && (vrAddr==addr || !vrAddr)) {
           clone = vrAddr==addr ? $('#vrSuccess').clone() : $('#vrWarning').clone();
 
