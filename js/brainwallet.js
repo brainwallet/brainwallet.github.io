@@ -1321,8 +1321,14 @@
 
     function sgOnChangeSec() {
         $('#sgSig').val('');
+        $('#sgLabel').html('');
         clearTimeout(timeout);
         timeout = setTimeout(sgGenAddr, TIMEOUT);
+    }
+
+    function sgOnChangeMsg() {
+        $('#sgSig').val('');
+        $('#sgLabel').html('');
     }
 
     function fullTrim(message)
@@ -1365,11 +1371,17 @@
 
       sgMsg = fullTrim(sgMsg);
 
+      var label = '';
+
       if (sgType=='armory_base64' || sgType=='armory_clearsign' || sgType=='armory_hex') {
         $('#sgSig').val(armory_sign_message (p.key, p.address, sgMsg, p.compressed, p.addrtype, sgType));
       } else {
-        $('#sgSig').val(joinMessage(sgType, p.address, sgMsg, sign_message(p.key, sgMsg, p.compressed, p.addrtype)));
+        var sgSig = sign_message(p.key, sgMsg, p.compressed, p.addrtype);
+        $('#sgSig').val(joinMessage(sgType, p.address, sgMsg, sgSig));
+        label = '(<a href="#verify'+vrPermalink(p.address, sgMsg, sgSig)+'" target=_blank>permalink</a>)';
       }
+
+      $('#sgLabel').html(label);
     }
 
     // -- verify --
@@ -1636,7 +1648,7 @@
         $('#sgMsg').val("This is an example of a signed message.");
 
         onInput('#sgSec', sgOnChangeSec);
-        onInput('#sgMsg', function() { $('#sgSig').val(''); } );
+        onInput('#sgMsg', sgOnChangeMsg);
 
         $('#sgType label input').on('change', function() { if ($('#sgSig').val()!='') sgSign(); } );
 
