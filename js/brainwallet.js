@@ -1529,7 +1529,6 @@
 
 
     function vrOnChange() {
-        window.location.hash='#verify';
         clearTimeout(timeout);
         timeout = setTimeout(vrOnInput, TIMEOUT);
     }
