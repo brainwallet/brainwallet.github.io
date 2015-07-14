@@ -1461,6 +1461,8 @@
         var vrAddr = $('#vrAddr').val();
         var vrSig = $('#vrSig').val();
 
+        console.log(vrMsg, vrAddr, vrSig);
+
         var vrVer = PUBLIC_KEY_VERSION;
 
         var bSplit = $('#vrFromMessage').parent().hasClass('active');
@@ -1472,6 +1474,7 @@
           return;
 
         var addr = null;
+        var p = null;
 
         if (bSplit) {
           p = splitMessage(vrMsg);
