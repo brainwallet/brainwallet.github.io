@@ -259,6 +259,21 @@
         $('#genAddrQR').html(qrCode.createImgTag(4));
         $('#genAddrURL').attr('href', getAddressURL(addr));
         $('#genAddrURL').attr('title', addr);
+
+        var keyQRCode = qrcode(3, 'L');
+        var text = $('#sec').val();
+        text = text.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+        keyQRCode.addData(text);
+        keyQRCode.make();
+
+        $('#genKeyQR').html(keyQRCode.createImgTag(4));
+        // NMC fix
+        if (ADDRESS_URL_PREFIX.indexOf('explorer.dot-bit.org')>=0 )
+          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/a/'+addr);
+
+        // chainbrowser fix (needs closing slash for some reason)
+        if (ADDRESS_URL_PREFIX.indexOf('chainbrowser.com')>=0 )
+          $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+'/address/'+addr+'/');
     }
 
     function genCalcHash() {
@@ -1721,5 +1736,15 @@
           console.log ('secureRandom is not supported');
         }
 
+        $('#toggleKeyCode').on('click', function() {
+            $('#genKeyQR').slideToggle();
+            $('#sec').closest('.form-group').slideToggle();
+        });
+
+        $('#togglePass').on('click', function(){
+            var type = $('#pass').attr('type');
+            type = (type === 'text' ? 'password' : 'text');
+            $('#pass').attr('type', type);
+        });
     });
 })(jQuery);
