@@ -1461,8 +1461,6 @@
         var vrAddr = $('#vrAddr').val();
         var vrSig = $('#vrSig').val();
 
-        console.log(vrMsg, vrAddr, vrSig);
-
         var vrVer = PUBLIC_KEY_VERSION;
 
         var bSplit = $('#vrFromMessage').parent().hasClass('active');
@@ -1484,6 +1482,8 @@
 
           // try armory first
           addr = armory_verify_message(p);
+        } else {
+          p = { "type": "bitcoin_qt", "address":vrAddr, "message": vrMsg, "signature": vrSig };
         }
 
         if (!addr) {
@@ -1492,7 +1492,7 @@
         }
 
         var armoryMsg = "";
-        if (p && p.type=="armory_base64" && p.message) {
+        if (p.type=="armory_base64" && p.message) {
           armoryMsg = p.message;
           console.log(armoryMsg);
         }
