@@ -1,6 +1,476 @@
 <!DOCTYPE html>
-<html><head>
-<title>Closed Permanently</title>
-</head><body>
-<h1>Closed Permanently</h1>
-</body></html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Brainwallet - JavaScript Client-Side Bitcoin Address Generator</title>
+    <meta content="Client-side Bitcoin address and deterministic wallets generator, Base58 converter, transaction builder, signing and verifying messages with Bitcoin address" name="description" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="bitcoin address generator" name="description" />
+    <meta content="brainwallet" name="author" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/brainwallet.css" rel="stylesheet" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bitcoinjs-min.js"></script>
+    <script src="js/qrcode.js"></script>
+    <script src="js/rfc1751.js"></script>
+    <script src="js/mnemonic.js"></script>
+    <script src="js/armory.js"></script>
+    <script src="js/electrum.js"></script>
+    <script src="js/tx.js"></script>
+    <script src="js/bitcoinsig.js"></script>
+    <script src="js/secure-random.js"></script>
+    <script src="js/asn1.js"></script>
+    <script src="js/brainwallet.js"></script>
+  </head>
+  <body onclick="rng_seed_time();" onkeypress="rng_seed_time();">
+    <header class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button class="navbar-toggle" data-target=".bs-navbar-collapse" data-toggle="collapse" type="button"><span class="sr-only">Toggle navigation</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span></button> <a class="navbar-brand" href="/">Brainwallet</a>
+        </div>
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a data-toggle="tab" href="#generator" id="tab-gen">Generator</a></li>
+            <li><a data-toggle="tab" href="#chains" id="tab-chains">Chains</a></li>
+            <li><a data-toggle="tab" href="#tx" id="tab-tx">Transactions</a></li>
+            <li><a data-toggle="tab" href="#converter" id="tab-converter">Converter</a></li>
+            <li><a data-toggle="tab" href="#sign" id="tab-sign">Sign</a></li>
+            <li><a data-toggle="tab" href="#verify" id="tab-verify">Verify</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown" id="crCurrency">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="crSelect"><span id="crName">BTC</span>&nbsp;<b class="caret">&nbsp;</b></a>
+              <ul class="dropdown-menu dropdown-menu-two-column">
+                <!-- data target is "address_version,privatekey_version (optional)", privatekey_version is address_version+128 by default -->
+                <li><a data-target="0x00" href="http://blockchain.info"><span class="pull-right">BTC</span>Bitcoin</a></li>
+                <li><a data-target="0x17" href="https://chainz.cryptoid.info/arch/address.dws"><span class="pull-right">ARCH</span>Archcoin</a></li>
+                <li><a data-target="0x55" href="http://bitmark.co:3000"><span class="pull-right">BTM</span>Bitmark</a></li>
+                <li><a data-target="0x19" href="http://blackco.in"><span class="pull-right">BC</span>Blackcoin</a></li>
+                <li><a data-target="0x3C" href="http://explorebtcd.info:3000"><span class="pull-right">BTCD</span>BitcoinDark</a></li>
+                <li><a data-target="0x0B" href="http://explorer.cryptogenicbullion.org:2750"><span class="pull-right">CGB</span>Cryptogenic</a></li>
+                <li><a data-target="0x89,0x85" href="http://khashier.com"><span class="pull-right">CLAM</span>ClamCoin</a></li>
+                <li><a data-target="0x1E" href="http://www.chainbrowser.com/datacoin"><span class="pull-right">DTC</span>Datacoin</a></li>
+                <li><a data-target="0x00" href="http://d.evco.in/abe"><span class="pull-right">DVC</span>Devcoin</a></li>
+                <li><a data-target="0x1E" href="http://dgc.cryptocoinexplorer.com"><span class="pull-right">DGC</span>Digitalcoin</a></li>
+                <li><a data-target="0x1E" href="http://dogechain.info"><span class="pull-right">DOGE</span>Dogecoin</a></li>
+                <li><a data-target="0x0E" href="http://ftc.cryptocoinexplorer.com"><span class="pull-right">FTC</span>Feathercoin</a></li>
+                <li><a data-target="0x26" href="http://gmc.cryptocloudhosting.org:3001"><span class="pull-right">GMC</span>GameCredits</a></li>
+                <li><a data-target="0x66" href="http://exploretheblocks.com:2750"><span class="pull-right">IFC</span>Infinitecoin</a></li>
+                <li><a data-target="0x8A" href="http://d.evco.in/abe"><span class="pull-right">IXC</span>Ixcoin</a></li>
+                <li><a data-target="0x30" href="http://explorer.litecoin.net"><span class="pull-right">LTC</span>Litecoin</a></li>
+                <li><a data-target="0x32" href="http://explore.marscoin.org"><span class="pull-right">MRS</span>Marscoin</a></li>
+                <li><a data-target="0x32" href="http://www.chainbrowser.com/memorycoin"><span class="pull-right">MMC</span>Memorycoin</a></li>
+                <li><a data-target="0x32" href="https://coinplorer.com/MEC"><span class="pull-right">MEC</span>Megacoin</a></li>
+                <li><a data-target="0x33" href="http://localhost"><span class="pull-right">MINT</span>MintCoin</a></li>
+                <li><a data-target="0x34" href="http://explorer.dot-bit.org"><span class="pull-right">NMC</span>Namecoin</a></li>
+                <li><a data-target="0x08" href="http://nvc.cryptocoinexplorer.com"><span class="pull-right">NVC</span>Novacoin</a></li>
+                <li><a data-target="0x37" href="http://ppc.cryptocoinexplorer.com"><span class="pull-right">PPC</span>Peercoin</a></li>
+                <li><a data-target="0x37" href="http://localhost"><span class="pull-right">PAC</span>PandaCoin</a></li>
+                <li><a data-target="0x17" href="http://primecoin.org"><span class="pull-right">XPM</span>Primecoin</a></li>
+                <li><a data-target="0x38" href="http://btsblock.com"><span class="pull-right">PTS</span>Protoshares</a></li>
+                <li><a data-target="0x3A" href="http://quarkexplorer.com"><span class="pull-right">QRK</span>Quarkcoin</a></li>
+                <li><a data-target="0x3D" href="http://live.reddcoin.com"><span class="pull-right">RDD</span>Reddcoin</a></li>
+                <li><a data-target="0x3F" href="http://explorer.shadow.cash/"><span class="pull-right">SDC</span>ShadowCash</a></li>
+                <li><a data-target="0x00" href="http://trc.cryptocoinexplorer.com"><span class="pull-right">TRC</span>Terracoin</a></li>
+                <li><a data-target="0x30" href="http://tacochain.info"><span class="pull-right">TC0</span>Tacocoin</a></li>
+                <li><a data-target="0x6F" href="http://blockexplorer.com/testnet"><span class="pull-right">TEST</span>Testnet</a></li>
+                <li><a data-target="0x47" href="http://explorer.vertcoin.org"><span class="pull-right">VTC</span>Vertcoin</a></li>
+                <li><a data-target="0x49" href="http://wdc.cryptocoinexplorer.com"><span class="pull-right">WDC</span>Worldcoin</a></li>
+                <li><a data-target="0x50" href="http://bit.usr.sh:2750"><span class="pull-right">ZET</span>Zetacoin</a></li>
+              </ul></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div class="container">
+      <div class="tab-content">
+        <!-- Generator -->
+        <div class="tab-pane fade in active" id="generator">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Generator</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="from_pass">Get Address From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="gen_from">
+                    <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" checked/>Passphrase</label>
+                    <label class="btn btn-default" title="Hex-encoded"><input id="from_hash" name="gen_from" type="radio" />Secret Exponent</label>
+                    <label class="btn btn-default" title="Base58-encoded"><input id="from_sec" name="gen_from" type="radio" />Private Key</label>
+                    <label class="btn btn-default" title="DER-encoded"><input id="from_der" name="gen_from" type="radio" />ASN.1 Key</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="pass">Passphrase</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-append">
+                    <input class="form-control" id="pass" placeholder="Long sentence that does not appear in songs or literature. SHA256 used as private key. Should not be empty!" type="text" autofocus/>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="hash">Secret Exponent</label>
+                <div class="col-lg-10 controls">
+                  <!-- div class="input-group">
+                    <input class="form-control" id="hash" maxlength="64" readonly="readonly" type="text" spellcheck="false" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text"/>
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="genRandom" title="Uses cryptographically-strong window.crypto. Disabled on unsupported browsers." type="button" disabled="disabled">Secure Random</button>
+                    </div>
+                  </div -->
+                  <input class="form-control" id="hash" maxlength="64" readonly="readonly" type="text" spellcheck="false" title="SHA256(Passphrase), 256-bit ECDSA private key" type="text"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label">Point Conversion</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="gen_comp">
+                    <label class="btn btn-default active" title="Uncompressed keys (reference client)"><input name="uncompressed" type="radio" />Uncompressed</label> <label class="btn btn-default" title="Compressed keys (introduced in 0.5.99)"><input name="compressed" type="radio" />Compressed</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sec" readonly="readonly" spellcheck="false" title="Wallet Import Format (Base58Check of Secret Exponent)" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="addr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="addr" readonly="readonly" title="Bitcoin Address (Base58Check of HASH160)" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="genAddrQR">Address QR Code</label>
+                <div class="col-lg-10 controls">
+                  <a href="#" id="genAddrURL" target="_blank" title="Click to view address history (external link)"><span id="genAddrQR"></span></a>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="der">ASN.1 Key</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="der" readonly="readonly" rows="5" title="ASN.1 DER-encoded ECDSA private key (OpenSSL)"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="pub">Public Key</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="pub" readonly="readonly" rows="2" title="SEC1-encoded ECDSA public key (OpenSSL)"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="h160">HASH160</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="h160" readonly="readonly" title="Hex-encoded address, RIPEMD160(SHA256(Public Key))" type="text" />
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Chains -->
+        <div class="tab-pane fade" id="chains">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Chains</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chType">Generation Method</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="chType">
+                    <label class="btn btn-default active"><input id="armory" name="chType" type="radio" />Armory</label> <label class="btn btn-default"><input id="electrum" name="chType" type="radio" />Electrum</label>
+                  </div>&nbsp;&nbsp;<span class="help-inline" id="chMsg">&nbsp;</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chRoot">Root Key</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-group">
+                    <input class="form-control" id="chRoot" maxlength="32" readonly="readonly" type="text" />
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" id="chRandom" title="Uses cryptographically-strong window.crypto. Disabled on unsupported browsers." type="button" disabled="disabled">Secure Random</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chCode">Chain Code</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="chCode" maxlength="64" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chBackup">Paper Backup</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="chBackup" rows="4" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chRange">Primary Addresses</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="chRange" maxlength="3" type="text" value="10" />
+                </div>
+              </div>
+              <div class="form-group" title="Electrum specific, added to the end of the list">
+                <label class="col-lg-2 control-label" for="chChange">Change Addresses</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" disabled="disabled" id="chChange" maxlength="3" type="text" value="1" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chFormat">Wallet Format</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="chFormat">
+                    <label class="btn btn-default active"><input id="csv" type="radio" />CSV</label> <label class="btn btn-default"><input id="json" type="radio" />JSON</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="chList">Chain</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="chList" readonly="readonly" rows="13"></textarea>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Transactions -->
+        <div class="tab-pane fade" id="tx">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Transactions</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txFrom">Build Transaction From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="txFrom">
+                    <label class="btn btn-default active"><input id="txFromSec" name="txFrom" type="radio" />Private Key</label> <label class="btn btn-default"><input id="txFromJSON" name="txFrom" type="radio" />JSON Transaction</label> <label class="btn btn-default"><input id="txFromRaw" name="txFrom" type="radio" />Raw Transaction</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txSec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="txSec" spellcheck="false" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txAddr">Source Address</label>
+                <div class="col-lg-10 controls">
+                  <div class="row">
+                    <div class="col-xs-6">
+                      <input class="form-control" id="txAddr" spellcheck="false" type="text" />
+                    </div>
+                    <div class="col-xs-3">
+                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txBalance" placeholder="0.00" readonly="readonly" type="text" /></span>
+                    </div>
+                    <div class="col-xs-2">
+                      <button class="btn btn-default" data-target="#txUnspentForm" data-toggle="collapse" id="txToggle" type="button">Edit History</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="collapse" id="txUnspentForm">
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="txBBE">Use History From</label>
+                  <div class="col-lg-10 controls">
+                    <div class="btn-group" data-toggle="buttons" id="txType">
+                      <label class="btn btn-default active"><input id="txBCI" name="txType" type="radio" />BlockChain Info</label> <label class="btn btn-default"><input id="txBBE" name="txType" type="radio" />Bitcoin Block Explorer</label>
+                    </div>&nbsp;<button class="btn btn-default help-inline" id="txGetUnspent" type="button">Download</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="txUnspent">Transaction History</label>
+                  <div class="col-lg-10 controls">
+                    <textarea class="form-control" id="txUnspent" rows="16"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group txCC">
+                <label class="col-lg-2 control-label" for="txDest">Destination Address</label>
+                <div class="col-lg-10 controls">
+                  <div class="row">
+                    <div class="col-xs-6">
+                      <input autocomplete="off" class="form-control txDest" spellcheck="false" id="txDest" type="text" />
+                    </div>
+                    <div class="col-xs-3">
+                      <span class="input-group"><span class="input-group-addon">BTC</span> <input class="form-control" id="txValue" placeholder="0.00" type="text" /></span>
+                    </div>
+                    <div class="col-xs-3 help-inline">
+                      <button class="btn btn-default" id="txAddDest" type="button">+</button>&nbsp;<button class="btn btn-default" disabled="disabled" id="txRemoveDest" type="button">–</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txJSON">JSON Transaction</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="txJSON" readonly="readonly" rows="12" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txHex">Raw Transaction</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="txHex" readonly="readonly" rows="5"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="txFee">Fee</label>
+                <div class="col-lg-10 controls">
+                  <div class="input-group">
+                    <span class="input-group-addon">BTC</span> <input class="form-control" id="txFee" type="text" value="0.0001" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <div class="input-group">
+                    <button class="btn btn-default" id="txSign" title="Signatures require a random number which means signing the same data twice results in different sigs" type="button">Re-sign</button> &nbsp;<button class="btn btn-default" id="txSend" type="button">Send Transaction</button>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Converter -->
+        <div class="tab-pane fade" id="converter">
+          <form action="/" class="form-horizontal" method="get">
+            <fieldset>
+              <legend>Converter</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Source Encoding</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="enc_from">
+                    <label class="btn btn-default"><input id="from_hex" name="enc_from" type="radio" />Hex</label> <label class="btn btn-default"><input id="from_text" name="enc_from" type="radio" />Text</label> <label class="btn btn-default"><input id="from_bin" name="enc_from" type="radio" />Bin</label> <label class="btn btn-default"><input id="from_dec" name="enc_from" type="radio" />Dec</label> <label class="btn btn-default"><input id="from_base58" name="enc_from" type="radio" />Base58</label> <label class="btn btn-default"><input id="from_base58check" name="enc_from" type="radio" />B58Check</label> <label class="btn btn-default"><input id="from_base64" name="enc_from" type="radio" />Base64</label> <label class="btn btn-default"><input id="from_rfc1751" name="enc_from" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="from_mnemonic" name="enc_from" type="radio" />Poetry</label> <label class="btn btn-default"><input id="from_rot13" name="enc_from" type="radio" />Rot13</label> <label class="btn btn-default"><input id="from_easy16" name="enc_from" type="radio" />Easy16</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Source Text</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="src" rows="8" spellcheck="false"></textarea>
+                  <div>
+                    <span id="hint_from">&nbsp;</span>&nbsp;
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Convert To</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="enc_to">
+                    <label class="btn btn-default active"><input id="to_hex" name="enc_to" type="radio" />Hex</label> <label class="btn btn-default"><input id="to_text" name="enc_to" type="radio" />Text</label> <label class="btn btn-default"><input id="to_bin" name="enc_from" type="radio" />Bin</label><label class="btn btn-default"><input id="to_dec" name="enc_from" type="radio" />Dec</label> <label class="btn btn-default"><input id="to_base58" name="enc_to" type="radio" />Base58</label> <label class="btn btn-default"><input id="to_base58check" name="enc_to" type="radio" />B58Check</label> <label class="btn btn-default"><input id="to_base64" name="enc_to" type="radio" />Base64</label> <label class="btn btn-default"><input id="to_rfc1751" name="enc_to" type="radio" />Rfc1751</label> <label class="btn btn-default"><input id="to_mnemonic" name="enc_to" type="radio" />Poetry</label> <label class="btn btn-default"><input id="to_rot13" name="enc_to" type="radio" />Rot13</label> <label class="btn btn-default"><input id="to_easy16" name="enc_from" type="radio" />Easy16</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="enc_from">Result</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="dest" readonly="readonly" rows="8"></textarea>
+                  <div>
+                    <span id="hint_to">&nbsp;</span>&nbsp;
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Sign -->
+        <div class="tab-pane fade" id="sign">
+          <form action="/" class="form-horizontal" id="sgForm" method="get" name="sgForm">
+            <fieldset>
+              <legend>Sign Message</legend>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgSec">Private Key</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sgSec" spellcheck="false" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgAddr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="sgAddr" readonly="readonly" type="text" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgMsg">Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="sgMsg" rows="5" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgType">Signature Type</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="sgType">
+                    <label class="btn btn-default active" title="Introduced by inputs.io, see https://inputs.io/clearsign"><input name="sgType" value="inputs_io" type="radio" checked/>Inputs.IO</label>
+                    <label class="btn btn-default" title="Introduced in Multibit release notes"><input name="sgType" value="multibit" type="radio" />Multibit</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="sgType" value="armory_base64" type="radio" />Armory Base64</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.90"><input name="sgType" value="armory_clearsign" type="radio" />Armory Clearsign</label>
+                    <label class="btn btn-default" title="Introduced in Bitcoin Armory 0.88"><input name="sgType" value="armory_hex" type="radio" />Armory Hex</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="sgSig">Signed Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="sgSig" readonly="readonly" rows="10" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-2 col-lg-10 controls">
+                  <button class="btn btn-default" id="sgSign" title="Signatures require a random number which means signing the same data twice results in different sigs" type="button">Sign Message</button>
+                  &nbsp;&nbsp;<span class="help-inline" id="sgLabel"></span>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- Verify -->
+        <div class="tab-pane fade" id="verify">
+          <form action="/" class="form-horizontal" id="vrForm" method="get" name="vrForm">
+            <fieldset>
+              <legend>Verify Message</legend>
+              <div class="hidden">
+                <div class="col-lg-offset-2 col-lg-10 alert alert-success fade in" id="vrSuccess">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddrLabel"></span>
+                </div>
+                <div class="col-lg-offset-2 col-lg-10 alert alert-danger fade in" id="vrError">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message failed to verify!
+                </div>
+                <div class="col-lg-offset-2 col-lg-10 alert alert-warning fade in" id="vrWarning">
+                  <button aria-hidden="true" class="close" data-dismiss="alert" type="button">&times;</button> Message verified to be from <span id="vrAddrLabel"></span> (address wasn't specified)
+                </div>
+              </div>
+              <div id="vrAlert"></div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="vrFrom">Verify From</label>
+                <div class="col-lg-10 controls">
+                  <div class="btn-group" data-toggle="buttons" id="vrFrom">
+                    <label class="btn btn-default active" title="RFC2440-like"><input id="vrFromMessage" name="vrFrom" type="radio" checked/>Signed Message</label>
+                    <label class="btn btn-default"><input id="vrFromForm" name="vrFrom" type="radio" />Bitcoin-QT</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group vrAddr" hidden>
+                <label class="col-lg-2 control-label" for="vrAddr">Address</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="vrAddr" type="text"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-lg-2 control-label" for="vrMsg">Message</label>
+                <div class="col-lg-10 controls">
+                  <textarea class="form-control" id="vrMsg" rows="14" spellcheck="false"></textarea>
+                </div>
+              </div>
+              <div class="form-group vrSig" hidden>
+                <label class="col-lg-2 control-label" for="vrSig">Signature</label>
+                <div class="col-lg-10 controls">
+                  <input class="form-control" id="vrSig" spellcheck="false" type="text"/>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <hr />
+        <footer>
+          <p>
+            &copy; 2012&ndash;2015 <a href="https://twitter.com/brainwallet">Brainwallet</a><span class="pull-right">Powered by <a href="http://pages.github.com">GitHub Pages</a> &nbsp; <a href="https://github.com/brainwallet/brainwallet.github.io">GitHub Repository</a> &nbsp; <a href="https://github.com/brainwallet/brainwallet.github.io/archive/master.zip">Download ZIP</a></span>
+          </p>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
