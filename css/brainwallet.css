@@ -14,3 +14,8 @@ body {
   width: 360px;
   padding: 7px 0px;
 }
+
+.navbar-brand { color: #BB0 !important; }
+
+.navbar-left li:first-child a { color: #F88; }
+.navbar-left li:first-child a:hover { color: #F00; }
