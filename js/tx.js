@@ -119,7 +119,7 @@ var TX = new function () {
         var bytes = f.slice(0, size);
         var pos = 1;
         var n = 0;
-        for (var i = 0; i < size; i++) { 
+        for (var i = 0; i < size; i++) {
             var b = f.shift();
             n += b * pos;
             pos *= 256;
@@ -171,7 +171,7 @@ var TX = new function () {
             var script = readString(f);
             var seq = u32(f);
             var txin = new Bitcoin.TransactionIn({
-                outpoint: { 
+                outpoint: {
                     hash: Crypto.util.bytesToBase64(op),
                     index: n
                 },
@@ -267,7 +267,7 @@ var TX = new function () {
             var seq = txi['sequence'] === undefined ? 4294967295 : txi['sequence'];
 
             var txin = new Bitcoin.TransactionIn({
-                outpoint: { 
+                outpoint: {
                     hash: Crypto.util.bytesToBase64(hash.reverse()),
                     index: n
                 },
@@ -317,7 +317,7 @@ function dumpScript(script) {
 }
 
 // blockchain.info parser (adapted)
-// uses http://blockchain.info/unspent?address=<address>
+// uses http://blockchain.info/unspent?active=<address>
 function tx_parseBCI(data, address) {
     var r = JSON.parse(data);
     var txs = r.unspent_outputs;
@@ -357,7 +357,7 @@ function parseTxs(data, address) {
             continue;
         txs.push(tmp[a]);
     }
-    
+
     // Sort chronologically
     txs.sort(function(a,b) {
         if (a.time > b.time) return 1;
@@ -370,14 +370,14 @@ function parseTxs(data, address) {
 
     var balance = BigInteger.ZERO;
 
-    // Enumerate the transactions 
+    // Enumerate the transactions
     for (var a in txs) {
-    
+
         if (!txs.hasOwnProperty(a))
             continue;
         var tx = txs[a];
         if (tx.ver != 1) throw "Unknown version found. Expected version 1, found version " + tx.ver;
-        
+
         // Enumerate inputs
         for (var b in tx.in ) {
             if (!tx.in.hasOwnProperty(b))
@@ -388,7 +388,7 @@ function parseTxs(data, address) {
             // if this came from a transaction to our address...
             if (lilendHash in unspenttxs) {
                 unspenttx = unspenttxs[lilendHash];
-                
+
                 // remove from unspent transactions, and deduce the amount from the balance
                 balance = balance.subtract(unspenttx[p.n].amount);
                 delete unspenttx[p.n]
@@ -397,13 +397,13 @@ function parseTxs(data, address) {
                 }
             }
         }
-        
+
         // Enumerate outputs
         var i = 0;
         for (var b in tx.out) {
             if (!tx.out.hasOwnProperty(b))
                 continue;
-                
+
             var output = tx.out[b];
 
             // if this was sent to our address...
