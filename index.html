@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>BIP32 - JavaScript Deterministic Wallets</title>
-    <meta content="Client-side Bitcoin address and deterministic wallets generator" name="description"/>
+    <meta content="Client-side Bitcoin and other cryptocurrency address and deterministic wallets generator" name="description"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="bitcoin address generator" name="description" />
     <meta content="brainwallet" name="author" />
@@ -21,6 +21,7 @@
     <script src="js/mnemonic.js"></script>
     <script src="js/armory.js"></script>
     <script src="js/bip32.js"></script>
+    <script src="js/cashaddrjs-0.2.8.min.js"></script>
     <script src="js/electrum.js"></script>
     <script src="js/tx.js"></script>
     <script src="js/bitcoinsig.js"></script>
@@ -42,6 +43,8 @@
               <ul class="dropdown-menu">
                 <li><a href="http://blockchain.info/address/" id="btc_main">Bitcoin Mainnet</a></li>
                 <li><a href="http://blockexplorer.com/testnet/address/" id="btc_test">Bitcoin Testnet</a></li>
+                <li><a href="https://blockchair.com/bitcoin-cash/address/" id="bch_main">Bitcoin Cash Mainnet</a></li>
+                <li><a href="" id="bch_test">Bitcoin Cash Testnet</a></li>
                 <li><a href="http://block-explorer.com/address/" id="ltc_main">Litecoin Mainnet</a></li>
                 <li><a href="#" id="ltc_test">Litecoin Testnet</a></li>
                 <li><a href="http://dogechain.info/address/" id="doge_main">Dogecoin Mainnet</a></li>
@@ -75,7 +78,7 @@
                     <label class="btn btn-default active" title="Single SHA256"><input id="from_pass" name="gen_from" type="radio" />Passphrase</label>
                     <label class="btn btn-default" title="Base58-encoded"><input id="from_key" name="gen_from" type="radio" />BIP32 Key</label>
                   </div>
-                  &nbsp;&nbsp;<span class="help-inline" id="gen_from_msg"></span>
+                  &nbsp;&nbsp;<span class="help-inline" id="gen_from_msg"></span>
                 </div>
               </div>
               <div class="form-group">
@@ -223,6 +226,13 @@
                 </div>
               </div>
               <div class="form-group">
+                <label class="col-lg-2 control-label" for="genKeyQR">Private Key QR Code</label>
+                <div class="col-lg-10">
+                  <a id="revealKeyQR" class="form-control" style="cursor: pointer;">Click to show Private Key QR Code</a>
+                  <a id="genKeyURL" title=""><span id="genKeyQR"></span></a>
+                </div>
+              </div>
+              <div class="form-group">
                 <label class="col-lg-2 control-label" for="derived_public_key">Derived Public Key</label>
                 <div class="col-lg-10">
                   <input class="form-control" id="derived_public_key" readonly="readonly" type="text" />
@@ -234,14 +244,28 @@
                   <input class="form-control" id="derived_public_key_hex" readonly="readonly" type="text" />
                 </div>
               </div>
+              <div id="cashaddr_group">
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="cashaddr">CashAddr</label>
+                  <div class="col-lg-10">
+                    <input class="form-control" id="cashaddr" readonly="readonly" type="text" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-lg-2 control-label" for="genCashAddrQR">CashAddr QR Code</label>
+                  <div class="col-lg-10">
+                    <a href="#" id="genCashAddrURL" target="_blank" title="Click to view address history (external link)"><span id="genCashAddrQR"></span></a>
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="addr">Address</label>
+                <label class="col-lg-2 control-label" for="addr" id="addrlabel">Address</label>
                 <div class="col-lg-10">
                   <input class="form-control" id="addr" readonly="readonly" type="text" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-lg-2 control-label" for="genAddrQR">Address QR Code</label>
+                <label class="col-lg-2 control-label" for="genAddrQR" id="qraddrlabel">Address QR Code</label>
                 <div class="col-lg-10">
                   <a href="#" id="genAddrURL" target="_blank" title="Click to view address history (external link)"><span id="genAddrQR"></span></a>
                 </div>

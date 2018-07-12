@@ -3,3 +3,7 @@ JavaScript Client-Side BIP0032 generator
 http://github.com/sarchar/brainwallet.github.com/tree/bip32
 
 - Web Worker hashes 50,000 rounds to protect passphrases
+- Several Crypto-coins supported
+- Bitcoin Cash support urtilizes https://github.com/bitcoincashjs/cashaddrjs
+- Inline QR code for private keys makes sweeping easier
+

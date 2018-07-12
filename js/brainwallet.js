@@ -29,6 +29,22 @@
             bip32_public: BITCOIN_TESTNET_PUBLIC,
             bip32_private: BITCOIN_TESTNET_PRIVATE
         },
+        bch_main: {
+            name: "Bitcoin Cash",
+            network: "Mainnet",
+            prefix: 0,
+            private_prefix: 0+0x80,
+            bip32_public: BITCOIN_CASH_MAINNET_PUBLIC,
+            bip32_private: BITCOIN_CASH_MAINNET_PRIVATE
+        },
+        bch_test: {
+            name: "Bitcoin Cash",
+            network: "Testnet",
+            prefix: 0x6f,
+            private_prefix: 0x6f+0x80,
+            bip32_public: BITCOIN_CASH_TESTNET_PUBLIC,
+            bip32_private: BITCOIN_CASH_TESTNET_PRIVATE
+        },
         doge_main: {
             name: "Dogecoin",
             network: "Mainnet",
@@ -71,10 +87,8 @@
         }
     };
 
-    var PUBLIC_KEY_VERSION = 0;
-    var PRIVATE_KEY_VERSION = 0x80;
     var ADDRESS_URL_PREFIX = 'http://blockchain.info/address/'
-    var BIP32_TYPE = BITCOIN_MAINNET_PRIVATE;
+    var acknowledged_bch_is_experimental = false;
 
     function pad(str, len, ch) {
         padding = '';
@@ -250,6 +264,19 @@
             return;
         }
 
+        var coin = getCoinFromKey(bip32_source_key);
+        if(coin.name == "Bitcoin Cash" && !acknowledged_bch_is_experimental) {
+            alert("Warning!\n\nBitcoin Cash support is NEW and EXPERIMENTAL. Use at your own risk!\n\nPlease verify your addresses with other services before using!");
+            acknowledged_bch_is_experimental = true;
+        }
+
+        for(var coin_name in COINS) {
+            if(coin.bip32_private == COINS[coin_name].bip32_private) {
+                $('#crName').text($("#" + coin_name).text());
+                break;
+            }
+        }
+
         //console.log(bip32_source_key);
         updateSourceKeyInfo();
         updateDerivationPath();
@@ -372,7 +399,12 @@
         $("#derived_private_key_wif").val('');
         $("#derived_public_key_hex").val('');
         $("#addr").val('');
-        $("#genAddrQR").val('');
+        $("#cashaddr").val('');
+        $("#genKeyQR").html('');
+        $("#genKeyURL").hide();
+        $("#revealKeyQR").show();
+        $("#genAddrQR").html('');
+        $("#genCashAddrQR").html('');
 
         try {
             if(bip32_source_key == null) {
@@ -420,6 +452,32 @@
         $('#genAddrQR').html(qrCode.createImgTag(4));
         $('#genAddrURL').attr('href', ADDRESS_URL_PREFIX+text);
         $('#genAddrURL').attr('title', text);
+
+        if(key_coin.name == "Bitcoin Cash") {
+            var bch_addr;
+            if(key_coin.bip32_private == BITCOIN_CASH_TESTNET_PRIVATE) {
+                bch_addr = cashaddr.encode("bchtest", "P2PKH", new Uint8Array(result.eckey.pubKeyHash));
+            } else {
+                bch_addr = cashaddr.encode("bitcoincash", "P2PKH", new Uint8Array(result.eckey.pubKeyHash));
+            }
+            $("#cashaddr").val(bch_addr);
+            $("#addrlabel").text("Legacy Address");
+            $("#qraddrlabel").text("Legacy Address QR Code");
+
+            qrCode = qrcode(4, 'M');
+            qrCode.addData(bch_addr);
+            qrCode.make();
+
+            $('#genCashAddrQR').html(qrCode.createImgTag(4));
+            $('#genCashAddrURL').attr('href', ADDRESS_URL_PREFIX+bch_addr);
+            $('#genCashAddrURL').attr('title', bch_addr);
+
+            $("#cashaddr_group").show();
+        } else {
+            $("#addrlabel").text("Address");
+            $("#qraddrlabel").text("Address QR Code");
+            $("#cashaddr_group").hide();                
+        }
     }
 
     function onInput(id, func) {
@@ -444,10 +502,15 @@
         $('#crName').text($(this).text());
         $('#crSelect').dropdown('toggle');
 
+        if((coin == "bch_main" || coin == "bch_test") && !acknowledged_bch_is_experimental) {
+            alert("Warning!\n\nBitcoin Cash support is NEW and EXPERIMENTAL.\n\nPlease verify your addresses with other services before using!");
+            acknowledged_bch_is_experimental = true;
+        }
+
         if( gen_from == 'pass' && bip32_source_key === null ) {
             updateSourcePassphrase();
         } else if( bip32_source_key !== null ) {
-            if( COINS[coin].prefix != key_coin.prefix ) { // key is changing to another realm..
+            if( coin != key_coin ) { // key is changing to another realm..
                 var is_private = (bip32_source_key.version == key_coin.bip32_private);
                 var is_public = (bip32_source_key.version == key_coin.bip32_public);
 
@@ -521,6 +584,23 @@
         }
     }
 
+    function revealKeyQRClicked() {
+        $("#revealKeyQR").hide();
+
+        qrCode = qrcode(5, 'Q');
+        qrCode.addData($("#derived_private_key_wif").val());
+        qrCode.make();
+
+        $('#genKeyQR').html(qrCode.createImgTag(4));
+        $('#genKeyURL').attr('title','Click again to hide');
+        $('#genKeyURL').show();
+    }
+
+    function hideKeyQRClicked() {
+        $('#genKeyURL').hide();
+        $("#revealKeyQR").show();
+    }
+
     $(document).ready( function() {
 
         if (window.location.hash)
@@ -558,5 +638,8 @@
 
         $('#crCurrency ul li a').on('click', crChange);
 
+        $('#genKeyURL').hide();
+        $("#revealKeyQR").on('click', revealKeyQRClicked);
+        $('#genKeyURL').on('click', hideKeyQRClicked);
     });
 })(jQuery);
