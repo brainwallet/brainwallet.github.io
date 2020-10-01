@@ -1,3 +1,3 @@
 # brainwallet.github.io
-Brainwallet site
-README.md
+Brainwallet an Amazing site
+
